@@ -190,6 +190,8 @@ def main(argv: List[str] | None = None) -> None:
             step_minutes=args.step,
             double_sided_fold=args.double_sided_fold,
             fold_safe_gap=args.fold_safe_gap,
+            omdb_api_key=args.omdb_api_key,
+            movie_inline_meta=args.movie_inline_meta,
         )
     else:
         blocks = split_into_blocks(start_dt, end_dt, args.page_block_hours)
@@ -236,6 +238,8 @@ def main(argv: List[str] | None = None) -> None:
             cover_art_dir=args.cover_art_dir,
             tvdb_api_key=args.tvdb_api_key,
             tvdb_pin=args.tvdb_pin,
+            omdb_api_key=args.omdb_api_key,
+            movie_inline_meta=args.movie_inline_meta,
             status_messages=args.status_messages,
             fold_safe_gap=args.fold_safe_gap,
         )

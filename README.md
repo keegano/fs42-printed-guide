@@ -71,6 +71,7 @@ Compilation mode supports:
 - TVDB covers can include an airing label (for example: `"Rugrats playing Tuesday at 7:00"`)
   using configurable templates per range mode (`single/day/week/month`)
 - If no bottom ad is available, guide pages can fill lower space with TVDB show-description columns for titles airing in that block
+- "On Tonight" titles are bold; entries without a usable description are skipped
 
 Cover art sources (`--cover-art-source`):
 - `none`
@@ -169,6 +170,7 @@ Compilation extras:
 - `--cover-art-dir PATH`
 - `--tvdb-api-key KEY`
 - `--tvdb-pin PIN`
+- `--omdb-api-key KEY`
 - `--dump-catalog PATH`
 - `--load-catalog PATH`
 - `--status-messages` / `--no-status-messages`
@@ -181,6 +183,12 @@ Cover text defaults to white with black outline (`--cover-text-color` and
 `--cover-text-outline-color`) so title/date remain printable over arbitrary art.
 Date and airing-label lines are positioned near the bottom by default (`cover_date_y=0.18`,
 `cover_airing_y=0.11`) and are configurable.
+
+Movie metadata:
+- When `--omdb-api-key` is provided, movie blocks can include inline badges
+  like `[PG-13 3.8*]` in the guide.
+- "On Tonight" description fallback will use OMDb plot summaries for movies,
+  TVDB overviews for series.
 
 ## Example
 

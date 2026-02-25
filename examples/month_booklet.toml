@@ -33,4 +33,5 @@ cover_art_dir = "./assets/cover"
 ads_dir = "./assets/ads/full"
 ad_insert_every = 4
 bottom_ads_dir = "./assets/ads/bottom"
+omdb_api_key = "YOUR_OMDB_API_KEY"
 out = "out/march_booklet.pdf"

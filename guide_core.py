@@ -50,6 +50,9 @@ EXTENT_RE = re.compile(
 
 YEAR_RE = re.compile(r"\b(19\d{2}|20\d{2})\b")
 EP_RE = re.compile(r"\bS\d{2}E\d{2}\b", re.IGNORECASE)
+FULL_STAR = "★"
+HALF_STAR = "⯪"
+EMPTY_STAR = "☆"
 
 
 def pretty_from_filename(filename: str) -> str:
@@ -111,12 +114,43 @@ def display_title(event_title: str, filename: str) -> str:
         return cleaned
     return normalize_title_text(strip_year_and_after(event_title) or event_title)
 
+
+def is_movie_event(event_title: str, filename: str) -> bool:
+    filename = clean_text(filename)
+    event_title = clean_text(event_title)
+    if EP_RE.search(filename):
+        return False
+    if YEAR_RE.search(filename):
+        return True
+    # Conservative fallback: likely a movie block if filename is absent and title has a year.
+    return bool(YEAR_RE.search(event_title))
+
+
+def _extract_year_hint(text: str) -> str:
+    m = YEAR_RE.search(clean_text(text))
+    return m.group(1) if m else ""
+
 @dataclass(frozen=True)
 class Event:
     start: datetime
     end: datetime
     title: str
     filename: str
+
+
+@dataclass(frozen=True)
+class OnTonightEntry:
+    title: str
+    description: str
+
+
+@dataclass(frozen=True)
+class MovieMeta:
+    title: str
+    year: str
+    plot: str
+    imdb_rating: str
+    rated: str
 
 
 def run_fs42(fs42_dir: Path, args: List[str]) -> str:
@@ -286,6 +320,36 @@ def fit_show_title(text: str, font_name: str, font_size: float, max_width_pts: f
             truncated = " ".join(trunc_words).rstrip(", ").strip()
 
     return truncated
+
+
+def fit_title_with_badge(
+    title: str,
+    badge: str,
+    font_name: str,
+    font_size: float,
+    max_width_pts: float,
+) -> str:
+    t = clean_text(title)
+    b = re.sub(r"\s+", " ", str(badge or "")).strip()
+    if not b:
+        return fit_show_title(t, font_name, font_size, max_width_pts)
+
+    badge_txt = f"[{b}]"
+    badge_w = pdfmetrics.stringWidth(badge_txt, font_name, font_size)
+    space_w = pdfmetrics.stringWidth(" ", font_name, font_size)
+
+    if badge_w > max_width_pts:
+        # Badge alone does not fit; fallback to title behavior.
+        return fit_show_title(t, font_name, font_size, max_width_pts)
+
+    title_max = max_width_pts - badge_w - space_w
+    if title_max <= 4:
+        return badge_txt
+
+    title_fit = fit_show_title(t, font_name, font_size, title_max)
+    if title_fit:
+        return f"{title_fit} {badge_txt}"
+    return badge_txt
 
 
 def clip_events(events: List[Event], start_dt: datetime, end_dt: datetime) -> List[Event]:
@@ -524,25 +588,92 @@ def _fetch_tvdb_overview_by_title(title: str, token: str) -> str:
     return clean_text(d.get("overview") or "")
 
 
-def _block_show_titles(
+def _fetch_omdb_movie_meta(title: str, year: str, api_key: str) -> Optional[MovieMeta]:
+    if not title or not api_key:
+        return None
+    params = {"t": clean_text(title), "apikey": api_key}
+    if year:
+        params["y"] = year
+    url = f"http://www.omdbapi.com/?{urllib.parse.urlencode(params)}"
+    data = _http_json(url)
+    if clean_text(str(data.get("Response", ""))).lower() == "false":
+        return None
+    return MovieMeta(
+        title=clean_text(str(data.get("Title", title))),
+        year=clean_text(str(data.get("Year", year))),
+        plot=clean_text(str(data.get("Plot", ""))),
+        imdb_rating=clean_text(str(data.get("imdbRating", ""))),
+        rated=clean_text(str(data.get("Rated", ""))),
+    )
+
+
+def _movie_meta_badge(meta: Optional[MovieMeta]) -> str:
+    if not meta:
+        return ""
+    bits: List[str] = []
+    rated = clean_text(meta.rated)
+    if rated and rated not in ("N/A", "Not Rated"):
+        bits.append(rated)
+    try:
+        score = float(meta.imdb_rating)
+        stars = max(0.0, min(5.0, score / 2.0))
+        half_steps = int(round(stars * 2.0))
+        full = half_steps // 2
+        has_half = (half_steps % 2) == 1
+        empty = max(0, 5 - full - (1 if has_half else 0))
+        bits.append((FULL_STAR * full) + (HALF_STAR if has_half else "") + (EMPTY_STAR * empty))
+    except Exception:
+        pass
+    return " ".join(bits).strip()
+
+
+def _movie_cache_key_for_event(event: Event) -> str:
+    return clean_text(display_title(event.title, event.filename))
+
+
+def _get_movie_meta_for_event(
+    event: Event,
+    omdb_api_key: str,
+    movie_cache: Dict[str, MovieMeta],
+) -> Optional[MovieMeta]:
+    if not is_movie_event(event.title, event.filename):
+        return None
+    key = _movie_cache_key_for_event(event)
+    if not key:
+        return None
+    meta = movie_cache.get(key)
+    if meta:
+        return meta
+    if not omdb_api_key:
+        return None
+    try:
+        meta = _fetch_omdb_movie_meta(key, _extract_year_hint(event.filename), omdb_api_key)
+    except Exception:
+        meta = None
+    if meta:
+        movie_cache[key] = meta
+    return meta
+
+
+def _block_show_events(
     schedules: Dict[str, List[Event]],
     start_dt: datetime,
     end_dt: datetime,
-    max_titles: int = 20,
-) -> List[str]:
-    names: List[str] = []
+    max_items: int = 20,
+) -> List[Tuple[str, Event]]:
+    names: List[Tuple[str, Event]] = []
     seen = set()
     for evs in schedules.values():
         for e in evs:
             if e.end <= start_dt or e.start >= end_dt:
                 continue
-            t = normalize_title_text(e.title)
+            t = display_title(e.title, e.filename)
             if not t or t in seen:
                 continue
             seen.add(t)
-            names.append(t)
+            names.append((t, e))
     random.shuffle(names)
-    return names[:max_titles]
+    return names[:max_items]
 
 
 def _wrap_text_lines(text: str, font_name: str, font_size: float, max_width: float) -> List[str]:
@@ -562,7 +693,15 @@ def _wrap_text_lines(text: str, font_name: str, font_size: float, max_width: flo
     return lines
 
 
-def _draw_description_columns(c, descriptions: List[str], x: float, y: float, w: float, h: float) -> None:
+def _split_sentences(text: str) -> List[str]:
+    parts = [clean_text(p) for p in re.split(r"(?<=[.!?])\s+", clean_text(text)) if clean_text(p)]
+    if parts:
+        return parts
+    t = clean_text(text)
+    return [t] if t else []
+
+
+def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y: float, w: float, h: float) -> None:
     if not descriptions or w <= 20 or h <= 16:
         return
     c.setFillColorRGB(0, 0, 0)
@@ -590,16 +729,53 @@ def _draw_description_columns(c, descriptions: List[str], x: float, y: float, w:
     col = 0
     line_idx = 0
     text_top = y + h - 22
-    c.setFont("Helvetica", 7)
-    for desc in descriptions:
-        lines = _wrap_text_lines(desc, "Helvetica", 7, col_w)
-        for ln in lines:
-            if line_idx >= lines_per_col:
-                col += 1
-                line_idx = 0
-            if col >= cols:
-                return
-            cx = body_x + col * (col_w + col_gap)
+    for entry in descriptions:
+        if line_idx >= lines_per_col:
+            col += 1
+            line_idx = 0
+        if col >= cols:
+            return
+
+        title = clean_text(entry.title)
+        if not title:
+            continue
+        if pdfmetrics.stringWidth(title, "Helvetica-Bold", 7) > col_w:
+            # Title itself cannot fit safely; stop this column as requested.
+            return
+
+        sentences = _split_sentences(entry.description)
+        if not sentences:
+            # No valid sentences -> remove this show and stop column.
+            return
+
+        usable_lines: List[str] = []
+        prospective_idx = line_idx + 1  # reserve title line
+        for sent in sentences:
+            sent_lines = _wrap_text_lines(sent, "Helvetica", 7, col_w)
+            # If a sentence overflows width with long token, or would exceed remaining lines,
+            # drop the whole sentence.
+            if any(pdfmetrics.stringWidth(ln, "Helvetica", 7) > col_w for ln in sent_lines):
+                continue
+            remaining = lines_per_col - prospective_idx
+            if len(sent_lines) > remaining:
+                continue
+            usable_lines.extend(sent_lines)
+            prospective_idx += len(sent_lines)
+
+        if not usable_lines:
+            # Remove whole show and end this column.
+            return
+
+        cx = body_x + col * (col_w + col_gap)
+        cy = text_top - (line_idx * line_h)
+        if cy < body_y:
+            return
+        c.setFont("Helvetica-Bold", 7)
+        c.drawString(cx, cy, title)
+        line_idx += 1
+
+        c.setFont("Helvetica", 7)
+        for ln in usable_lines:
             cy = text_top - (line_idx * line_h)
             if cy < body_y:
                 return
@@ -613,14 +789,16 @@ def _build_block_descriptions(
     end_dt: datetime,
     tvdb_api_key: str,
     tvdb_pin: str,
+    omdb_api_key: str,
     desc_cache: Dict[str, str],
+    movie_cache: Dict[str, MovieMeta],
     token_holder: Dict[str, str],
     max_items: int = 8,
-) -> List[str]:
-    titles = _block_show_titles(schedules, start_dt, end_dt, max_titles=max_items * 2)
-    if not titles:
+) -> List[OnTonightEntry]:
+    candidates = _block_show_events(schedules, start_dt, end_dt, max_items=max_items * 3)
+    if not candidates:
         return []
-    out: List[str] = []
+    out: List[OnTonightEntry] = []
     token = token_holder.get("token", "")
     if tvdb_api_key and not token:
         try:
@@ -629,18 +807,29 @@ def _build_block_descriptions(
             token = ""
         token_holder["token"] = token
 
-    for title in titles:
-        desc = desc_cache.get(title, "")
-        if not desc and token:
-            try:
-                desc = _fetch_tvdb_overview_by_title(title, token)
-            except Exception:
-                desc = ""
-            desc_cache[title] = desc
-        if desc:
-            out.append(f"{title}: {desc}")
+    for title, ev in candidates:
+        desc = ""
+        if is_movie_event(ev.title, ev.filename):
+            key = clean_text(title)
+            meta = movie_cache.get(key)
+            if not meta and omdb_api_key:
+                try:
+                    meta = _fetch_omdb_movie_meta(title, _extract_year_hint(ev.filename), omdb_api_key)
+                except Exception:
+                    meta = None
+                if meta:
+                    movie_cache[key] = meta
+            desc = clean_text(meta.plot if meta else "")
         else:
-            out.append(f"{title}: See schedule listing.")
+            desc = desc_cache.get(title, "")
+            if not desc and token:
+                try:
+                    desc = _fetch_tvdb_overview_by_title(title, token)
+                except Exception:
+                    desc = ""
+                desc_cache[title] = desc
+        if desc:
+            out.append(OnTonightEntry(title=title, description=desc))
         if len(out) >= max_items:
             break
     return out
@@ -659,6 +848,9 @@ class GuideTimelineFlowable(Flowable):
         start_dt: datetime,
         end_dt: datetime,
         step_minutes: int,
+        omdb_api_key: str = "",
+        movie_cache: Optional[Dict[str, MovieMeta]] = None,
+        movie_inline_meta: bool = True,
     ) -> None:
         super().__init__()
         self.channels = channels
@@ -667,6 +859,9 @@ class GuideTimelineFlowable(Flowable):
         self.start_dt = start_dt
         self.end_dt = end_dt
         self.step_minutes = step_minutes
+        self.omdb_api_key = clean_text(omdb_api_key)
+        self.movie_cache = movie_cache if movie_cache is not None else {}
+        self.movie_inline_meta = movie_inline_meta
         self.first_col = (1.15 * 0.75) * inch
         self.header_h = 0.26 * inch
         self.row_h = 0.24 * inch
@@ -777,7 +972,15 @@ class GuideTimelineFlowable(Flowable):
                     continue
 
                 shown = display_title(e.title, e.filename)
-                shown = fit_show_title(shown, "Helvetica-Bold", 6.5, text_w)
+                if self.movie_inline_meta:
+                    meta = _get_movie_meta_for_event(e, self.omdb_api_key, self.movie_cache)
+                    badge = _movie_meta_badge(meta)
+                    if badge:
+                        shown = fit_title_with_badge(shown, badge, "Helvetica-Bold", 6.5, text_w)
+                    else:
+                        shown = fit_show_title(shown, "Helvetica-Bold", 6.5, text_w)
+                else:
+                    shown = fit_show_title(shown, "Helvetica-Bold", 6.5, text_w)
                 if not shown:
                     continue
                 c.setFont("Helvetica-Bold", 6.5)
@@ -799,8 +1002,12 @@ class FoldedGuideTimelineFlowable(Flowable):
         end_dt: datetime,
         step_minutes: int,
         safe_gap: float = 0.0,
+        omdb_api_key: str = "",
+        movie_cache: Optional[Dict[str, MovieMeta]] = None,
+        movie_inline_meta: bool = True,
     ) -> None:
         super().__init__()
+        cache = movie_cache if movie_cache is not None else {}
         self.left = GuideTimelineFlowable(
             channels=channels,
             channel_numbers=channel_numbers,
@@ -808,6 +1015,9 @@ class FoldedGuideTimelineFlowable(Flowable):
             start_dt=start_dt,
             end_dt=split_dt,
             step_minutes=step_minutes,
+            omdb_api_key=omdb_api_key,
+            movie_cache=cache,
+            movie_inline_meta=movie_inline_meta,
         )
         self.right = GuideTimelineFlowable(
             channels=channels,
@@ -816,6 +1026,9 @@ class FoldedGuideTimelineFlowable(Flowable):
             start_dt=split_dt,
             end_dt=end_dt,
             step_minutes=step_minutes,
+            omdb_api_key=omdb_api_key,
+            movie_cache=cache,
+            movie_inline_meta=movie_inline_meta,
         )
         self.gap = (0.12 + max(0.0, safe_gap)) * inch
 
@@ -1177,7 +1390,7 @@ class GuideWithBottomAdFlowable(Flowable):
         guide: Flowable,
         ad_path: Optional[Path],
         frame_height: float,
-        descriptions: Optional[List[str]] = None,
+        descriptions: Optional[List[OnTonightEntry]] = None,
     ) -> None:
         super().__init__()
         self.guide = guide
@@ -1215,7 +1428,7 @@ class CompilationGuidePageFlowable(Flowable):
         right_header: str,
         guide: Flowable,
         bottom_ad: Optional[Path] = None,
-        bottom_descriptions: Optional[List[str]] = None,
+        bottom_descriptions: Optional[List[OnTonightEntry]] = None,
     ) -> None:
         super().__init__()
         self.frame_height = frame_height
@@ -1265,7 +1478,7 @@ class BookletPageSpec:
     header_left: str = ""
     header_right: str = ""
     bottom_ad: Optional[Path] = None
-    bottom_descriptions: Optional[List[str]] = None
+    bottom_descriptions: Optional[List[OnTonightEntry]] = None
     cover_title: str = ""
     cover_subtitle: str = ""
     cover_period_label: str = ""
@@ -1333,6 +1546,9 @@ class BookletHalfPageFlowable(Flowable):
         channel_numbers: Dict[str, str],
         schedules: Dict[str, List[Event]],
         step_minutes: int,
+        omdb_api_key: str = "",
+        movie_cache: Optional[Dict[str, MovieMeta]] = None,
+        movie_inline_meta: bool = True,
     ) -> None:
         super().__init__()
         self.frame_height = frame_height
@@ -1341,6 +1557,9 @@ class BookletHalfPageFlowable(Flowable):
         self.channel_numbers = channel_numbers
         self.schedules = schedules
         self.step_minutes = step_minutes
+        self.omdb_api_key = clean_text(omdb_api_key)
+        self.movie_cache = movie_cache if movie_cache is not None else {}
+        self.movie_inline_meta = movie_inline_meta
         self.header_h = 0.14 * inch
         self.gap = 0.06 * inch
 
@@ -1393,6 +1612,9 @@ class BookletHalfPageFlowable(Flowable):
             start_dt=self.spec.start_dt,  # type: ignore[arg-type]
             end_dt=self.spec.end_dt,  # type: ignore[arg-type]
             step_minutes=self.step_minutes,
+            omdb_api_key=self.omdb_api_key,
+            movie_cache=self.movie_cache,
+            movie_inline_meta=self.movie_inline_meta,
         )
         content: Flowable = guide
         if self.spec.bottom_ad or self.spec.bottom_descriptions:
@@ -1456,6 +1678,8 @@ def make_pdf(
     step_minutes: int,
     double_sided_fold: bool = False,
     fold_safe_gap: float = 0.0,
+    omdb_api_key: str = "",
+    movie_inline_meta: bool = True,
 ) -> None:
     page_size = landscape(letter)
     doc = SimpleDocTemplate(
@@ -1478,6 +1702,7 @@ def make_pdf(
         spaceAfter=6,
     )
     story = []
+    movie_cache: Dict[str, MovieMeta] = {}
 
     if double_sided_fold:
         split_dt = _compute_fold_split(start_dt, end_dt, step_minutes)
@@ -1500,6 +1725,9 @@ def make_pdf(
                 end_dt=end_dt,
                 step_minutes=step_minutes,
                 safe_gap=fold_safe_gap,
+                omdb_api_key=omdb_api_key,
+                movie_cache=movie_cache,
+                movie_inline_meta=movie_inline_meta,
             )
         )
     else:
@@ -1513,6 +1741,9 @@ def make_pdf(
                 start_dt=start_dt,
                 end_dt=end_dt,
                 step_minutes=step_minutes,
+                omdb_api_key=omdb_api_key,
+                movie_cache=movie_cache,
+                movie_inline_meta=movie_inline_meta,
             )
         )
     doc.build(story)
@@ -1560,6 +1791,8 @@ def make_compilation_pdf(
     cover_art_dir: Optional[Path] = None,
     tvdb_api_key: str = "",
     tvdb_pin: str = "",
+    omdb_api_key: str = "",
+    movie_inline_meta: bool = True,
     status_messages: bool = False,
     fold_safe_gap: float = 0.0,
 ) -> None:
@@ -1654,6 +1887,7 @@ def make_compilation_pdf(
 
     blocks = split_into_blocks(range_start, range_end, page_block_hours)
     desc_cache: Dict[str, str] = {}
+    movie_cache: Dict[str, MovieMeta] = {}
     token_holder: Dict[str, str] = {}
     _status(f"Computed {len(blocks)} schedule block(s) for compilation")
     if double_sided_fold:
@@ -1690,8 +1924,8 @@ def make_compilation_pdf(
             split_dt = _compute_fold_split(b0, b1, step_minutes)
             bottom_ad_left = choose_random(bottom_ads) if bottom_ads else None
             bottom_ad_right = choose_random(bottom_ads) if bottom_ads else None
-            bottom_desc_left: List[str] = []
-            bottom_desc_right: List[str] = []
+            bottom_desc_left: List[OnTonightEntry] = []
+            bottom_desc_right: List[OnTonightEntry] = []
             if not bottom_ad_left:
                 bottom_desc_left = _build_block_descriptions(
                     schedules=schedules,
@@ -1699,7 +1933,9 @@ def make_compilation_pdf(
                     end_dt=split_dt,
                     tvdb_api_key=tvdb_api_key,
                     tvdb_pin=tvdb_pin,
+                    omdb_api_key=omdb_api_key,
                     desc_cache=desc_cache,
+                    movie_cache=movie_cache,
                     token_holder=token_holder,
                 )
             if not bottom_ad_right:
@@ -1709,7 +1945,9 @@ def make_compilation_pdf(
                     end_dt=b1,
                     tvdb_api_key=tvdb_api_key,
                     tvdb_pin=tvdb_pin,
+                    omdb_api_key=omdb_api_key,
                     desc_cache=desc_cache,
+                    movie_cache=movie_cache,
                     token_holder=token_holder,
                 )
             logical_pages.append(
@@ -1754,6 +1992,9 @@ def make_compilation_pdf(
                         channel_numbers=channel_numbers,
                         schedules=schedules,
                         step_minutes=step_minutes,
+                        omdb_api_key=omdb_api_key,
+                        movie_cache=movie_cache,
+                        movie_inline_meta=movie_inline_meta,
                     ),
                     right=BookletHalfPageFlowable(
                         frame_height=frame_h,
@@ -1762,6 +2003,9 @@ def make_compilation_pdf(
                         channel_numbers=channel_numbers,
                         schedules=schedules,
                         step_minutes=step_minutes,
+                        omdb_api_key=omdb_api_key,
+                        movie_cache=movie_cache,
+                        movie_inline_meta=movie_inline_meta,
                     ),
                     safe_gap=fold_safe_gap,
                 )
@@ -1792,6 +2036,9 @@ def make_compilation_pdf(
                 end_dt=b1,
                 step_minutes=step_minutes,
                 safe_gap=fold_safe_gap,
+                omdb_api_key=omdb_api_key,
+                movie_cache=movie_cache,
+                movie_inline_meta=movie_inline_meta,
             )
         else:
             guide_flow = GuideTimelineFlowable(
@@ -1801,10 +2048,13 @@ def make_compilation_pdf(
                 start_dt=b0,
                 end_dt=b1,
                 step_minutes=step_minutes,
+                omdb_api_key=omdb_api_key,
+                movie_cache=movie_cache,
+                movie_inline_meta=movie_inline_meta,
             )
 
         bottom_ad = choose_random(bottom_ads) if bottom_ads else None
-        bottom_desc: List[str] = []
+        bottom_desc: List[OnTonightEntry] = []
         if not bottom_ad:
             bottom_desc = _build_block_descriptions(
                 schedules=schedules,
@@ -1812,7 +2062,9 @@ def make_compilation_pdf(
                 end_dt=b1,
                 tvdb_api_key=tvdb_api_key,
                 tvdb_pin=tvdb_pin,
+                omdb_api_key=omdb_api_key,
                 desc_cache=desc_cache,
+                movie_cache=movie_cache,
                 token_holder=token_holder,
             )
         header_left = "CABLE GUIDE"

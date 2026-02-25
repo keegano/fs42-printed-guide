@@ -329,3 +329,26 @@ def test_bottom_descriptions_used_when_no_bottom_ads(tmp_path: Path, monkeypatch
     text = "\n".join((p.extract_text() or "") for p in pytest.importorskip("pypdf").PdfReader(str(out)).pages)
     assert "ON TONIGHT" in text
     assert "overview from TVDB" in text
+
+
+def test_block_descriptions_skip_missing_instead_of_placeholder(monkeypatch):
+    _, _, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
+    monkeypatch.setattr(core, "_fetch_tvdb_token", lambda *_a, **_k: "tok")
+    monkeypatch.setattr(core, "_fetch_tvdb_overview_by_title", lambda *_a, **_k: "")
+    monkeypatch.setattr(core, "_fetch_omdb_movie_meta", lambda *_a, **_k: None)
+
+    entries = core._build_block_descriptions(
+        schedules=schedules,
+        start_dt=datetime(2026, 2, 24, 0, 0),
+        end_dt=datetime(2026, 2, 24, 6, 0),
+        tvdb_api_key="k",
+        tvdb_pin="",
+        omdb_api_key="k",
+        desc_cache={},
+        movie_cache={},
+        token_holder={},
+        max_items=5,
+    )
+    assert isinstance(entries, list)
+    assert all(isinstance(e, core.OnTonightEntry) for e in entries)
+    assert all("See schedule listing" not in e.description for e in entries)

@@ -304,6 +304,86 @@ def test_draw_image_cover(tmp_path: Path):
     assert ok is True
 
 
+def test_draw_description_columns_skips_show_when_no_fitting_sentence(tmp_path: Path):
+    from reportlab.pdfgen import canvas
+
+    out = tmp_path / "ontonight_trim.pdf"
+    c = canvas.Canvas(str(out))
+    entries = [
+        core.OnTonightEntry(
+            title="A Very Very Long Show Title That Does Not Fit",
+            description="This sentence will not fit either.",
+        )
+    ]
+    core._draw_description_columns(c, entries, 0, 0, 80, 60)
+    c.showPage()
+    c.save()
+
+    txt = _extract_pdf_text(out)
+    # Header may still draw, but the show should be removed entirely.
+    assert "ON TONIGHT" in txt
+    assert "Very Very Long Show" not in txt
+
+
+def test_draw_description_columns_renders_bold_title_and_sentence(tmp_path: Path):
+    from reportlab.pdfgen import canvas
+
+    out = tmp_path / "ontonight_ok.pdf"
+    c = canvas.Canvas(str(out))
+    entries = [core.OnTonightEntry(title="Rugrats", description="Tommy leads a toy hunt. Angelica objects.")]
+    core._draw_description_columns(c, entries, 0, 0, 300, 120)
+    c.showPage()
+    c.save()
+
+    txt = _extract_pdf_text(out)
+    assert "Rugrats" in txt
+    assert "Tommy leads a toy hunt." in txt
+
+
+def test_movie_meta_badge_rendered_inline(monkeypatch, tmp_path: Path):
+    channels = ["MTV"]
+    numbers = {"MTV": "7"}
+    schedules = {
+        "MTV": [
+                core.Event(
+                    start=datetime(2026, 3, 5, 9, 0),
+                    end=datetime(2026, 3, 5, 12, 0),
+                    title="Movie Block",
+                    filename="The.Matrix.1999.1080p.BluRay.mkv",
+                )
+        ]
+    }
+
+    monkeypatch.setattr(
+        core,
+        "_fetch_omdb_movie_meta",
+        lambda *a, **k: core.MovieMeta(
+            title="The Matrix",
+            year="1999",
+            plot="A computer hacker learns reality is simulated.",
+            imdb_rating="7.6",
+            rated="R",
+        ),
+    )
+
+    out = tmp_path / "movie_inline.pdf"
+    core.make_pdf(
+        out_path=out,
+        grid_title="CABLE GUIDE",
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        start_dt=datetime(2026, 3, 5, 9, 0),
+        end_dt=datetime(2026, 3, 5, 12, 0),
+        step_minutes=30,
+        omdb_api_key="fake",
+        movie_inline_meta=True,
+    )
+    txt = _extract_pdf_text(out)
+    assert "R" in txt
+    assert "★" in txt or "☆" in txt
+
+
 def _sample_schedules() -> tuple[list[str], dict[str, str], dict[str, list[core.Event]]]:
     channels = ["NBC", "PBS"]
     numbers = {"NBC": "3", "PBS": "4"}

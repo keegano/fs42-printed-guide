@@ -37,6 +37,7 @@ def test_example_month_booklet_toml_parses():
     assert args.cover_date_y == 0.18
     assert args.cover_airing_y == 0.11
     assert "{weekday}" in args.cover_airing_label_week_format
+    assert args.omdb_api_key == "YOUR_OMDB_API_KEY"
 
 
 def test_example_cached_iterate_toml_parses():
@@ -52,6 +53,7 @@ def test_example_cached_iterate_toml_parses():
     assert args.cover_text_outline_color == "000000"
     assert args.cover_airing_label_enabled is True
     assert "Catch {show}" in args.cover_airing_label_week_format
+    assert args.omdb_api_key == "YOUR_OMDB_API_KEY"
 
 
 def test_example_real_catalog_ads_toml_parses():
@@ -64,3 +66,4 @@ def test_example_real_catalog_ads_toml_parses():
     assert args.cover_bg_color == "101820"
     assert args.cover_text_color == "FFFFFF"
     assert args.cover_airing_label_day_format == "Catch {show} at {time}!"
+    assert args.omdb_api_key == "YOUR_OMDB_API_KEY"

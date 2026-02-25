@@ -30,4 +30,5 @@ cover_art_dir = "./assets/cover"
 ads_dir = "./assets/ads/full"
 ad_insert_every = 1
 bottom_ads_dir = "./assets/ads/bottom"
+omdb_api_key = "YOUR_OMDB_API_KEY"
 out = "out/real_catalog_ads.pdf"

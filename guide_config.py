@@ -56,6 +56,8 @@ DEFAULTS: Dict[str, Any] = {
     "cover_art_dir": None,
     "tvdb_api_key": "",
     "tvdb_pin": "",
+    "omdb_api_key": "",
+    "movie_inline_meta": True,
     "load_catalog": None,
     "dump_catalog": None,
     "status_messages": True,
@@ -91,7 +93,7 @@ def load_env_values() -> Dict[str, str]:
         merged.update(_parse_env_file(p))
 
     # Process env vars override file values.
-    merged.update({k: v for k, v in os.environ.items() if k in ("TVDB_API_KEY", "TVDB_PIN")})
+    merged.update({k: v for k, v in os.environ.items() if k in ("TVDB_API_KEY", "TVDB_PIN", "OMDB_API_KEY")})
     return merged
 
 
@@ -155,7 +157,7 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
         if k in out and out[k] is not None and not isinstance(out[k], float):
             out[k] = float(out[k])
 
-    bool_keys = ("double_sided_fold", "cover_page", "status_messages", "cover_airing_label_enabled")
+    bool_keys = ("double_sided_fold", "cover_page", "status_messages", "cover_airing_label_enabled", "movie_inline_meta")
     for k in bool_keys:
         if k in out and not isinstance(out[k], bool):
             if isinstance(out[k], str):
@@ -216,6 +218,9 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--cover-art-dir", type=Path, help="Folder for cover art images (used by cover-art-source folder/auto).")
     p.add_argument("--tvdb-api-key", type=str, help="TVDB API key for cover-art-source tvdb/auto.")
     p.add_argument("--tvdb-pin", type=str, help="TVDB PIN (if required by your TVDB account/app).")
+    p.add_argument("--omdb-api-key", type=str, help="OMDb API key for movie descriptions/ratings metadata.")
+    p.add_argument("--movie-inline-meta", action="store_true", help="Render movie rating/parential metadata inline in guide cells (default on).")
+    p.add_argument("--no-movie-inline-meta", dest="movie_inline_meta", action="store_false", help="Disable inline movie metadata in guide cells.")
     p.add_argument("--load-catalog", type=Path, help="Load pre-scanned channel schedules/catalog JSON instead of querying station_42.py.")
     p.add_argument("--dump-catalog", type=Path, help="Write scanned channel schedules/catalog JSON for later reuse.")
     p.add_argument("--status-messages", action="store_true", help="Print progress/status messages while scanning and rendering (default on).")
@@ -241,6 +246,8 @@ def parse_effective_args(argv: Optional[list[str]] = None) -> argparse.Namespace
         merged["tvdb_api_key"] = env_values["TVDB_API_KEY"]
     if env_values.get("TVDB_PIN"):
         merged["tvdb_pin"] = env_values["TVDB_PIN"]
+    if env_values.get("OMDB_API_KEY"):
+        merged["omdb_api_key"] = env_values["OMDB_API_KEY"]
     merged.update(cfg)
     merged.update(cli_values)
 
