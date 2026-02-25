@@ -1003,7 +1003,7 @@ def _build_block_descriptions(
     if status_cb:
         status_cb(f"On Tonight candidates considered: {len(candidates)}")
     if not candidates:
-        return []
+        return [OnTonightEntry(title="Programming Note", description="No current descriptions available.")]
     out: List[OnTonightEntry] = []
     token = token_holder.get("token", "")
     if tvdb_api_key and not token:
@@ -1040,7 +1040,16 @@ def _build_block_descriptions(
             break
     if status_cb:
         status_cb(f"On Tonight entries after filtering/descriptions: {len(out)}")
+    if not out:
+        return [OnTonightEntry(title="Programming Note", description="No current descriptions available.")]
     return out
+
+
+def _ensure_bottom_descriptions(entries: Optional[List[OnTonightEntry]]) -> List[OnTonightEntry]:
+    """Ensure bottom description sections are never empty."""
+    if entries:
+        return entries
+    return [OnTonightEntry(title="Programming Note", description="No current descriptions available.")]
 
 
 def time_label(dt: datetime) -> str:
@@ -1626,7 +1635,7 @@ class GuideWithBottomAdFlowable(Flowable):
 
         available = guide_y - self.gap
         if not self.ad_path:
-            if self.descriptions and available > 24:
+            if available > 24:
                 _draw_description_columns(c, self.descriptions, 0, 0, self.width, available)
             return
         if available <= 12:
@@ -1675,7 +1684,7 @@ class CompilationGuidePageFlowable(Flowable):
 
         if ad_h > 0:
             draw_image_fit(c, self.bottom_ad, 0, 0, self.width, ad_h)
-        elif self.bottom_descriptions and content_h - guide_h > 24:
+        elif content_h - guide_h > 24:
             desc_h = content_h - guide_h - self.gap
             _draw_description_columns(c, self.bottom_descriptions, 0, 0, self.width, desc_h)
             ad_h = desc_h
@@ -2143,6 +2152,57 @@ def make_compilation_pdf(
     movie_cache: Dict[str, MovieMeta] = {}
     token_holder: Dict[str, str] = {}
     _status(f"Computed {len(blocks)} schedule block(s) for compilation")
+
+    def _build_catch_promo_asset(block_start: datetime, block_end: datetime) -> tuple[str, str, Optional[Path]]:
+        base_title, base_label = build_catch_promo_label(
+            schedules=schedules,
+            range_mode=range_mode,
+            start_dt=block_start,
+            end_dt=block_end,
+            ignored_channels=ignore_ch,
+            ignored_titles=ignore_t,
+            single_fmt=cover_airing_label_single_format,
+            day_fmt=cover_airing_label_day_format,
+            week_fmt=cover_airing_label_week_format,
+            month_fmt=cover_airing_label_month_format,
+        )
+        candidates = _block_show_events(
+            schedules=schedules,
+            start_dt=block_start,
+            end_dt=block_end,
+            ignored_channels=ignore_ch,
+            ignored_titles=ignore_t,
+            max_items=12,
+        )
+        if not candidates:
+            _status("Catch promo image search: no candidate events after filters")
+            return base_title, base_label, None
+
+        for idx, (shown, ev) in enumerate(candidates, start=1):
+            art: Optional[Path] = None
+            if is_movie_event(ev.title, ev.filename) and omdb_api_key:
+                _status(f"Catch promo image attempt {idx}: OMDb poster for {shown}")
+                art = fetch_omdb_cover_art(shown, _extract_year_hint(ev.filename), omdb_api_key, api_cache=runtime_api_cache)
+            elif tvdb_api_key:
+                _status(f"Catch promo image attempt {idx}: TVDB art for {shown}")
+                art = fetch_tvdb_cover_art([shown], tvdb_api_key, tvdb_pin, api_cache=runtime_api_cache)
+            if art:
+                tmp_files.append(art)
+                label = _build_airing_label(
+                    range_mode=range_mode,
+                    title=shown,
+                    when_dt=ev.start,
+                    single_fmt=cover_airing_label_single_format,
+                    day_fmt=cover_airing_label_day_format,
+                    week_fmt=cover_airing_label_week_format,
+                    month_fmt=cover_airing_label_month_format,
+                )
+                _status(f"Catch promo image selected on attempt {idx}: {shown}")
+                return "Catch Tonight", label, art
+
+        _status("Catch promo image lookup failed for all candidates; using text-only promo page")
+        return base_title, base_label, None
+
     if double_sided_fold:
         logical_pages: List[BookletPageSpec] = []
         if cover_enabled:
@@ -2198,6 +2258,7 @@ def make_compilation_pdf(
                     api_cache=runtime_api_cache,
                     status_cb=_status,
                 )
+                bottom_desc_left = _ensure_bottom_descriptions(bottom_desc_left)
                 _status(f"On Tonight entries (left): {len(bottom_desc_left)}")
             if not bottom_ad_right:
                 _status(
@@ -2218,6 +2279,7 @@ def make_compilation_pdf(
                     api_cache=runtime_api_cache,
                     status_cb=_status,
                 )
+                bottom_desc_right = _ensure_bottom_descriptions(bottom_desc_right)
                 _status(f"On Tonight entries (right): {len(bottom_desc_right)}")
             logical_pages.append(
                 BookletPageSpec(
@@ -2244,18 +2306,7 @@ def make_compilation_pdf(
 
         if cover_enabled:
             if back_cover_catch_enabled:
-                bc_title, bc_label = build_catch_promo_label(
-                    schedules=schedules,
-                    range_mode=range_mode,
-                    start_dt=range_start,
-                    end_dt=range_end,
-                    ignored_channels=ignore_ch,
-                    ignored_titles=ignore_t,
-                    single_fmt=cover_airing_label_single_format,
-                    day_fmt=cover_airing_label_day_format,
-                    week_fmt=cover_airing_label_week_format,
-                    month_fmt=cover_airing_label_month_format,
-                )
+                bc_title, bc_label, bc_art = _build_catch_promo_asset(range_start, range_end)
                 logical_pages.append(
                     BookletPageSpec(
                         kind="cover",
@@ -2263,7 +2314,7 @@ def make_compilation_pdf(
                         cover_subtitle="",
                         cover_period_label="",
                         cover_airing_label=bc_label,
-                        cover_art_path=None,
+                        cover_art_path=bc_art,
                         cover_bg_color=cover_bg_color,
                         cover_border_size=cover_border_size,
                         cover_text_color=cover_text_color,
@@ -2387,6 +2438,7 @@ def make_compilation_pdf(
                 api_cache=runtime_api_cache,
                 status_cb=_status,
             )
+            bottom_desc = _ensure_bottom_descriptions(bottom_desc)
             _status(f"On Tonight entries: {len(bottom_desc)}")
         header_left = "CABLE GUIDE"
         header_right = f"{b0.strftime('%a %b %d, %Y %H:%M')} - {b1.strftime('%H:%M')}"
@@ -2411,18 +2463,7 @@ def make_compilation_pdf(
             _status(f"Inserting interstitial page after block {i + 1} using source={interstitial_source}")
             story.append(PageBreak())
             if interstitial_source == "catch":
-                cap_title, cap_label = build_catch_promo_label(
-                    schedules=schedules,
-                    range_mode=range_mode,
-                    start_dt=b0,
-                    end_dt=b1,
-                    ignored_channels=ignore_ch,
-                    ignored_titles=ignore_t,
-                    single_fmt=cover_airing_label_single_format,
-                    day_fmt=cover_airing_label_day_format,
-                    week_fmt=cover_airing_label_week_format,
-                    month_fmt=cover_airing_label_month_format,
-                )
+                cap_title, cap_label, cap_art = _build_catch_promo_asset(b0, b1)
                 story.append(
                     CoverPageFlowable(
                         frame_height=frame_h,
@@ -2430,7 +2471,7 @@ def make_compilation_pdf(
                         subtitle="",
                         period_label="",
                         airing_label=cap_label,
-                        art_path=None,
+                        art_path=cap_art,
                         bg_color=cover_bg_color,
                         border_size=cover_border_size,
                         text_color=cover_text_color,

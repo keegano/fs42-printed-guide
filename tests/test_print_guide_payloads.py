@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import sys
 import base64
+import random
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -352,6 +354,7 @@ def test_block_descriptions_skip_missing_instead_of_placeholder(monkeypatch):
         max_items=5,
     )
     assert isinstance(entries, list)
+    assert len(entries) > 0
     assert all(isinstance(e, core.OnTonightEntry) for e in entries)
     assert all("See schedule listing" not in e.description for e in entries)
 
@@ -387,3 +390,56 @@ def test_ignore_list_filters_cover_and_ontonight(tmp_path: Path, monkeypatch):
         ignored_titles={"rock"},
     )
     assert out.exists()
+
+
+def test_real_catalog_fuzz_no_blank_ontonight_boxes_with_cached_api(tmp_path: Path, monkeypatch):
+    channels, _, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
+
+    # Build cached TVDB overviews so compilation can run without API calls.
+    tvdb_overview = {}
+    for evs in schedules.values():
+        for e in evs[:40]:
+            tvdb_overview[core.clean_text(core.display_title(e.title, e.filename)).lower()] = "Cached description."
+    cache_file = tmp_path / "api_cache.json"
+    cache_file.write_text(
+        json.dumps(
+            {
+                "tvdb_token": {"fake|": "tok"},
+                "tvdb_overview": tvdb_overview,
+                "tvdb_cover_image": {},
+                "omdb_movie": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(core, "_http_json", lambda *a, **k: (_ for _ in ()).throw(AssertionError("network call not expected")))
+
+    rng = random.Random(1234)
+    starts = [datetime(2026, 2, 24, h, 0) for h in (0, 3, 6, 9, 12)]
+    for idx in range(5):
+        start = rng.choice(starts)
+        end = start.replace(hour=min(23, start.hour + 8))
+        out = tmp_path / f"fuzz_{idx}.pdf"
+        core.make_compilation_pdf(
+            out_path=out,
+            channels=channels,
+            channel_numbers={},
+            schedules=schedules,
+            range_mode="single",
+            range_start=start,
+            range_end=end,
+            page_block_hours=2,
+            step_minutes=30,
+            bottom_ads_dir=None,
+            tvdb_api_key="fake",
+            api_cache_enabled=True,
+            api_cache_file=cache_file,
+            cover_enabled=False,
+        )
+        reader = pytest.importorskip("pypdf").PdfReader(str(out))
+        for page in reader.pages:
+            txt = page.extract_text() or ""
+            if "CABLE GUIDE" in txt and "CH" in txt:
+                assert "ON TONIGHT" in txt
+                assert ("No current descriptions available." in txt) or re.search(r"[A-Za-z][A-Za-z0-9 '&-]{1,40}:", txt)
