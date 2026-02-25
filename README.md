@@ -14,6 +14,8 @@ Current rendering supports:
 - Optional ad insertion and optional cover page with image art
 - Progress status messages during station scanning and PDF assembly
 - Catalog dump/load to reuse scanned schedules without re-running FieldStation42
+- Configurable folded safe-gap at center fold for print tolerance
+- Cover styling controls (background color, border inset, and title/date fonts)
 
 ## Data Flow
 
@@ -63,6 +65,8 @@ Compilation mode supports:
 - Full-page interstitial ads from `--ads-dir`, inserted every N guide pages via `--ad-insert-every`
 - Bottom ad fill from `--bottom-ads-dir` (ad image placed below guide when page has remaining vertical space)
 - Optional cover page (`--cover-page`) with configurable text and optional art
+- Cover art can be rendered as a full-bleed image inside a configurable border
+  filled by `--cover-bg-color` (useful for trim/fold safety)
 
 Cover art sources (`--cover-art-source`):
 - `none`
@@ -93,6 +97,7 @@ To avoid repeatedly scanning slow `station_42.py` calls:
 2. Iterate on rendering options with `--load-catalog ./cache/march_scan.json`.
 
 Catalog files include discovered channels, inferred year, and parsed schedule events.
+See `examples/real_catalog_ads.toml` for a realistic cached-catalog + ad setup.
 
 Example `guide.toml`:
 
@@ -136,6 +141,14 @@ Compilation extras:
 - `--cover-title TEXT`
 - `--cover-subtitle TEXT`
 - `--cover-period-label TEXT`
+- `--cover-bg-color HEX`
+- `--cover-border-size FLOAT`
+- `--cover-title-font NAME`
+- `--cover-title-size FLOAT`
+- `--cover-subtitle-font NAME`
+- `--cover-subtitle-size FLOAT`
+- `--cover-date-font NAME`
+- `--cover-date-size FLOAT`
 - `--cover-art-source none|folder|tvdb|auto`
 - `--cover-art-dir PATH`
 - `--tvdb-api-key KEY`
@@ -145,6 +158,8 @@ Compilation extras:
 - `--status-messages` / `--no-status-messages`
 
 `--fold-safe-gap` applies to folded single pages and folded booklet compilation spreads.
+Time tick labels on guide headers are inset at the edges so start/end labels stay
+inside print-safe bounds and clear of the `CH` column and fold gutter.
 
 ## Example
 

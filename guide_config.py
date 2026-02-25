@@ -32,6 +32,14 @@ DEFAULTS: Dict[str, Any] = {
     "cover_title": "Time Travel Cable Guide",
     "cover_subtitle": "",
     "cover_period_label": "",
+    "cover_bg_color": "FFFFFF",
+    "cover_border_size": 0.0,
+    "cover_title_font": "Helvetica-Bold",
+    "cover_title_size": 28.0,
+    "cover_subtitle_font": "Helvetica",
+    "cover_subtitle_size": 13.0,
+    "cover_date_font": "Helvetica-Bold",
+    "cover_date_size": 18.0,
     "cover_art_source": "none",
     "cover_art_dir": None,
     "tvdb_api_key": "",
@@ -118,7 +126,15 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
         if k in out and out[k] is not None and not isinstance(out[k], int):
             out[k] = int(out[k])
 
-    float_keys = ("hours", "page_block_hours", "fold_safe_gap")
+    float_keys = (
+        "hours",
+        "page_block_hours",
+        "fold_safe_gap",
+        "cover_border_size",
+        "cover_title_size",
+        "cover_subtitle_size",
+        "cover_date_size",
+    )
     for k in float_keys:
         if k in out and out[k] is not None and not isinstance(out[k], float):
             out[k] = float(out[k])
@@ -159,6 +175,14 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--cover-title", type=str, help='Cover title, e.g. "Time Travel Cable Guide".')
     p.add_argument("--cover-subtitle", type=str, help='Cover subtitle, e.g. "March 2026".')
     p.add_argument("--cover-period-label", type=str, help="Optional explicit period label on cover. If omitted, inferred from range mode/date.")
+    p.add_argument("--cover-bg-color", type=str, help="Cover background/border color hex, e.g. FFFFFF or 101820.")
+    p.add_argument("--cover-border-size", type=float, help="Border inset in inches around cover art.")
+    p.add_argument("--cover-title-font", type=str, help="Cover title font name.")
+    p.add_argument("--cover-title-size", type=float, help="Cover title font size (pt).")
+    p.add_argument("--cover-subtitle-font", type=str, help="Cover subtitle font name.")
+    p.add_argument("--cover-subtitle-size", type=float, help="Cover subtitle font size (pt).")
+    p.add_argument("--cover-date-font", type=str, help="Cover period/date font name.")
+    p.add_argument("--cover-date-size", type=float, help="Cover period/date font size (pt).")
     p.add_argument("--cover-art-source", choices=["none", "folder", "tvdb", "auto"], help="Cover art source.")
     p.add_argument("--cover-art-dir", type=Path, help="Folder for cover art images (used by cover-art-source folder/auto).")
     p.add_argument("--tvdb-api-key", type=str, help="TVDB API key for cover-art-source tvdb/auto.")

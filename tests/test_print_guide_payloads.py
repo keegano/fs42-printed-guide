@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+import base64
 from datetime import datetime
 from pathlib import Path
 
@@ -17,6 +18,14 @@ core = pytest.importorskip("guide_core")
 
 
 PAYLOAD_DIR = Path(__file__).resolve().parent / "test_payloads"
+REAL_CATALOG_DUMP = PAYLOAD_DIR / "catalog_dump.json"
+
+
+def _write_tiny_png(path: Path) -> None:
+    tiny_png = (
+        b"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+Xx2kAAAAASUVORK5CYII="
+    )
+    path.write_bytes(base64.b64decode(tiny_png))
 
 
 def _payload_for_channel(channel: str) -> str:
@@ -202,3 +211,63 @@ def test_main_uses_loaded_catalog_without_scanning(monkeypatch, tmp_path: Path):
 
     assert called["discover"] == 0
     assert called["make_pdf"] == 1
+
+
+def test_load_real_catalog_dump():
+    channels, year, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
+    assert year == 2026
+    assert len(channels) >= 20
+    assert "NBC" in channels
+    assert len(schedules["NBC"]) > 10
+    assert schedules["NBC"][0].start < schedules["NBC"][0].end
+
+
+def test_real_catalog_compilation_with_ads(tmp_path: Path, monkeypatch):
+    channels, _, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
+    monkeypatch.setattr(core, "choose_random", lambda items: items[0] if items else None)
+
+    ads_dir = tmp_path / "ads"
+    bottom_ads = tmp_path / "bottom_ads"
+    cover_dir = tmp_path / "cover"
+    ads_dir.mkdir()
+    bottom_ads.mkdir()
+    cover_dir.mkdir()
+    _write_tiny_png(ads_dir / "ad.png")
+    _write_tiny_png(bottom_ads / "bottom.png")
+    _write_tiny_png(cover_dir / "cover.png")
+
+    out = tmp_path / "real_catalog_compilation.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers={},
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 2, 24, 0, 0),
+        range_end=datetime(2026, 2, 25, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        ads_dir=ads_dir,
+        ad_insert_every=1,
+        bottom_ads_dir=bottom_ads,
+        cover_enabled=True,
+        cover_title="Time Travel Cable Guide",
+        cover_subtitle="Real Dump",
+        cover_art_source="folder",
+        cover_art_dir=cover_dir,
+        cover_bg_color="102030",
+        cover_border_size=0.12,
+        cover_title_font="Helvetica-Bold",
+        cover_title_size=24,
+        cover_subtitle_font="Helvetica",
+        cover_subtitle_size=11,
+        cover_date_font="Helvetica-Bold",
+        cover_date_size=15,
+    )
+
+    reader = pytest.importorskip("pypdf").PdfReader(str(out))
+    text = "\n".join((p.extract_text() or "") for p in reader.pages)
+    # day 24h + 12h blocks = 2 guide pages, +1 cover, +1 interstitial ad after page 1 = 4 pages.
+    assert len(reader.pages) == 4
+    assert "Time Travel Cable Guide" in text
+    assert "CABLE GUIDE" in text

@@ -120,12 +120,30 @@ def test_catalog_options_and_status_toggle():
             "dump.json",
             "--fold-safe-gap",
             "0.2",
+            "--cover-bg-color",
+            "112233",
+            "--cover-border-size",
+            "0.1",
+            "--cover-title-font",
+            "Helvetica-Bold",
+            "--cover-title-size",
+            "30",
+            "--cover-date-font",
+            "Helvetica",
+            "--cover-date-size",
+            "16",
             "--no-status-messages",
         ]
     )
     assert args.load_catalog == Path("scan.json")
     assert args.dump_catalog == Path("dump.json")
     assert args.fold_safe_gap == 0.2
+    assert args.cover_bg_color == "112233"
+    assert args.cover_border_size == 0.1
+    assert args.cover_title_font == "Helvetica-Bold"
+    assert args.cover_title_size == 30.0
+    assert args.cover_date_font == "Helvetica"
+    assert args.cover_date_size == 16.0
     assert args.status_messages is False
 
 

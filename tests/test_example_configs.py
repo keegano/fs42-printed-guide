@@ -30,6 +30,9 @@ def test_example_month_booklet_toml_parses():
     assert args.cover_page is True
     assert args.fold_safe_gap == 0.2
     assert args.ad_insert_every == 4
+    assert args.cover_bg_color == "102030"
+    assert args.cover_border_size == 0.14
+    assert args.cover_title_size == 30.0
 
 
 def test_example_cached_iterate_toml_parses():
@@ -40,3 +43,15 @@ def test_example_cached_iterate_toml_parses():
     assert args.load_catalog == Path("cache/march_week_catalog.json")
     assert args.dump_catalog == Path("cache/march_week_catalog.json")
     assert args.cover_art_source == "auto"
+    assert args.cover_bg_color == "1D2A44"
+    assert args.cover_border_size == 0.12
+
+
+def test_example_real_catalog_ads_toml_parses():
+    path = ROOT / "examples" / "real_catalog_ads.toml"
+    args = cfg.parse_effective_args(["--config", str(path)])
+
+    assert args.load_catalog == Path("tests/test_payloads/catalog_dump.json")
+    assert args.range_mode == "day"
+    assert args.ad_insert_every == 1
+    assert args.cover_bg_color == "101820"

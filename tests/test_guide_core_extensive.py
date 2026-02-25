@@ -240,6 +240,20 @@ def test_draw_image_fit(tmp_path: Path):
     assert not_ok is False
 
 
+def test_draw_image_cover(tmp_path: Path):
+    png = tmp_path / "tiny.png"
+    _write_tiny_png(png)
+
+    from reportlab.pdfgen import canvas
+
+    out = tmp_path / "cover_img.pdf"
+    c = canvas.Canvas(str(out))
+    ok = core.draw_image_cover(c, png, 0, 0, 100, 50)
+    c.showPage()
+    c.save()
+    assert ok is True
+
+
 def _sample_schedules() -> tuple[list[str], dict[str, str], dict[str, list[core.Event]]]:
     channels = ["NBC", "PBS"]
     numbers = {"NBC": "3", "PBS": "4"}
@@ -407,3 +421,15 @@ def test_flowable_wraps():
     hdr = core.FoldHeaderFlowable("L", "R")
     w3, h3 = hdr.wrap(500, 700)
     assert w3 == 500 and h3 > 0
+
+
+def test_header_label_edges_are_inset():
+    channels, numbers, schedules = _sample_schedules()
+    guide = core.GuideTimelineFlowable(channels, numbers, schedules, datetime(2026, 3, 5, 9, 0), datetime(2026, 3, 5, 11, 0), 30)
+    guide.wrap(500, 700)
+
+    left_safe = guide._safe_header_label_x(guide.first_col, "9a", 500)
+    right_safe = guide._safe_header_label_x(500, "11a", 500)
+
+    assert left_safe > guide.first_col
+    assert right_safe < 500

@@ -1,0 +1,24 @@
+# Realistic example using a pre-dumped catalog and ads.
+load_catalog = "./tests/test_payloads/catalog_dump.json"
+date = "2026-02-24"
+range_mode = "day"
+page_block_hours = 12
+step = 30
+double_sided_fold = false
+cover_page = true
+cover_title = "Time Travel Cable Guide"
+cover_subtitle = "Real Catalog Demo"
+cover_bg_color = "101820"
+cover_border_size = 0.12
+cover_title_font = "Helvetica-Bold"
+cover_title_size = 26
+cover_subtitle_font = "Helvetica"
+cover_subtitle_size = 11
+cover_date_font = "Helvetica-Bold"
+cover_date_size = 15
+cover_art_source = "folder"
+cover_art_dir = "./assets/cover"
+ads_dir = "./assets/ads/full"
+ad_insert_every = 1
+bottom_ads_dir = "./assets/ads/bottom"
+out = "out/real_catalog_ads.pdf"

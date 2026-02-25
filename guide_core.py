@@ -476,6 +476,14 @@ class GuideTimelineFlowable(Flowable):
         secs = max(0.0, min(total_seconds, secs))
         return self.first_col + (timeline_w * (secs / total_seconds))
 
+    def _safe_header_label_x(self, x: float, label: str, page_width: float) -> float:
+        label_w = pdfmetrics.stringWidth(label, "Helvetica-Bold", 7)
+        min_x = self.first_col + 1.0 + (label_w / 2.0)
+        max_x = page_width - 1.0 - (label_w / 2.0)
+        if max_x <= min_x:
+            return x
+        return min(max(x, min_x), max_x)
+
     def _draw_channel_label(self, c, row_bottom: float, channel_name: str, channel_num: str) -> None:
         y = row_bottom + ((self.row_h - 7) / 2.0) + 1
         c.setFont("Helvetica-Bold", 7)
@@ -521,12 +529,18 @@ class GuideTimelineFlowable(Flowable):
         # Header
         c.setFont("Helvetica-Bold", 7)
         c.drawCentredString(self.first_col / 2.0, height - self.header_h + 6, "CH")
+        ticks: List[datetime] = []
         cur = self.start_dt
         while cur <= self.end_dt:
+            ticks.append(cur)
+            cur += timedelta(minutes=self.step_minutes)
+
+        for cur in ticks:
             x = self._x_for(cur, timeline_w, total_seconds)
             c.line(x, height - self.header_h, x, height - self.header_h + 3)
-            c.drawCentredString(x, height - self.header_h + 6, time_label(cur))
-            cur += timedelta(minutes=self.step_minutes)
+            label = time_label(cur)
+            safe_x = self._safe_header_label_x(x, label, width)
+            c.drawCentredString(safe_x, height - self.header_h + 6, label)
 
         # Rows and proportional event blocks
         for idx, raw_ch in enumerate(self.channels):
@@ -660,6 +674,86 @@ def draw_image_fit(c, image_path: Path, x: float, y: float, w: float, h: float) 
         return False
 
 
+def _parse_hex_color(hex_value: str, fallback: Tuple[float, float, float] = (1.0, 1.0, 1.0)) -> Tuple[float, float, float]:
+    raw = clean_text(hex_value).lstrip("#")
+    if len(raw) == 3:
+        raw = "".join([ch * 2 for ch in raw])
+    if len(raw) != 6:
+        return fallback
+    try:
+        return tuple(int(raw[i : i + 2], 16) / 255.0 for i in (0, 2, 4))  # type: ignore[return-value]
+    except Exception:
+        return fallback
+
+
+def draw_image_cover(c, image_path: Path, x: float, y: float, w: float, h: float) -> bool:
+    """
+    Draw image using "cover" behavior: fills target rect and crops overflow.
+    """
+    try:
+        ir = ImageReader(str(image_path))
+        iw, ih = ir.getSize()
+        if iw <= 0 or ih <= 0 or w <= 0 or h <= 0:
+            return False
+
+        scale = max(w / iw, h / ih)
+        dw = iw * scale
+        dh = ih * scale
+        dx = x + (w - dw) / 2.0
+        dy = y + (h - dh) / 2.0
+
+        c.saveState()
+        clip = c.beginPath()
+        clip.rect(x, y, w, h)
+        c.clipPath(clip, stroke=0, fill=0)
+        c.drawImage(ir, dx, dy, width=dw, height=dh, preserveAspectRatio=True, mask="auto")
+        c.restoreState()
+        return True
+    except Exception:
+        return False
+
+
+def draw_cover_panel(
+    c,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    title: str,
+    subtitle: str,
+    period_label: str,
+    art_path: Optional[Path] = None,
+    bg_color_hex: str = "FFFFFF",
+    border_size_in: float = 0.0,
+    title_font: str = "Helvetica-Bold",
+    title_size: float = 28.0,
+    subtitle_font: str = "Helvetica",
+    subtitle_size: float = 13.0,
+    date_font: str = "Helvetica-Bold",
+    date_size: float = 18.0,
+) -> None:
+    bg = _parse_hex_color(bg_color_hex, fallback=(1.0, 1.0, 1.0))
+    c.setFillColorRGB(*bg)
+    c.rect(x, y, width, height, stroke=0, fill=1)
+
+    border = max(0.0, border_size_in) * inch
+    inner_w = max(0.0, width - (2.0 * border))
+    inner_h = max(0.0, height - (2.0 * border))
+    if art_path and inner_w > 0 and inner_h > 0:
+        draw_image_cover(c, art_path, x + border, y + border, inner_w, inner_h)
+
+    c.setFillColorRGB(1.0, 1.0, 1.0)
+    cx = x + (width / 2.0)
+    c.setFont(title_font, title_size)
+    c.drawCentredString(cx, y + height * 0.86, clean_text(title))
+    if subtitle:
+        c.setFont(subtitle_font, subtitle_size)
+        c.drawCentredString(cx, y + height * 0.80, clean_text(subtitle))
+    if period_label:
+        c.setFont(date_font, date_size)
+        c.drawCentredString(cx, y + height * 0.72, clean_text(period_label))
+
+
 class FullPageImageFlowable(Flowable):
     def __init__(self, image_path: Path, frame_height: float) -> None:
         super().__init__()
@@ -683,6 +777,14 @@ class CoverPageFlowable(Flowable):
         subtitle: str,
         period_label: str,
         art_path: Optional[Path] = None,
+        bg_color: str = "FFFFFF",
+        border_size: float = 0.0,
+        title_font: str = "Helvetica-Bold",
+        title_size: float = 28.0,
+        subtitle_font: str = "Helvetica",
+        subtitle_size: float = 13.0,
+        date_font: str = "Helvetica-Bold",
+        date_size: float = 18.0,
     ) -> None:
         super().__init__()
         self.frame_height = frame_height
@@ -690,6 +792,14 @@ class CoverPageFlowable(Flowable):
         self.subtitle = clean_text(subtitle)
         self.period_label = clean_text(period_label)
         self.art_path = art_path
+        self.bg_color = clean_text(bg_color) or "FFFFFF"
+        self.border_size = max(0.0, border_size)
+        self.title_font = clean_text(title_font) or "Helvetica-Bold"
+        self.title_size = max(1.0, title_size)
+        self.subtitle_font = clean_text(subtitle_font) or "Helvetica"
+        self.subtitle_size = max(1.0, subtitle_size)
+        self.date_font = clean_text(date_font) or "Helvetica-Bold"
+        self.date_size = max(1.0, date_size)
 
     def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
         self.width = availWidth
@@ -697,25 +807,25 @@ class CoverPageFlowable(Flowable):
         return self.width, self.height
 
     def draw(self) -> None:
-        c = self.canv
-        if self.art_path:
-            draw_image_fit(c, self.art_path, 0, 0, self.width, self.height)
-            c.setFillColorRGB(1, 1, 1)
-            c.rect(0, self.height * 0.60, self.width, self.height * 0.40, stroke=0, fill=1)
-            c.setFillColorRGB(0, 0, 0)
-        else:
-            c.setFillColorRGB(1, 1, 1)
-            c.rect(0, 0, self.width, self.height, stroke=0, fill=1)
-            c.setFillColorRGB(0, 0, 0)
-
-        c.setFont("Helvetica-Bold", 28)
-        c.drawCentredString(self.width / 2.0, self.height * 0.86, self.title)
-        if self.subtitle:
-            c.setFont("Helvetica", 13)
-            c.drawCentredString(self.width / 2.0, self.height * 0.80, self.subtitle)
-        if self.period_label:
-            c.setFont("Helvetica-Bold", 18)
-            c.drawCentredString(self.width / 2.0, self.height * 0.72, self.period_label)
+        draw_cover_panel(
+            c=self.canv,
+            x=0,
+            y=0,
+            width=self.width,
+            height=self.height,
+            title=self.title,
+            subtitle=self.subtitle,
+            period_label=self.period_label,
+            art_path=self.art_path,
+            bg_color_hex=self.bg_color,
+            border_size_in=self.border_size,
+            title_font=self.title_font,
+            title_size=self.title_size,
+            subtitle_font=self.subtitle_font,
+            subtitle_size=self.subtitle_size,
+            date_font=self.date_font,
+            date_size=self.date_size,
+        )
 
 
 class GuideWithBottomAdFlowable(Flowable):
@@ -801,6 +911,14 @@ class BookletPageSpec:
     cover_subtitle: str = ""
     cover_period_label: str = ""
     cover_art_path: Optional[Path] = None
+    cover_bg_color: str = "FFFFFF"
+    cover_border_size: float = 0.0
+    cover_title_font: str = "Helvetica-Bold"
+    cover_title_size: float = 28.0
+    cover_subtitle_font: str = "Helvetica"
+    cover_subtitle_size: float = 13.0
+    cover_date_font: str = "Helvetica-Bold"
+    cover_date_size: float = 18.0
 
 
 def _compute_fold_split(start_dt: datetime, end_dt: datetime, step_minutes: int) -> datetime:
@@ -865,24 +983,25 @@ class BookletHalfPageFlowable(Flowable):
         return self.width, self.height
 
     def _draw_cover(self, c) -> None:
-        if self.spec.cover_art_path:
-            draw_image_fit(c, self.spec.cover_art_path, 0, 0, self.width, self.height)
-            c.setFillColorRGB(1, 1, 1)
-            c.rect(0, self.height * 0.55, self.width, self.height * 0.45, stroke=0, fill=1)
-            c.setFillColorRGB(0, 0, 0)
-        else:
-            c.setFillColorRGB(1, 1, 1)
-            c.rect(0, 0, self.width, self.height, stroke=0, fill=1)
-            c.setFillColorRGB(0, 0, 0)
-
-        c.setFont("Helvetica-Bold", 16)
-        c.drawCentredString(self.width / 2.0, self.height * 0.86, clean_text(self.spec.cover_title))
-        if self.spec.cover_subtitle:
-            c.setFont("Helvetica", 9)
-            c.drawCentredString(self.width / 2.0, self.height * 0.79, clean_text(self.spec.cover_subtitle))
-        if self.spec.cover_period_label:
-            c.setFont("Helvetica-Bold", 12)
-            c.drawCentredString(self.width / 2.0, self.height * 0.70, clean_text(self.spec.cover_period_label))
+        draw_cover_panel(
+            c=c,
+            x=0,
+            y=0,
+            width=self.width,
+            height=self.height,
+            title=self.spec.cover_title,
+            subtitle=self.spec.cover_subtitle,
+            period_label=self.spec.cover_period_label,
+            art_path=self.spec.cover_art_path,
+            bg_color_hex=self.spec.cover_bg_color,
+            border_size_in=self.spec.cover_border_size,
+            title_font=self.spec.cover_title_font,
+            title_size=self.spec.cover_title_size,
+            subtitle_font=self.spec.cover_subtitle_font,
+            subtitle_size=self.spec.cover_subtitle_size,
+            date_font=self.spec.cover_date_font,
+            date_size=self.spec.cover_date_size,
+        )
 
     def _draw_guide(self, c) -> None:
         c.setFont("Helvetica-Bold", 7)
@@ -1037,6 +1156,14 @@ def make_compilation_pdf(
     cover_title: str = "Time Travel Cable Guide",
     cover_subtitle: str = "",
     cover_period_label: str = "",
+    cover_bg_color: str = "FFFFFF",
+    cover_border_size: float = 0.0,
+    cover_title_font: str = "Helvetica-Bold",
+    cover_title_size: float = 28.0,
+    cover_subtitle_font: str = "Helvetica",
+    cover_subtitle_size: float = 13.0,
+    cover_date_font: str = "Helvetica-Bold",
+    cover_date_size: float = 18.0,
     cover_art_source: str = "none",
     cover_art_dir: Optional[Path] = None,
     tvdb_api_key: str = "",
@@ -1096,6 +1223,14 @@ def make_compilation_pdf(
                     subtitle=cover_subtitle,
                     period_label=period,
                     art_path=cover_art,
+                    bg_color=cover_bg_color,
+                    border_size=cover_border_size,
+                    title_font=cover_title_font,
+                    title_size=cover_title_size,
+                    subtitle_font=cover_subtitle_font,
+                    subtitle_size=cover_subtitle_size,
+                    date_font=cover_date_font,
+                    date_size=cover_date_size,
                 )
             )
 
@@ -1112,6 +1247,14 @@ def make_compilation_pdf(
                     cover_subtitle=cover_subtitle,
                     cover_period_label=period,
                     cover_art_path=cover_art,
+                    cover_bg_color=cover_bg_color,
+                    cover_border_size=cover_border_size,
+                    cover_title_font=cover_title_font,
+                    cover_title_size=cover_title_size,
+                    cover_subtitle_font=cover_subtitle_font,
+                    cover_subtitle_size=cover_subtitle_size,
+                    cover_date_font=cover_date_font,
+                    cover_date_size=cover_date_size,
                 )
             )
 
