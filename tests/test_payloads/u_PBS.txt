@@ -1,0 +1,350 @@
+[02/24/26 22:15:20] INFO     [root] Loading and checking guide channel                                                                                                                      station_manager.py:60
+                    INFO     [root] Guide channel checks completed.                                                                                                                         station_manager.py:72
+02/24 00:00 - 00:26 - Between The Lions - Between the Lions - S01E11 - To the Ship! To the Ship! DVD.mkv
+02/24 00:26 - 00:53 - Arthur - Arthur - S01E27-E28 - Arthur the Wrecker + Arthur and the True Francine DVD.avi
+02/24 00:53 - 01:19 - Arthur - Arthur - S01E06 - Buster's Dino Dilemma WEBRip-480p.mkv
+02/24 01:19 - 01:46 - Arthur - Arthur - S01E13-E14 - Arthur Goes to Camp + Buster Makes the Grade DVD.avi
+02/24 01:46 - 02:10 - Arthur - Arthur - S01E51-E52 - My Dad, the Garbage Man + Poor Muffy DVD.avi
+02/24 02:10 - 02:37 - Arthur - Arthur - S01E23-E24 - Arthur Writes a Story + Arthur's Lost Dog DVD.avi
+02/24 02:37 - 03:03 - Between The Lions - Between the Lions - S01E04 - Farmer Ken's Puzzle DVD.mkv
+02/24 03:03 - 03:30 - Between The Lions - Between the Lions - S01E07 - Touching the Moon DVD.mkv
+02/24 03:30 - 03:57 - Between The Lions - Between the Lions - S01E12 - The Chap With Caps DVD.mkv
+02/24 03:57 - 04:23 - Between The Lions - Between the Lions - S01E23 - The Lucky Duck DVD.mkv
+02/24 04:23 - 04:50 - Arthur - Arthur - S01E15-E16 - Arthur's New Puppy + Arthur Bounces Back DVD.avi
+02/24 04:50 - 05:15 - Arthur - Arthur - S01E19-E20 - Arthur's Birthday + Francine Frensky, Superstar DVD.avi
+02/24 05:15 - 05:39 - Arthur - Arthur - S01E55-E56 - I'm a Poet + The Scare-Your-Pants-Off Club! DVD.avi
+02/24 05:39 - 06:04 - Arthur - Arthur - S01E53-E54 - D.W.'s Blankie + Arthur's Substitute Teacher Trouble DVD.avi
+02/24 06:04 - 06:31 - Between The Lions - Between the Lions - S01E28 - The Fox and the Crow DVD.mkv
+02/24 06:31 - 06:57 - Between The Lions - Between the Lions - S01E10 - Lionel's Antlers DVD.mkv
+02/24 06:57 - 07:24 - Arthur - Arthur - S01E17-E18 - Arthur Babysits + Arthur's Cousin Catastrophe DVD.avi
+02/24 07:24 - 07:50 - Between The Lions - Between the Lions - S01E16 - The Popcorn Popper DVD.mkv
+02/24 07:50 - 08:17 - Between The Lions - Between the Lions - S01E20 - A Peck of Peppers DVD.mkv
+02/24 08:17 - 08:42 - Arthur - Arthur - S01E39-E40 - Arthur's Almost Boring Day + The Half-Baked Sale DVD.avi
+02/24 08:42 - 09:08 - Arthur - Arthur - S01E37-E38 - D.W. Rides Again + Arthur Makes the Team DVD.avi
+02/24 09:08 - 09:35 - Between The Lions - Between the Lions - S01E14 - Lionel's Great Escape Trick DVD.mkv
+02/24 09:35 - 10:01 - Arthur - Arthur - S01E45-E46 - Bully for Binky + Mis-fortune Teller DVD.avi
+02/24 10:01 - 10:28 - Between The Lions - Between the Lions - S01E02 - The Lost Rock DVD.mkv
+02/24 10:28 - 10:52 - Arthur - Arthur - S01E25-E26 - So Long, Spanky + Buster's New Friend DVD.avi
+02/24 10:52 - 11:19 - Between The Lions - Between the Lions - S01E24 - The Old Man DVD.mkv
+02/24 11:19 - 11:46 - Arthur - Arthur - S01E07-E08 - D.W.'s Imaginary Friend + Arthur's Lost Library Book DVD.avi
+02/24 11:46 - 12:12 - Between The Lions - Between the Lions - S01E27 - Piggyback, Piggyback DVD.mkv
+02/24 12:12 - 12:39 - Between The Lions - Between the Lions - S01E08 - The Boy Who Cried Wolf DVD.mkv
+02/24 12:39 - 13:06 - Between The Lions - Between the Lions - S01E06 - The Hopping Hen DVD.mp4
+02/24 13:06 - 13:32 - Between The Lions - Between the Lions - S01E15 - There's a Fly in My Soup DVD.mkv
+02/24 13:32 - 13:59 - Arthur - Arthur - S01E47-E48 - Arthur's Tooth + D.W. Gets Lost DVD.avi
+02/24 13:59 - 14:25 - Between The Lions - Between the Lions - S01E13 - Pandora's Box DVD.mkv
+02/24 14:25 - 14:52 - Between The Lions - Between the Lions - S01E19 - The Ram in the Pepper Patch DVD.mkv
+02/24 14:52 - 15:19 - Between The Lions - Between the Lions - S01E25 - A King and His Hawk DVD.mkv
+02/24 15:19 - 15:45 - Arthur - Arthur - S01E49-E50 - D.W. Thinks Big + Arthur Cleans Up DVD.avi
+02/24 15:45 - 16:12 - Between The Lions - Between the Lions - S01E05 - Shooting Stars DVD.mkv
+02/24 16:12 - 16:38 - Arthur - Arthur - S01E09-E10 - Arthur's Pet Business + D.W. the Copycat DVD.avi
+02/24 16:38 - 17:05 - Arthur - Arthur - S01E35-E36 - Arthur's Chicken Pox + Sick as a Dog DVD.avi
+02/24 17:05 - 17:31 - Arthur - Arthur - S01E21-E22 - Arthur's Baby + D.W.'s Baby DVD.avi
+02/24 17:31 - 17:58 - Between The Lions - Between the Lions - S01E26 - The Roar That Makes Them Run DVD.mkv
+02/24 17:58 - 18:24 - Arthur - Arthur - S01E33-E34 - Meek for a Week + Arthur, World's Greatest Gleeper DVD.avi
+02/24 18:24 - 18:51 - Between The Lions - Between the Lions - S01E09 - Fuzzy Wuzzy, Wuzzy DVD.mkv
+02/24 18:51 - 19:17 - Between The Lions - Between the Lions - S01E01 - Pecos Bill Cleans Up the West DVD.mkv
+02/24 19:17 - 19:44 - Arthur - Arthur - S01E43-E44 - D.W.'s Snow Mystery + Team Trouble DVD.avi
+02/24 19:44 - 20:10 - Arthur - Arthur - S01E03-E04 - Arthur and the Real Mr. Ratburn + Arthur's Spelling Trubble DVD.avi
+02/24 20:10 - 20:37 - Between The Lions - Between the Lions - S01E21 - Sausage Nose DVD.mkv
+02/24 20:37 - 21:04 - Between The Lions - Between the Lions - S01E18 - Hug, Hug, Hug! DVD.mkv
+02/24 21:04 - 21:30 - Arthur - Arthur - S01E29-E30 - Arthur's Family Vacation + Grandpa Dave's Old Country Farm DVD.avi
+02/24 21:30 - 21:55 - Arthur - Arthur - S01E11-E12 - Locked in the Library! + Arthur Accused! DVD.avi
+02/24 21:55 - 22:21 - Arthur - Arthur - S01E57-E58 - My Club Rules! + Stolen Bike DVD.avi
+02/24 22:21 - 22:48 - Between The Lions - Between the Lions - S01E22 - Red Hat, Green Hat DVD.mkv
+02/24 22:48 - 23:14 - Arthur - Arthur - S01E59-E60 - Arthur's First Sleepover + Arthur's New Years Eve DVD.avi
+02/24 23:14 - 23:41 - Between The Lions - Between the Lions - S01E29 - Giants and Cubs DVD.mkv
+02/24 23:41 - 00:08 - Between The Lions - Between the Lions - S01E30 - Be Bop DVD.mkv
+02/25 00:08 - 00:34 - Between The Lions - Between the Lions - S01E03 - Little Big Mouse DVD.mp4
+02/25 00:34 - 01:01 - Arthur - Arthur - S01E05 - D.W. All Wet WEBRip-480p.mkv
+02/25 01:01 - 01:25 - Arthur - Arthur - S01E41-E42 - Sue Ellen Moves In + The Perfect Brother DVD.avi
+02/25 01:25 - 01:50 - Arthur - Arthur - S01E31-E32 - Arthur and the Crunch Cereal Contest + D.W. Flips DVD.avi
+02/25 01:50 - 02:17 - Between The Lions - Between the Lions - S01E17 - Something Fishy DVD.mkv
+02/25 02:17 - 02:43 - Arthur - Arthur - S01E01-E02 - Arthur's Eyes + Francine's Bad Hair Day DVD.avi
+02/25 02:43 - 03:10 - Between The Lions - Between the Lions - S01E01 - Pecos Bill Cleans Up the West DVD.mkv
+02/25 03:10 - 03:37 - Between The Lions - Between the Lions - S01E08 - The Boy Who Cried Wolf DVD.mkv
+02/25 03:37 - 04:03 - Arthur - Arthur - S01E06 - Buster's Dino Dilemma WEBRip-480p.mkv
+02/25 04:03 - 04:30 - Arthur - Arthur - S01E03-E04 - Arthur and the Real Mr. Ratburn + Arthur's Spelling Trubble DVD.avi
+02/25 04:30 - 04:56 - Arthur - Arthur - S01E47-E48 - Arthur's Tooth + D.W. Gets Lost DVD.avi
+02/25 04:56 - 05:23 - Between The Lions - Between the Lions - S01E30 - Be Bop DVD.mkv
+02/25 05:23 - 05:49 - Arthur - Arthur - S01E49-E50 - D.W. Thinks Big + Arthur Cleans Up DVD.avi
+02/25 05:49 - 06:15 - Arthur - Arthur - S01E01-E02 - Arthur's Eyes + Francine's Bad Hair Day DVD.avi
+02/25 06:15 - 06:42 - Between The Lions - Between the Lions - S01E03 - Little Big Mouse DVD.mp4
+02/25 06:42 - 07:09 - Between The Lions - Between the Lions - S01E28 - The Fox and the Crow DVD.mkv
+02/25 07:09 - 07:35 - Between The Lions - Between the Lions - S01E20 - A Peck of Peppers DVD.mkv
+02/25 07:35 - 08:00 - Arthur - Arthur - S01E11-E12 - Locked in the Library! + Arthur Accused! DVD.avi
+02/25 08:00 - 08:25 - Arthur - Arthur - S01E31-E32 - Arthur and the Crunch Cereal Contest + D.W. Flips DVD.avi
+02/25 08:25 - 08:51 - Arthur - Arthur - S01E57-E58 - My Club Rules! + Stolen Bike DVD.avi
+02/25 08:51 - 09:18 - Between The Lions - Between the Lions - S01E17 - Something Fishy DVD.mkv
+02/25 09:18 - 09:42 - Arthur - Arthur - S01E41-E42 - Sue Ellen Moves In + The Perfect Brother DVD.avi
+02/25 09:42 - 10:09 - Arthur - Arthur - S01E09-E10 - Arthur's Pet Business + D.W. the Copycat DVD.avi
+02/25 10:09 - 10:36 - Between The Lions - Between the Lions - S01E18 - Hug, Hug, Hug! DVD.mkv
+02/25 10:36 - 11:02 - Arthur - Arthur - S01E21-E22 - Arthur's Baby + D.W.'s Baby DVD.avi
+02/25 11:02 - 11:29 - Between The Lions - Between the Lions - S01E26 - The Roar That Makes Them Run DVD.mkv
+02/25 11:29 - 11:55 - Arthur - Arthur - S01E29-E30 - Arthur's Family Vacation + Grandpa Dave's Old Country Farm DVD.avi
+02/25 11:55 - 12:22 - Between The Lions - Between the Lions - S01E02 - The Lost Rock DVD.mkv
+02/25 12:22 - 12:48 - Between The Lions - Between the Lions - S01E10 - Lionel's Antlers DVD.mkv
+02/25 12:48 - 13:15 - Arthur - Arthur - S01E07-E08 - D.W.'s Imaginary Friend + Arthur's Lost Library Book DVD.avi
+02/25 13:15 - 13:40 - Arthur - Arthur - S01E55-E56 - I'm a Poet + The Scare-Your-Pants-Off Club! DVD.avi
+02/25 13:40 - 14:06 - Arthur - Arthur - S01E43-E44 - D.W.'s Snow Mystery + Team Trouble DVD.avi
+02/25 14:06 - 14:33 - Between The Lions - Between the Lions - S01E16 - The Popcorn Popper DVD.mkv
+02/25 14:33 - 14:59 - Between The Lions - Between the Lions - S01E14 - Lionel's Great Escape Trick DVD.mkv
+02/25 14:59 - 15:26 - Between The Lions - Between the Lions - S01E06 - The Hopping Hen DVD.mp4
+02/25 15:26 - 15:51 - Arthur - Arthur - S01E51-E52 - My Dad, the Garbage Man + Poor Muffy DVD.avi
+02/25 15:51 - 16:17 - Arthur - Arthur - S01E35-E36 - Arthur's Chicken Pox + Sick as a Dog DVD.avi
+02/25 16:17 - 16:44 - Between The Lions - Between the Lions - S01E13 - Pandora's Box DVD.mkv
+02/25 16:44 - 17:10 - Arthur - Arthur - S01E59-E60 - Arthur's First Sleepover + Arthur's New Years Eve DVD.avi
+02/25 17:10 - 17:37 - Between The Lions - Between the Lions - S01E27 - Piggyback, Piggyback DVD.mkv
+02/25 17:37 - 18:04 - Between The Lions - Between the Lions - S01E22 - Red Hat, Green Hat DVD.mkv
+02/25 18:04 - 18:30 - Between The Lions - Between the Lions - S01E29 - Giants and Cubs DVD.mkv
+02/25 18:30 - 18:55 - Arthur - Arthur - S01E25-E26 - So Long, Spanky + Buster's New Friend DVD.avi
+02/25 18:55 - 19:21 - Arthur - Arthur - S01E37-E38 - D.W. Rides Again + Arthur Makes the Team DVD.avi
+02/25 19:21 - 19:48 - Between The Lions - Between the Lions - S01E07 - Touching the Moon DVD.mkv
+02/25 19:48 - 20:13 - Arthur - Arthur - S01E19-E20 - Arthur's Birthday + Francine Frensky, Superstar DVD.avi
+02/25 20:13 - 20:39 - Arthur - Arthur - S01E23-E24 - Arthur Writes a Story + Arthur's Lost Dog DVD.avi
+02/25 20:39 - 21:06 - Between The Lions - Between the Lions - S01E12 - The Chap With Caps DVD.mkv
+02/25 21:06 - 21:32 - Between The Lions - Between the Lions - S01E11 - To the Ship! To the Ship! DVD.mkv
+02/25 21:32 - 21:59 - Arthur - Arthur - S01E15-E16 - Arthur's New Puppy + Arthur Bounces Back DVD.avi
+02/25 21:59 - 22:25 - Arthur - Arthur - S01E33-E34 - Meek for a Week + Arthur, World's Greatest Gleeper DVD.avi
+02/25 22:25 - 22:52 - Between The Lions - Between the Lions - S01E09 - Fuzzy Wuzzy, Wuzzy DVD.mkv
+02/25 22:52 - 23:19 - Between The Lions - Between the Lions - S01E24 - The Old Man DVD.mkv
+02/25 23:19 - 23:45 - Arthur - Arthur - S01E17-E18 - Arthur Babysits + Arthur's Cousin Catastrophe DVD.avi
+02/25 23:45 - 00:12 - Between The Lions - Between the Lions - S01E05 - Shooting Stars DVD.mkv
+02/26 00:12 - 00:38 - Arthur - Arthur - S01E05 - D.W. All Wet WEBRip-480p.mkv
+02/26 00:38 - 01:05 - Arthur - Arthur - S01E45-E46 - Bully for Binky + Mis-fortune Teller DVD.avi
+02/26 01:05 - 01:29 - Arthur - Arthur - S01E39-E40 - Arthur's Almost Boring Day + The Half-Baked Sale DVD.avi
+02/26 01:29 - 01:54 - Arthur - Arthur - S01E53-E54 - D.W.'s Blankie + Arthur's Substitute Teacher Trouble DVD.avi
+02/26 01:54 - 02:21 - Between The Lions - Between the Lions - S01E25 - A King and His Hawk DVD.mkv
+02/26 02:21 - 02:47 - Between The Lions - Between the Lions - S01E04 - Farmer Ken's Puzzle DVD.mkv
+02/26 02:47 - 03:14 - Between The Lions - Between the Lions - S01E21 - Sausage Nose DVD.mkv
+02/26 03:14 - 03:40 - Arthur - Arthur - S01E13-E14 - Arthur Goes to Camp + Buster Makes the Grade DVD.avi
+02/26 03:40 - 04:07 - Arthur - Arthur - S01E27-E28 - Arthur the Wrecker + Arthur and the True Francine DVD.avi
+02/26 04:07 - 04:34 - Between The Lions - Between the Lions - S01E15 - There's a Fly in My Soup DVD.mkv
+02/26 04:34 - 05:00 - Between The Lions - Between the Lions - S01E23 - The Lucky Duck DVD.mkv
+02/26 05:00 - 05:27 - Between The Lions - Between the Lions - S01E19 - The Ram in the Pepper Patch DVD.mkv
+02/26 05:27 - 05:54 - Between The Lions - Between the Lions - S01E06 - The Hopping Hen DVD.mp4
+02/26 05:54 - 06:20 - Arthur - Arthur - S01E21-E22 - Arthur's Baby + D.W.'s Baby DVD.avi
+02/26 06:20 - 06:47 - Between The Lions - Between the Lions - S01E17 - Something Fishy DVD.mkv
+02/26 06:47 - 07:13 - Arthur - Arthur - S01E37-E38 - D.W. Rides Again + Arthur Makes the Team DVD.avi
+02/26 07:13 - 07:40 - Arthur - Arthur - S01E15-E16 - Arthur's New Puppy + Arthur Bounces Back DVD.avi
+02/26 07:40 - 08:06 - Between The Lions - Between the Lions - S01E07 - Touching the Moon DVD.mkv
+02/26 08:06 - 08:33 - Between The Lions - Between the Lions - S01E14 - Lionel's Great Escape Trick DVD.mkv
+02/26 08:33 - 08:59 - Arthur - Arthur - S01E43-E44 - D.W.'s Snow Mystery + Team Trouble DVD.avi
+02/26 08:59 - 09:26 - Between The Lions - Between the Lions - S01E19 - The Ram in the Pepper Patch DVD.mkv
+02/26 09:26 - 09:51 - Arthur - Arthur - S01E55-E56 - I'm a Poet + The Scare-Your-Pants-Off Club! DVD.avi
+02/26 09:51 - 10:17 - Between The Lions - Between the Lions - S01E13 - Pandora's Box DVD.mkv
+02/26 10:17 - 10:44 - Between The Lions - Between the Lions - S01E26 - The Roar That Makes Them Run DVD.mkv
+02/26 10:44 - 11:11 - Between The Lions - Between the Lions - S01E05 - Shooting Stars DVD.mkv
+02/26 11:11 - 11:37 - Arthur - Arthur - S01E09-E10 - Arthur's Pet Business + D.W. the Copycat DVD.avi
+02/26 11:37 - 12:04 - Arthur - Arthur - S01E33-E34 - Meek for a Week + Arthur, World's Greatest Gleeper DVD.avi
+02/26 12:04 - 12:30 - Between The Lions - Between the Lions - S01E18 - Hug, Hug, Hug! DVD.mkv
+02/26 12:30 - 12:55 - Arthur - Arthur - S01E25-E26 - So Long, Spanky + Buster's New Friend DVD.avi
+02/26 12:55 - 13:21 - Arthur - Arthur - S01E57-E58 - My Club Rules! + Stolen Bike DVD.avi
+02/26 13:21 - 13:48 - Between The Lions - Between the Lions - S01E23 - The Lucky Duck DVD.mkv
+02/26 13:48 - 14:15 - Between The Lions - Between the Lions - S01E28 - The Fox and the Crow DVD.mkv
+02/26 14:15 - 14:41 - Between The Lions - Between the Lions - S01E30 - Be Bop DVD.mkv
+02/26 14:41 - 15:08 - Between The Lions - Between the Lions - S01E10 - Lionel's Antlers DVD.mkv
+02/26 15:08 - 15:34 - Arthur - Arthur - S01E07-E08 - D.W.'s Imaginary Friend + Arthur's Lost Library Book DVD.avi
+02/26 15:34 - 15:59 - Arthur - Arthur - S01E19-E20 - Arthur's Birthday + Francine Frensky, Superstar DVD.avi
+02/26 15:59 - 16:25 - Arthur - Arthur - S01E59-E60 - Arthur's First Sleepover + Arthur's New Years Eve DVD.avi
+02/26 16:25 - 16:52 - Between The Lions - Between the Lions - S01E11 - To the Ship! To the Ship! DVD.mkv
+02/26 16:52 - 17:19 - Arthur - Arthur - S01E06 - Buster's Dino Dilemma WEBRip-480p.mkv
+02/26 17:19 - 17:45 - Between The Lions - Between the Lions - S01E02 - The Lost Rock DVD.mkv
+02/26 17:45 - 18:12 - Between The Lions - Between the Lions - S01E12 - The Chap With Caps DVD.mkv
+02/26 18:12 - 18:38 - Arthur - Arthur - S01E45-E46 - Bully for Binky + Mis-fortune Teller DVD.avi
+02/26 18:38 - 19:05 - Arthur - Arthur - S01E29-E30 - Arthur's Family Vacation + Grandpa Dave's Old Country Farm DVD.avi
+02/26 19:05 - 19:31 - Arthur - Arthur - S01E47-E48 - Arthur's Tooth + D.W. Gets Lost DVD.avi
+02/26 19:31 - 19:58 - Arthur - Arthur - S01E49-E50 - D.W. Thinks Big + Arthur Cleans Up DVD.avi
+02/26 19:58 - 20:24 - Between The Lions - Between the Lions - S01E03 - Little Big Mouse DVD.mp4
+02/26 20:24 - 20:51 - Between The Lions - Between the Lions - S01E08 - The Boy Who Cried Wolf DVD.mkv
+02/26 20:51 - 21:17 - Arthur - Arthur - S01E01-E02 - Arthur's Eyes + Francine's Bad Hair Day DVD.avi
+02/26 21:17 - 21:44 - Between The Lions - Between the Lions - S01E01 - Pecos Bill Cleans Up the West DVD.mkv
+02/26 21:44 - 22:11 - Arthur - Arthur - S01E13-E14 - Arthur Goes to Camp + Buster Makes the Grade DVD.avi
+02/26 22:11 - 22:37 - Between The Lions - Between the Lions - S01E22 - Red Hat, Green Hat DVD.mkv
+02/26 22:37 - 23:04 - Arthur - Arthur - S01E35-E36 - Arthur's Chicken Pox + Sick as a Dog DVD.avi
+02/26 23:04 - 23:30 - Arthur - Arthur - S01E23-E24 - Arthur Writes a Story + Arthur's Lost Dog DVD.avi
+02/26 23:30 - 23:57 - Between The Lions - Between the Lions - S01E09 - Fuzzy Wuzzy, Wuzzy DVD.mkv
+02/26 23:57 - 00:23 - Arthur - Arthur - S01E27-E28 - Arthur the Wrecker + Arthur and the True Francine DVD.avi
+02/27 00:23 - 00:50 - Between The Lions - Between the Lions - S01E27 - Piggyback, Piggyback DVD.mkv
+02/27 00:50 - 01:16 - Arthur - Arthur - S01E03-E04 - Arthur and the Real Mr. Ratburn + Arthur's Spelling Trubble DVD.avi
+02/27 01:16 - 01:41 - Arthur - Arthur - S01E11-E12 - Locked in the Library! + Arthur Accused! DVD.avi
+02/27 01:41 - 02:06 - Arthur - Arthur - S01E31-E32 - Arthur and the Crunch Cereal Contest + D.W. Flips DVD.avi
+02/27 02:06 - 02:32 - Between The Lions - Between the Lions - S01E16 - The Popcorn Popper DVD.mkv
+02/27 02:32 - 02:57 - Arthur - Arthur - S01E53-E54 - D.W.'s Blankie + Arthur's Substitute Teacher Trouble DVD.avi
+02/27 02:57 - 03:24 - Between The Lions - Between the Lions - S01E21 - Sausage Nose DVD.mkv
+02/27 03:24 - 03:50 - Between The Lions - Between the Lions - S01E04 - Farmer Ken's Puzzle DVD.mkv
+02/27 03:50 - 04:17 - Arthur - Arthur - S01E17-E18 - Arthur Babysits + Arthur's Cousin Catastrophe DVD.avi
+02/27 04:17 - 04:43 - Between The Lions - Between the Lions - S01E20 - A Peck of Peppers DVD.mkv
+02/27 04:43 - 05:10 - Arthur - Arthur - S01E05 - D.W. All Wet WEBRip-480p.mkv
+02/27 05:10 - 05:37 - Between The Lions - Between the Lions - S01E15 - There's a Fly in My Soup DVD.mkv
+02/27 05:37 - 06:03 - Between The Lions - Between the Lions - S01E25 - A King and His Hawk DVD.mkv
+02/27 06:03 - 06:30 - Between The Lions - Between the Lions - S01E24 - The Old Man DVD.mkv
+02/27 06:30 - 06:57 - Between The Lions - Between the Lions - S01E29 - Giants and Cubs DVD.mkv
+02/27 06:57 - 07:21 - Arthur - Arthur - S01E41-E42 - Sue Ellen Moves In + The Perfect Brother DVD.avi
+02/27 07:21 - 07:46 - Arthur - Arthur - S01E51-E52 - My Dad, the Garbage Man + Poor Muffy DVD.avi
+02/27 07:46 - 08:11 - Arthur - Arthur - S01E39-E40 - Arthur's Almost Boring Day + The Half-Baked Sale DVD.avi
+02/27 08:11 - 08:37 - Between The Lions - Between the Lions - S01E19 - The Ram in the Pepper Patch DVD.mkv
+02/27 08:37 - 09:04 - Arthur - Arthur - S01E15-E16 - Arthur's New Puppy + Arthur Bounces Back DVD.avi
+02/27 09:04 - 09:28 - Arthur - Arthur - S01E19-E20 - Arthur's Birthday + Francine Frensky, Superstar DVD.avi
+02/27 09:28 - 09:55 - Arthur - Arthur - S01E33-E34 - Meek for a Week + Arthur, World's Greatest Gleeper DVD.avi
+02/27 09:55 - 10:21 - Arthur - Arthur - S01E57-E58 - My Club Rules! + Stolen Bike DVD.avi
+02/27 10:21 - 10:48 - Between The Lions - Between the Lions - S01E09 - Fuzzy Wuzzy, Wuzzy DVD.mkv
+02/27 10:48 - 11:15 - Between The Lions - Between the Lions - S01E04 - Farmer Ken's Puzzle DVD.mkv
+02/27 11:15 - 11:41 - Arthur - Arthur - S01E59-E60 - Arthur's First Sleepover + Arthur's New Years Eve DVD.avi
+02/27 11:41 - 12:08 - Between The Lions - Between the Lions - S01E26 - The Roar That Makes Them Run DVD.mkv
+02/27 12:08 - 12:34 - Arthur - Arthur - S01E27-E28 - Arthur the Wrecker + Arthur and the True Francine DVD.avi
+02/27 12:34 - 13:01 - Between The Lions - Between the Lions - S01E01 - Pecos Bill Cleans Up the West DVD.mkv
+02/27 13:01 - 13:27 - Arthur - Arthur - S01E35-E36 - Arthur's Chicken Pox + Sick as a Dog DVD.avi
+02/27 13:27 - 13:54 - Arthur - Arthur - S01E47-E48 - Arthur's Tooth + D.W. Gets Lost DVD.avi
+02/27 13:54 - 14:20 - Between The Lions - Between the Lions - S01E16 - The Popcorn Popper DVD.mkv
+02/27 14:20 - 14:47 - Arthur - Arthur - S01E43-E44 - D.W.'s Snow Mystery + Team Trouble DVD.avi
+02/27 14:47 - 15:13 - Between The Lions - Between the Lions - S01E30 - Be Bop DVD.mkv
+02/27 15:13 - 15:40 - Between The Lions - Between the Lions - S01E21 - Sausage Nose DVD.mkv
+02/27 15:40 - 16:07 - Between The Lions - Between the Lions - S01E25 - A King and His Hawk DVD.mkv
+02/27 16:07 - 16:31 - Arthur - Arthur - S01E39-E40 - Arthur's Almost Boring Day + The Half-Baked Sale DVD.avi
+02/27 16:31 - 16:58 - Between The Lions - Between the Lions - S01E18 - Hug, Hug, Hug! DVD.mkv
+02/27 16:58 - 17:25 - Between The Lions - Between the Lions - S01E23 - The Lucky Duck DVD.mkv
+02/27 17:25 - 17:51 - Arthur - Arthur - S01E07-E08 - D.W.'s Imaginary Friend + Arthur's Lost Library Book DVD.avi
+02/27 17:51 - 18:18 - Between The Lions - Between the Lions - S01E13 - Pandora's Box DVD.mkv
+02/27 18:18 - 18:44 - Arthur - Arthur - S01E17-E18 - Arthur Babysits + Arthur's Cousin Catastrophe DVD.avi
+02/27 18:44 - 19:11 - Between The Lions - Between the Lions - S01E08 - The Boy Who Cried Wolf DVD.mkv
+02/27 19:11 - 19:38 - Between The Lions - Between the Lions - S01E15 - There's a Fly in My Soup DVD.mkv
+02/27 19:38 - 20:04 - Between The Lions - Between the Lions - S01E10 - Lionel's Antlers DVD.mkv
+02/27 20:04 - 20:31 - Between The Lions - Between the Lions - S01E28 - The Fox and the Crow DVD.mkv
+02/27 20:31 - 20:57 - Arthur - Arthur - S01E37-E38 - D.W. Rides Again + Arthur Makes the Team DVD.avi
+02/27 20:57 - 21:24 - Between The Lions - Between the Lions - S01E07 - Touching the Moon DVD.mkv
+02/27 21:24 - 21:51 - Between The Lions - Between the Lions - S01E03 - Little Big Mouse DVD.mp4
+02/27 21:51 - 22:15 - Arthur - Arthur - S01E11-E12 - Locked in the Library! + Arthur Accused! DVD.avi
+02/27 22:15 - 22:42 - Arthur - Arthur - S01E01-E02 - Arthur's Eyes + Francine's Bad Hair Day DVD.avi
+02/27 22:42 - 23:06 - Arthur - Arthur - S01E25-E26 - So Long, Spanky + Buster's New Friend DVD.avi
+02/27 23:06 - 23:31 - Arthur - Arthur - S01E51-E52 - My Dad, the Garbage Man + Poor Muffy DVD.avi
+02/27 23:31 - 23:58 - Arthur - Arthur - S01E21-E22 - Arthur's Baby + D.W.'s Baby DVD.avi
+02/27 23:58 - 00:22 - Arthur - Arthur - S01E55-E56 - I'm a Poet + The Scare-Your-Pants-Off Club! DVD.avi
+02/28 00:22 - 00:47 - Arthur - Arthur - S01E41-E42 - Sue Ellen Moves In + The Perfect Brother DVD.avi
+02/28 00:47 - 01:14 - Between The Lions - Between the Lions - S01E05 - Shooting Stars DVD.mkv
+02/28 01:14 - 01:40 - Between The Lions - Between the Lions - S01E27 - Piggyback, Piggyback DVD.mkv
+02/28 01:40 - 02:07 - Arthur - Arthur - S01E23-E24 - Arthur Writes a Story + Arthur's Lost Dog DVD.avi
+02/28 02:07 - 02:33 - Between The Lions - Between the Lions - S01E24 - The Old Man DVD.mkv
+02/28 02:33 - 03:00 - Between The Lions - Between the Lions - S01E20 - A Peck of Peppers DVD.mkv
+02/28 03:00 - 03:26 - Arthur - Arthur - S01E45-E46 - Bully for Binky + Mis-fortune Teller DVD.avi
+02/28 03:26 - 03:53 - Arthur - Arthur - S01E05 - D.W. All Wet WEBRip-480p.mkv
+02/28 03:53 - 04:19 - Arthur - Arthur - S01E13-E14 - Arthur Goes to Camp + Buster Makes the Grade DVD.avi
+02/28 04:19 - 04:46 - Arthur - Arthur - S01E29-E30 - Arthur's Family Vacation + Grandpa Dave's Old Country Farm DVD.avi
+02/28 04:46 - 05:10 - Arthur - Arthur - S01E53-E54 - D.W.'s Blankie + Arthur's Substitute Teacher Trouble DVD.avi
+02/28 05:10 - 05:37 - Between The Lions - Between the Lions - S01E22 - Red Hat, Green Hat DVD.mkv
+02/28 05:37 - 06:04 - Arthur - Arthur - S01E06 - Buster's Dino Dilemma WEBRip-480p.mkv
+02/28 06:04 - 06:30 - Between The Lions - Between the Lions - S01E29 - Giants and Cubs DVD.mkv
+02/28 06:30 - 06:57 - Between The Lions - Between the Lions - S01E02 - The Lost Rock DVD.mkv
+02/28 06:57 - 07:24 - Between The Lions - Between the Lions - S01E06 - The Hopping Hen DVD.mp4
+02/28 07:24 - 07:50 - Between The Lions - Between the Lions - S01E11 - To the Ship! To the Ship! DVD.mkv
+02/28 07:50 - 08:17 - Arthur - Arthur - S01E09-E10 - Arthur's Pet Business + D.W. the Copycat DVD.avi
+02/28 08:17 - 08:43 - Arthur - Arthur - S01E03-E04 - Arthur and the Real Mr. Ratburn + Arthur's Spelling Trubble DVD.avi
+02/28 08:43 - 09:08 - Arthur - Arthur - S01E31-E32 - Arthur and the Crunch Cereal Contest + D.W. Flips DVD.avi
+02/28 09:08 - 09:35 - Between The Lions - Between the Lions - S01E14 - Lionel's Great Escape Trick DVD.mkv
+02/28 09:35 - 10:01 - Between The Lions - Between the Lions - S01E12 - The Chap With Caps DVD.mkv
+02/28 10:01 - 10:28 - Between The Lions - Between the Lions - S01E17 - Something Fishy DVD.mkv
+02/28 10:28 - 10:54 - Arthur - Arthur - S01E49-E50 - D.W. Thinks Big + Arthur Cleans Up DVD.avi
+02/28 10:54 - 11:21 - Between The Lions - Between the Lions - S01E18 - Hug, Hug, Hug! DVD.mkv
+02/28 11:21 - 11:48 - Between The Lions - Between the Lions - S01E14 - Lionel's Great Escape Trick DVD.mkv
+02/28 11:48 - 12:14 - Arthur - Arthur - S01E49-E50 - D.W. Thinks Big + Arthur Cleans Up DVD.avi
+02/28 12:14 - 12:41 - Between The Lions - Between the Lions - S01E28 - The Fox and the Crow DVD.mkv
+02/28 12:41 - 13:07 - Arthur - Arthur - S01E43-E44 - D.W.'s Snow Mystery + Team Trouble DVD.avi
+02/28 13:07 - 13:32 - Arthur - Arthur - S01E25-E26 - So Long, Spanky + Buster's New Friend DVD.avi
+02/28 13:32 - 13:58 - Arthur - Arthur - S01E27-E28 - Arthur the Wrecker + Arthur and the True Francine DVD.avi
+02/28 13:58 - 14:25 - Arthur - Arthur - S01E57-E58 - My Club Rules! + Stolen Bike DVD.avi
+02/28 14:25 - 14:51 - Arthur - Arthur - S01E37-E38 - D.W. Rides Again + Arthur Makes the Team DVD.avi
+02/28 14:51 - 15:18 - Between The Lions - Between the Lions - S01E30 - Be Bop DVD.mkv
+02/28 15:18 - 15:44 - Between The Lions - Between the Lions - S01E19 - The Ram in the Pepper Patch DVD.mkv
+02/28 15:44 - 16:11 - Arthur - Arthur - S01E05 - D.W. All Wet WEBRip-480p.mkv
+02/28 16:11 - 16:38 - Between The Lions - Between the Lions - S01E26 - The Roar That Makes Them Run DVD.mkv
+02/28 16:38 - 17:04 - Arthur - Arthur - S01E59-E60 - Arthur's First Sleepover + Arthur's New Years Eve DVD.avi
+02/28 17:04 - 17:30 - Arthur - Arthur - S01E15-E16 - Arthur's New Puppy + Arthur Bounces Back DVD.avi
+02/28 17:30 - 17:57 - Arthur - Arthur - S01E07-E08 - D.W.'s Imaginary Friend + Arthur's Lost Library Book DVD.avi
+02/28 17:57 - 18:23 - Arthur - Arthur - S01E13-E14 - Arthur Goes to Camp + Buster Makes the Grade DVD.avi
+02/28 18:23 - 18:50 - Arthur - Arthur - S01E21-E22 - Arthur's Baby + D.W.'s Baby DVD.avi
+02/28 18:50 - 19:16 - Between The Lions - Between the Lions - S01E04 - Farmer Ken's Puzzle DVD.mkv
+02/28 19:16 - 19:43 - Between The Lions - Between the Lions - S01E20 - A Peck of Peppers DVD.mkv
+02/28 19:43 - 20:09 - Arthur - Arthur - S01E03-E04 - Arthur and the Real Mr. Ratburn + Arthur's Spelling Trubble DVD.avi
+02/28 20:09 - 20:36 - Between The Lions - Between the Lions - S01E03 - Little Big Mouse DVD.mp4
+02/28 20:36 - 21:01 - Arthur - Arthur - S01E19-E20 - Arthur's Birthday + Francine Frensky, Superstar DVD.avi
+02/28 21:01 - 21:28 - Between The Lions - Between the Lions - S01E02 - The Lost Rock DVD.mkv
+02/28 21:28 - 21:54 - Arthur - Arthur - S01E23-E24 - Arthur Writes a Story + Arthur's Lost Dog DVD.avi
+02/28 21:54 - 22:21 - Between The Lions - Between the Lions - S01E08 - The Boy Who Cried Wolf DVD.mkv
+02/28 22:21 - 22:47 - Between The Lions - Between the Lions - S01E17 - Something Fishy DVD.mkv
+02/28 22:47 - 23:14 - Between The Lions - Between the Lions - S01E12 - The Chap With Caps DVD.mkv
+02/28 23:14 - 23:41 - Between The Lions - Between the Lions - S01E01 - Pecos Bill Cleans Up the West DVD.mkv
+02/28 23:41 - 00:05 - Arthur - Arthur - S01E41-E42 - Sue Ellen Moves In + The Perfect Brother DVD.avi
+03/01 00:05 - 00:32 - Arthur - Arthur - S01E06 - Buster's Dino Dilemma WEBRip-480p.mkv
+03/01 00:32 - 00:56 - Arthur - Arthur - S01E11-E12 - Locked in the Library! + Arthur Accused! DVD.avi
+03/01 00:56 - 01:21 - Arthur - Arthur - S01E55-E56 - I'm a Poet + The Scare-Your-Pants-Off Club! DVD.avi
+03/01 01:21 - 01:46 - Arthur - Arthur - S01E39-E40 - Arthur's Almost Boring Day + The Half-Baked Sale DVD.avi
+03/01 01:46 - 02:13 - Between The Lions - Between the Lions - S01E21 - Sausage Nose DVD.mkv
+03/01 02:13 - 02:39 - Between The Lions - Between the Lions - S01E15 - There's a Fly in My Soup DVD.mkv
+03/01 02:39 - 03:06 - Between The Lions - Between the Lions - S01E23 - The Lucky Duck DVD.mkv
+03/01 03:06 - 03:32 - Arthur - Arthur - S01E47-E48 - Arthur's Tooth + D.W. Gets Lost DVD.avi
+03/01 03:32 - 03:59 - Arthur - Arthur - S01E29-E30 - Arthur's Family Vacation + Grandpa Dave's Old Country Farm DVD.avi
+03/01 03:59 - 04:25 - Arthur - Arthur - S01E35-E36 - Arthur's Chicken Pox + Sick as a Dog DVD.avi
+03/01 04:25 - 04:52 - Between The Lions - Between the Lions - S01E10 - Lionel's Antlers DVD.mkv
+03/01 04:52 - 05:16 - Arthur - Arthur - S01E53-E54 - D.W.'s Blankie + Arthur's Substitute Teacher Trouble DVD.avi
+03/01 05:16 - 05:43 - Between The Lions - Between the Lions - S01E25 - A King and His Hawk DVD.mkv
+03/01 05:43 - 06:10 - Between The Lions - Between the Lions - S01E13 - Pandora's Box DVD.mkv
+03/01 06:10 - 06:36 - Between The Lions - Between the Lions - S01E27 - Piggyback, Piggyback DVD.mkv
+03/01 06:36 - 07:03 - Between The Lions - Between the Lions - S01E16 - The Popcorn Popper DVD.mkv
+03/01 07:03 - 07:30 - Arthur - Arthur - S01E33-E34 - Meek for a Week + Arthur, World's Greatest Gleeper DVD.avi
+03/01 07:30 - 07:56 - Between The Lions - Between the Lions - S01E06 - The Hopping Hen DVD.mp4
+03/01 07:56 - 08:23 - Between The Lions - Between the Lions - S01E05 - Shooting Stars DVD.mkv
+03/01 08:23 - 08:49 - Arthur - Arthur - S01E01-E02 - Arthur's Eyes + Francine's Bad Hair Day DVD.avi
+03/01 08:49 - 09:16 - Between The Lions - Between the Lions - S01E09 - Fuzzy Wuzzy, Wuzzy DVD.mkv
+03/01 09:16 - 09:42 - Arthur - Arthur - S01E09-E10 - Arthur's Pet Business + D.W. the Copycat DVD.avi
+03/01 09:42 - 10:07 - Arthur - Arthur - S01E51-E52 - My Dad, the Garbage Man + Poor Muffy DVD.avi
+03/01 10:07 - 10:34 - Between The Lions - Between the Lions - S01E29 - Giants and Cubs DVD.mkv
+03/01 10:34 - 11:00 - Between The Lions - Between the Lions - S01E11 - To the Ship! To the Ship! DVD.mkv
+03/01 11:00 - 11:27 - Between The Lions - Between the Lions - S01E24 - The Old Man DVD.mkv
+03/01 11:27 - 11:54 - Arthur - Arthur - S01E45-E46 - Bully for Binky + Mis-fortune Teller DVD.avi
+03/01 11:54 - 12:20 - Arthur - Arthur - S01E17-E18 - Arthur Babysits + Arthur's Cousin Catastrophe DVD.avi
+03/01 12:20 - 12:45 - Arthur - Arthur - S01E31-E32 - Arthur and the Crunch Cereal Contest + D.W. Flips DVD.avi
+03/01 12:45 - 13:11 - Between The Lions - Between the Lions - S01E22 - Red Hat, Green Hat DVD.mkv
+03/01 13:11 - 13:38 - Between The Lions - Between the Lions - S01E07 - Touching the Moon DVD.mkv
+03/01 13:38 - 14:05 - Between The Lions - Between the Lions - S01E01 - Pecos Bill Cleans Up the West DVD.mkv
+03/01 14:05 - 14:31 - Between The Lions - Between the Lions - S01E27 - Piggyback, Piggyback DVD.mkv
+03/01 14:31 - 14:58 - Between The Lions - Between the Lions - S01E04 - Farmer Ken's Puzzle DVD.mkv
+03/01 14:58 - 15:25 - Between The Lions - Between the Lions - S01E26 - The Roar That Makes Them Run DVD.mkv
+03/01 15:25 - 15:51 - Arthur - Arthur - S01E45-E46 - Bully for Binky + Mis-fortune Teller DVD.avi
+03/01 15:51 - 16:18 - Arthur - Arthur - S01E07-E08 - D.W.'s Imaginary Friend + Arthur's Lost Library Book DVD.avi
+03/01 16:18 - 16:42 - Arthur - Arthur - S01E41-E42 - Sue Ellen Moves In + The Perfect Brother DVD.avi
+03/01 16:42 - 17:09 - Arthur - Arthur - S01E13-E14 - Arthur Goes to Camp + Buster Makes the Grade DVD.avi
+03/01 17:09 - 17:35 - Arthur - Arthur - S01E23-E24 - Arthur Writes a Story + Arthur's Lost Dog DVD.avi
+03/01 17:35 - 18:01 - Arthur - Arthur - S01E49-E50 - D.W. Thinks Big + Arthur Cleans Up DVD.avi
+03/01 18:01 - 18:28 - Between The Lions - Between the Lions - S01E22 - Red Hat, Green Hat DVD.mkv
+03/01 18:28 - 18:55 - Between The Lions - Between the Lions - S01E10 - Lionel's Antlers DVD.mkv
+03/01 18:55 - 19:21 - Between The Lions - Between the Lions - S01E02 - The Lost Rock DVD.mkv
+03/01 19:21 - 19:48 - Between The Lions - Between the Lions - S01E15 - There's a Fly in My Soup DVD.mkv
+03/01 19:48 - 20:13 - Arthur - Arthur - S01E11-E12 - Locked in the Library! + Arthur Accused! DVD.avi
+03/01 20:13 - 20:39 - Between The Lions - Between the Lions - S01E08 - The Boy Who Cried Wolf DVD.mkv
+03/01 20:39 - 21:06 - Arthur - Arthur - S01E27-E28 - Arthur the Wrecker + Arthur and the True Francine DVD.avi
+03/01 21:06 - 21:32 - Arthur - Arthur - S01E15-E16 - Arthur's New Puppy + Arthur Bounces Back DVD.avi
+03/01 21:32 - 21:59 - Between The Lions - Between the Lions - S01E03 - Little Big Mouse DVD.mp4
+03/01 21:59 - 22:25 - Arthur - Arthur - S01E29-E30 - Arthur's Family Vacation + Grandpa Dave's Old Country Farm DVD.avi
+03/01 22:25 - 22:52 - Between The Lions - Between the Lions - S01E07 - Touching the Moon DVD.mkv
+03/01 22:52 - 23:19 - Arthur - Arthur - S01E37-E38 - D.W. Rides Again + Arthur Makes the Team DVD.avi
+03/01 23:19 - 23:45 - Between The Lions - Between the Lions - S01E28 - The Fox and the Crow DVD.mkv
+03/01 23:45 - 00:12 - Between The Lions - Between the Lions - S01E30 - Be Bop DVD.mkv
+03/02 00:12 - 00:36 - Arthur - Arthur - S01E53-E54 - D.W.'s Blankie + Arthur's Substitute Teacher Trouble DVD.avi
+03/02 00:36 - 01:03 - Between The Lions - Between the Lions - S01E05 - Shooting Stars DVD.mkv
+03/02 01:03 - 01:30 - Arthur - Arthur - S01E21-E22 - Arthur's Baby + D.W.'s Baby DVD.avi
+03/02 01:30 - 01:56 - Arthur - Arthur - S01E09-E10 - Arthur's Pet Business + D.W. the Copycat DVD.avi
+03/02 01:56 - 02:21 - Arthur - Arthur - S01E25-E26 - So Long, Spanky + Buster's New Friend DVD.avi
+03/02 02:21 - 02:45 - Arthur - Arthur - S01E39-E40 - Arthur's Almost Boring Day + The Half-Baked Sale DVD.avi
+03/02 02:45 - 03:12 - Arthur - Arthur - S01E57-E58 - My Club Rules! + Stolen Bike DVD.avi
+03/02 03:12 - 03:38 - Between The Lions - Between the Lions - S01E20 - A Peck of Peppers DVD.mkv
+03/02 03:38 - 04:05 - Arthur - Arthur - S01E17-E18 - Arthur Babysits + Arthur's Cousin Catastrophe DVD.avi
+03/02 04:05 - 04:31 - Arthur - Arthur - S01E43-E44 - D.W.'s Snow Mystery + Team Trouble DVD.avi
+03/02 04:31 - 04:58 - Between The Lions - Between the Lions - S01E24 - The Old Man DVD.mkv
+03/02 04:58 - 05:24 - Arthur - Arthur - S01E03-E04 - Arthur and the Real Mr. Ratburn + Arthur's Spelling Trubble DVD.avi
+03/02 05:24 - 05:51 - Arthur - Arthur - S01E01-E02 - Arthur's Eyes + Francine's Bad Hair Day DVD.avi
+03/02 05:51 - 06:17 - Between The Lions - Between the Lions - S01E25 - A King and His Hawk DVD.mkv
+[1;4;34mFinished running FieldStation42.[0m
+
+
+[1;4;32mI had successes![0m
+[32mI printed the schedule for PBS[0m

@@ -1,0 +1,207 @@
+[02/24/26 22:13:06] INFO     [root] Loading and checking guide channel                                                                                                                      station_manager.py:60
+                    INFO     [root] Guide channel checks completed.                                                                                                                         station_manager.py:72
+02/24 00:00 - 00:45 - Er - ER - S02E20 - Fevers of Unknown Origin WEBRip-1080p.mkv
+02/24 00:45 - 01:28 - Chuck - Chuck.S02E16.Chuck.Versus.The.Lethal.Weapon.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/24 01:28 - 02:13 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E10 - Closure (1) WEBDL-1080p.mkv
+02/24 02:13 - 02:59 - Er - ER - S01E25 - Everything Old Is New Again WEBRip-1080p.mkv
+02/24 02:59 - 03:42 - Chuck - Chuck.S02E18.Chuck.Versus.The.Broken.Heart.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/24 03:42 - 04:28 - Er - ER - S01E14 - Long Day's Journey WEBRip-1080p.mkv
+02/24 04:28 - 05:10 - Chuck - Chuck.S02E12.Chuck.Versus.The.Third.Dimension.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/24 05:10 - 05:56 - Er - ER - S02E15 - Baby Shower WEBRip-1080p.mkv
+02/24 05:56 - 06:43 - Law & Order - Law & Order - S02E12 - Star Struck WEBDL-720p.mkv
+02/24 06:43 - 07:26 - Chuck - Chuck.S01E10.Chuck.Versus.the.Nemesis.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/24 07:26 - 08:09 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E12 - Russian Love Poem WEBDL-1080p.mkv
+02/24 08:09 - 08:55 - Er - ER - S02E12 - True Lies WEBRip-1080p.mkv
+02/24 08:55 - 09:39 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E07 - Uncivilized WEBDL-1080p.mkv
+02/24 09:39 - 10:22 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E03 - Closure (2) WEBDL-1080p.mkv
+02/24 10:22 - 11:05 - Chuck - Chuck.S02E15.Chuck.Versus.The.Beefcake.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/24 11:05 - 11:49 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E10 - Consent WEBDL-1080p.mkv
+02/24 11:49 - 12:35 - Er - ER - S01E20 - Full Moon, Saturday Night WEBRip-1080p.mkv
+02/24 12:35 - 13:19 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E20 - Remorse WEBDL-1080p.mkv
+02/24 13:19 - 14:01 - Chuck - Chuck.S02E07.Chuck.Versus.The.Fat.Lady.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/24 14:01 - 14:47 - Er - ER - S01E10 - Blizzard WEBRip-1080p.mkv
+02/24 14:47 - 15:34 - Law & Order - Law & Order - S02E16 - Vengeance WEBDL-720p.mkv
+02/24 15:34 - 16:22 - Law & Order - Law & Order - S01E18 - The Secret Sharers WEBDL-720p.mkv
+02/24 16:22 - 17:05 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E14 - Paranoia WEBDL-1080p.mkv
+02/24 17:05 - 17:49 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E18 - Chat Room WEBDL-1080p.mkv
+02/24 17:49 - 18:32 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E15 - Entitled (1) WEBDL-1080p.mkv
+02/24 18:32 - 19:20 - Law & Order - Law & Order - S02E06 - Misconception WEBDL-720p.mkv
+02/24 19:20 - 20:05 - Er - ER - S02E18 - A Shift in the Night WEBRip-1080p.mkv
+02/24 20:05 - 20:52 - Law & Order - Law & Order - S01E02 - Subterranean Homeboy Blues WEBDL-720p.mkv
+02/24 20:52 - 21:38 - Er - ER - S01E23 - Love Among the Ruins WEBRip-1080p.mkv
+02/24 21:38 - 22:31 - Heroes - Heroes - S01E01 - Genesis Bluray-1080p.mkv
+02/24 22:31 - 23:17 - Er - ER - S02E08 - The Secret Sharer WEBRip-1080p.mkv
+02/24 23:17 - 00:01 - Heroes - Heroes - S01E03 - One Giant Leap Bluray-1080p.mkv
+02/25 00:01 - 00:44 - Heroes - Heroes - S01E04 - Collision Bluray-1080p.mkv
+02/25 00:44 - 01:27 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E16 - Runaway WEBDL-1080p.mkv
+02/25 01:27 - 02:11 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E20 - Pique WEBDL-1080p.mkv
+02/25 02:11 - 02:55 - Heroes - Heroes - S01E08 - Seven Minutes to Midnight Bluray-1080p.mkv
+02/25 02:55 - 03:40 - Er - ER - S01E15 - Feb. 5 '95 WEBRip-1080p.mkv
+02/25 03:40 - 04:22 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E04 - Hysteria WEBDL-1080p.mkv
+02/25 04:22 - 05:10 - Law & Order - Law & Order - S01E15 - The Torrents of Greed (1) WEBDL-720p.mkv
+02/25 05:10 - 05:54 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E11 - Bad Blood WEBDL-1080p.mkv
+02/25 05:54 - 06:37 - Chuck - Chuck.S01E04.Chuck.Versus.the.Wookiee.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/25 06:37 - 07:22 - Er - ER - S02E05 - And Baby Makes Two WEBRip-1080p.mkv
+02/25 07:22 - 08:06 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E22 - Slaves WEBDL-1080p.mkv
+02/25 08:06 - 08:50 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E09 - Stocks & Bondage WEBDL-1080p.mkv
+02/25 08:50 - 09:38 - Law & Order - Law & Order - S02E09 - Renunciation WEBDL-720p.mkv
+02/25 09:38 - 10:25 - Law & Order - Law & Order - S02E22 - The Working Stiff WEBDL-720p.mkv
+02/25 10:25 - 11:07 - Pushing Daisies - Pushing Daisies - S01E02 - Dummy Bluray-1080p.mkv
+02/25 11:07 - 11:51 - Er - ER - S01E21 - House of Cards WEBRip-1080p.mkv
+02/25 11:51 - 12:39 - Law & Order - Law & Order - S01E22 - The Blue Wall WEBDL-720p.mkv
+02/25 12:39 - 13:23 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E08 - Taken WEBDL-1080p.mkv
+02/25 13:23 - 14:06 - Chuck - Chuck.S02E08.Chuck.Versus.The.Gravitron.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/25 14:06 - 14:48 - Chuck - Chuck.S01E13.Chuck.Versus.the.Marlin.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/25 14:48 - 15:35 - Law & Order - Law & Order - S01E16 - The Torrents of Greed (2) WEBDL-720p.mkv
+02/25 15:35 - 16:21 - Law & Order - Law & Order - S02E01 - Confession WEBDL-720p.mkv
+02/25 16:21 - 17:07 - Er - ER - S02E21 - Take These Broken Wings WEBRip-1080p.mkv
+02/25 17:07 - 17:49 - Pushing Daisies - Pushing Daisies - S01E01 - Pie-lette Bluray-1080p.mkv
+02/25 17:49 - 18:32 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E13 - Disrobed WEBDL-1080p.mkv
+02/25 18:32 - 19:18 - Law & Order - Law & Order - S01E06 - Everybody's Favorite Bagman WEBDL-720p.mkv
+02/25 19:18 - 20:00 - Pushing Daisies - Pushing Daisies - S01E08 - Bitter Sweets Bluray-1080p.mkv
+02/25 20:00 - 20:44 - Er - ER - S02E01 - Welcome Back, Carter! WEBRip-1080p.mkv
+02/25 20:44 - 21:29 - Er - ER - S02E02 - Summer Run WEBRip-1080p.mkv
+02/25 21:29 - 22:13 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E15 - Countdown WEBDL-1080p.mkv
+02/25 22:13 - 23:00 - Er - ER - S01E18 - Sleepless in Chicago WEBRip-1080p.mkv
+02/25 23:00 - 23:42 - Chuck - Chuck.S01E11.Chuck.Versus.the.Crown.Vic.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/25 23:42 - 00:30 - Law & Order - Law & Order - S02E08 - Out of Control WEBDL-720p.mkv
+02/26 00:30 - 01:14 - Er - ER - S02E16 - The Healers WEBRip-1080p.mkv
+02/26 01:14 - 01:58 - Chuck - Chuck.S02E01.Chuck.Versus.The.First.Date.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/26 01:58 - 02:42 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E12 - Secrets WEBDL-1080p.mkv
+02/26 02:42 - 03:26 - Heroes - Heroes - S01E07 - Nothing to Hide Bluray-1080p.mkv
+02/26 03:26 - 04:09 - Pushing Daisies - Pushing Daisies - S01E07 - Smell of Success Bluray-1080p.mkv
+02/26 04:09 - 04:52 - Chuck - Chuck.S02E05.Chuck.Versus.Tom.Sawyer.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/26 04:52 - 05:35 - Pushing Daisies - Pushing Daisies - S01E03 - The Fun in Funeral Bluray-1080p.mkv
+02/26 05:35 - 06:20 - Er - ER - S02E09 - Home WEBRip-1080p.mkv
+02/26 06:20 - 07:06 - Law & Order - Law & Order - S01E13 - A Death in the Family WEBDL-720p.mkv
+02/26 07:06 - 07:52 - Er - ER - S02E19 - Fire in the Belly WEBRip-1080p.mkv
+02/26 07:52 - 08:35 - Chuck - Chuck.S01E05.Chuck.Versus.the.Sizzling.Shrimp.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/26 08:35 - 09:18 - Chuck - Chuck.S02E21.Chuck.Versus.The.Colonel.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/26 09:18 - 10:02 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E04 - Legacy WEBDL-1080p.mkv
+02/26 10:02 - 10:45 - Chuck - Chuck.S01E09.Chuck.Versus.the.Imported.Hard.Salami.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/26 10:45 - 11:33 - Law & Order - Law & Order - S01E21 - Sonata for a Solo Organ WEBDL-720p.mkv
+02/26 11:33 - 12:16 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E14 - Limitations WEBDL-1080p.mkv
+02/26 12:16 - 13:01 - Er - ER - S02E07 - Hell and High Water WEBRip-1080p.mkv
+02/26 13:01 - 13:46 - Er - ER - S01E11 - The Gift WEBRip-1080p.mkv
+02/26 13:46 - 14:30 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E16 - The Third Guy WEBDL-1080p.mkv
+02/26 14:30 - 15:13 - Chuck - Chuck.S02E11.Chuck.Versus.Santa.Claus.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/26 15:13 - 16:00 - Law & Order - Law & Order - S02E13 - Severance WEBDL-720p.mkv
+02/26 16:00 - 16:43 - Chuck - Chuck.S02E06.Chuck.Versus.The.Ex.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/26 16:43 - 17:26 - Chuck - Chuck.S02E20.Chuck.Versus.The.First.Kill.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/26 17:26 - 18:13 - Law & Order - Law & Order - S01E10 - Prisoner of Love WEBDL-720p.mkv
+02/26 18:13 - 18:59 - Er - ER - S02E10 - A Miracle Happens Here WEBRip-1080p.mkv
+02/26 18:59 - 19:47 - Law & Order - Law & Order - S02E02 - The Wages of Love WEBDL-720p.mkv
+02/26 19:47 - 20:30 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E07 - Asunder WEBDL-1080p.mkv
+02/26 20:30 - 21:18 - Er - ER - S01E03 - Going Home WEBRip-1080p.mkv
+02/26 21:18 - 22:06 - Law & Order - Law & Order - S02E03 - Aria WEBDL-720p.mkv
+02/26 22:06 - 22:53 - Law & Order - Law & Order - S01E14 - The Violence of Summer WEBDL-720p.mkv
+02/26 22:53 - 23:38 - Er - ER - S02E13 - It's Not Easy Being Greene WEBRip-1080p.mkv
+02/26 23:38 - 00:21 - Heroes - Heroes - S01E06 - Better Halves Bluray-1080p.mkv
+02/27 00:21 - 01:08 - Law & Order - Law & Order - S02E21 - Silence WEBDL-720p.mkv
+02/27 01:08 - 01:51 - Chuck - Chuck.S02E19.Chuck.Versus.The.Dream.Job.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/27 01:51 - 02:34 - Pushing Daisies - Pushing Daisies - S01E05 - Girth Bluray-1080p.mkv
+02/27 02:34 - 03:19 - Er - ER - S01E09 - ER Confidential WEBRip-1080p.mkv
+02/27 03:19 - 04:06 - Law & Order - Law & Order - S01E08 - Poison Ivy WEBDL-720p.mkv
+02/27 04:06 - 04:48 - Chuck - Chuck.S01E06.Chuck.Versus.the.Sandworm.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/27 04:48 - 05:30 - Pushing Daisies - Pushing Daisies - S01E04 - Pigeon Bluray-1080p.mkv
+02/27 05:30 - 06:15 - Er - ER - S02E11 - Dead of Winter WEBRip-1080p.mkv
+02/27 06:15 - 06:59 - Er - ER - S01E12 - Happy New Year WEBRip-1080p.mkv
+02/27 06:59 - 07:47 - Law & Order - Law & Order - S01E17 - Mushrooms WEBDL-720p.mkv
+02/27 07:47 - 08:31 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E08 - Stalked WEBDL-1080p.mkv
+02/27 08:31 - 09:17 - Law & Order - Law & Order - S01E03 - The Reaper's Helper WEBDL-720p.mkv
+02/27 09:17 - 10:00 - Heroes - Heroes - S01E02 - Don't Look Back Bluray-1080p.mkv
+02/27 10:00 - 10:43 - Chuck - Chuck.S01E12.Chuck.Versus.the.Undercover.Lover.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/27 10:43 - 11:27 - Chuck - Chuck.S02E04.Chuck.Versus.The.Cougars.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/27 11:27 - 12:15 - Law & Order - Law & Order - S02E07 - In Memory of… WEBDL-720p.mkv
+02/27 12:15 - 13:01 - Law & Order - Law & Order - S01E11 - Out of the Half-Light WEBDL-720p.mkv
+02/27 13:01 - 13:48 - Law & Order - Law & Order - S01E07 - By Hooker, by Crook WEBDL-720p.mkv
+02/27 13:48 - 14:31 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E03 - … Or Just Look Like One WEBDL-1080p.mkv
+02/27 14:31 - 15:13 - Chuck - Chuck.S01E07.Chuck.Versus.the.Alma.Mater.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/27 15:13 - 15:58 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E13 - Victims WEBDL-1080p.mkv
+02/27 15:58 - 16:42 - Er - ER - S01E07 - Another Perfect Day WEBRip-1080p.mkv
+02/27 16:42 - 17:25 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E21 - Nocturne WEBDL-1080p.mkv
+02/27 17:25 - 18:10 - Er - ER - S02E06 - Days Like This WEBRip-1080p.mkv
+02/27 18:10 - 18:53 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E06 - Sophomore Jinx WEBDL-1080p.mkv
+02/27 18:53 - 19:37 - Er - ER - S01E13 - Luck of the Draw WEBRip-1080p.mkv
+02/27 19:37 - 20:20 - Chuck - Chuck.S01E03.Chuck.Versus.the.Tango.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/27 20:20 - 21:01 - Pushing Daisies - Pushing Daisies - S01E06 - Bitches Bluray-1080p.mkv
+02/27 21:01 - 21:44 - Chuck - Chuck.S02E17.Chuck.Versus.The.Predator.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/27 21:44 - 22:28 - Heroes - Heroes - S01E05 - Hiros Bluray-1080p.mkv
+02/27 22:28 - 23:12 - Er - ER - S01E06 - Chicago Heat WEBRip-1080p.mkv
+02/27 23:12 - 23:58 - Er - ER - S01E05 - Into That Good Night WEBRip-1080p.mkv
+02/27 23:58 - 00:41 - Heroes - Heroes - S01E09 - Homecoming Bluray-1080p.mkv
+02/28 00:41 - 01:29 - Law & Order - Law & Order - S01E12 - Life Choice WEBDL-720p.mkv
+02/28 01:29 - 02:16 - Law & Order - Law & Order - S02E19 - The Fertile Fields WEBDL-720p.mkv
+02/28 02:16 - 03:00 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E21 - Scourge WEBDL-1080p.mkv
+02/28 03:00 - 03:43 - Chuck - Chuck.S01E08.Chuck.Versus.the.Truth.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/28 03:43 - 04:28 - Er - ER - S01E22 - Men Plan, God Laughs WEBRip-1080p.mkv
+02/28 04:28 - 05:14 - Er - ER - S02E22 - John Carter, M.D WEBRip-1080p.mkv
+02/28 05:14 - 06:41 - Er - ER - S01E01 - 24 Hours WEBRip-1080p.mkv
+02/28 06:41 - 07:28 - Law & Order - Law & Order - S02E18 - Cradle to Grave WEBDL-720p.mkv
+02/28 07:28 - 08:11 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E18 - Manhunt WEBDL-1080p.mkv
+02/28 08:11 - 08:56 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E06 - Noncompliance WEBDL-1080p.mkv
+02/28 08:56 - 09:42 - Er - ER - S01E17 - The Birthday Party WEBRip-1080p.mkv
+02/28 09:42 - 10:25 - Chuck - Chuck.S02E02.Chuck.Versus.The.Seduction.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/28 10:25 - 11:09 - Er - ER - S02E03 - Do One, Teach One, Kill One WEBRip-1080p.mkv
+02/28 11:09 - 11:54 - Er - ER - S02E17 - The Match Game WEBRip-1080p.mkv
+02/28 11:54 - 12:41 - Law & Order - Law & Order - S01E20 - The Troubles WEBDL-720p.mkv
+02/28 12:41 - 13:24 - Chuck - Chuck.S01E01.Chuck.Versus.the.Intersect.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+02/28 13:24 - 14:08 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E17 - Folly WEBDL-1080p.mkv
+02/28 14:08 - 14:54 - Er - ER - S01E19 - Love's Labor Lost WEBRip-1080p.mkv
+02/28 14:54 - 15:37 - Chuck - Chuck.S02E22.Chuck.Versus.The.Ring.1.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/28 15:37 - 16:20 - Chuck - Chuck.S02E03.Chuck.Versus.The.Break-Up.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/28 16:20 - 17:05 - Er - ER - S02E14 - The Right Thing WEBRip-1080p.mkv
+02/28 17:05 - 17:47 - Er - ER - S01E08 - 9½ Hours WEBRip-1080p.mkv
+02/28 17:47 - 18:35 - Law & Order - Law & Order - S02E05 - God Bless the Child WEBDL-720p.mkv
+02/28 18:35 - 19:18 - Chuck - Chuck.S02E13.Chuck.Versus.The.Suburbs.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/28 19:18 - 20:00 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E19 - Contact WEBDL-1080p.mkv
+02/28 20:00 - 20:44 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E19 - Parasites WEBDL-1080p.mkv
+02/28 20:44 - 21:27 - Chuck - Chuck.S02E10.Chuck.Versus.The.Delorean.Repack.1080p.BluRay.x264-FELIX12345.mkv
+02/28 21:27 - 22:15 - Law & Order - Law & Order - S01E04 - Kiss the Girls and Make Them Die WEBDL-720p.mkv
+02/28 22:15 - 22:59 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E05 - Wanderlust WEBDL-1080p.mkv
+02/28 22:59 - 23:43 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E17 - Misleader WEBDL-1080p.mkv
+02/28 23:43 - 00:31 - Law & Order - Law & Order - S01E09 - Indifference WEBDL-720p.mkv
+03/01 00:31 - 01:18 - Law & Order - Law & Order - S02E14 - Blood Is Thicker… WEBDL-720p.mkv
+03/01 01:18 - 02:01 - Chuck - Chuck.S01E02.Chuck.Versus.the.Helicopter.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+03/01 02:01 - 02:45 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E01 - Wrong Is Right WEBDL-1080p.mkv
+03/01 02:45 - 03:33 - Law & Order - Law & Order - S01E01 - Prescription for Death WEBDL-720p.mkv
+03/01 03:33 - 04:20 - Law & Order - Law & Order - S02E10 - Heaven WEBDL-720p.mkv
+03/01 04:20 - 05:03 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E02 - A Single Life WEBDL-1080p.mkv
+03/01 05:03 - 05:48 - Er - ER - S02E04 - What Life WEBRip-1080p.mkv
+03/01 05:48 - 06:36 - Law & Order - Law & Order - S02E11 - His Hour Upon the Stage WEBDL-720p.mkv
+03/01 06:36 - 07:24 - Law & Order - Law & Order - S01E05 - Happily Ever After WEBDL-720p.mkv
+03/01 07:24 - 08:07 - Chuck - Chuck.S02E09.Chuck.Versus.The.Sensei.Repack.1080p.BluRay.x264-FELIX12345.mkv
+03/01 08:07 - 08:50 - Chuck - Chuck.S02E14.Chuck.Versus.The.Best.Friend.Repack.1080p.BluRay.x264-FELIX12345.mkv
+03/01 08:50 - 09:34 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E11 - Abuse WEBDL-1080p.mkv
+03/01 09:34 - 10:21 - Law & Order - Law & Order - S02E17 - Sisters of Mercy WEBDL-720p.mkv
+03/01 10:21 - 11:04 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E01 - Payback WEBDL-1080p.mkv
+03/01 11:04 - 11:51 - Law & Order - Law & Order - S02E04 - Asylum WEBDL-720p.mkv
+03/01 11:51 - 12:38 - Er - ER - S01E02 - Day One WEBRip-1080p.mkv
+03/01 12:38 - 13:25 - Law & Order - Law & Order - S02E20 - Intolerance WEBDL-720p.mkv
+03/01 13:25 - 14:07 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E05 - Baby Killer WEBDL-1080p.mkv
+03/01 14:07 - 14:55 - Law & Order - Law & Order - S02E15 - Trust WEBDL-720p.mkv
+03/01 14:55 - 15:42 - Er - ER - S01E24 - Motherhood WEBRip-1080p.mkv
+03/01 15:42 - 16:29 - Er - ER - S01E04 - Hit and Run WEBRip-1080p.mkv
+03/01 16:29 - 17:12 - Er - ER - S01E16 - Make of Two Hearts WEBRip-1080p.mkv
+03/01 17:12 - 17:57 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E02 - Honor WEBDL-1080p.mkv
+03/01 17:57 - 18:40 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E09 - Pixies WEBDL-1080p.mkv
+03/01 18:40 - 19:28 - Law & Order - Law & Order - S01E19 - The Serpent's Tooth WEBDL-720p.mkv
+03/01 19:28 - 20:14 - Law & Order - Law & Order - S01E10 - Prisoner of Love WEBDL-720p.mkv
+03/01 20:14 - 20:58 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S02E11 - Abuse WEBDL-1080p.mkv
+03/01 20:58 - 21:44 - Er - ER - S02E15 - Baby Shower WEBRip-1080p.mkv
+03/01 21:44 - 22:31 - Law & Order - Law & Order - S02E11 - His Hour Upon the Stage WEBDL-720p.mkv
+03/01 22:31 - 23:18 - Er - ER - S01E04 - Hit and Run WEBRip-1080p.mkv
+03/01 23:18 - 00:04 - Er - ER - S02E10 - A Miracle Happens Here WEBRip-1080p.mkv
+03/02 00:04 - 00:52 - Er - ER - S01E03 - Going Home WEBRip-1080p.mkv
+03/02 00:52 - 01:39 - Law & Order - Law & Order - S02E17 - Sisters of Mercy WEBDL-720p.mkv
+03/02 01:39 - 02:22 - Er - ER - S01E16 - Make of Two Hearts WEBRip-1080p.mkv
+03/02 02:22 - 03:09 - Law & Order - Law & Order - S02E13 - Severance WEBDL-720p.mkv
+03/02 03:09 - 03:52 - Chuck - Chuck.S02E13.Chuck.Versus.The.Suburbs.Repack.1080p.BluRay.x264-FELIX12345.mkv
+03/02 03:52 - 04:35 - Chuck - Chuck.S01E10.Chuck.Versus.the.Nemesis.1080p.BluRay.10bit.EAC3.5.1.x265-iVy.mkv
+03/02 04:35 - 05:19 - Er - ER - S02E18 - A Shift in the Night WEBRip-1080p.mkv
+03/02 05:19 - 06:03 - Law & Order Special Victims Unit - Law & Order - Special Victims Unit - S01E16 - The Third Guy WEBDL-1080p.mkv
+[1;4;34mFinished running FieldStation42.[0m
+
+
+[1;4;32mI had successes![0m
+[32mI printed the schedule for NBC[0m

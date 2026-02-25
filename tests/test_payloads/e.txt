@@ -1,0 +1,33 @@
+[02/24/26 22:13:29] INFO     [Station42] Printing schedule summary.                                                                                                                             station_42.py:330
+                    INFO     [root] Loading and checking guide channel                                                                                                                      station_manager.py:60
+                    INFO     [root] Guide channel checks completed.                                                                                                                         station_manager.py:72
+NBC schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:03:40.143000
+PBS schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:17:56.714667
+USA schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:03:25.042000
+MTV schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:01:47.761000
+Sitcom schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:16:38.492674
+WeatherTV schedule extents: None to None
+Discovery schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:20:51.774724
+TLC schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:34:58.405058
+Animal Planet schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:19:46.468000
+Judge schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:22:06.240000
+TV Land schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:14:15.782000
+A&E schedule extents: 2026-02-23 00:00:00 to 2026-03-02 06:46:24.588000
+Nickelodeon schedule extents: 2026-02-23 00:00:00 to 2026-03-02 06:00:00
+Cartoon Network schedule extents: 2026-02-23 00:00:00 to 2026-03-02 06:06:13.372250
+Disney schedule extents: 2026-02-23 00:00:00 to 2026-03-02 06:00:00
+ABC Family schedule extents: 2026-02-23 00:00:00 to 2026-03-02 08:04:22.124580
+Boomerang schedule extents: 2026-02-23 00:00:00 to 2026-03-02 06:18:14.850000
+Gameshow schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:18:48.040180
+Adult Swim schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:15:00
+Sci-Fi schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:00:00
+Joss schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:48:47.910000
+Wizard schedule extents: 2026-02-24 00:00:00 to 2026-03-02 06:39:53.038000
+TCM schedule extents: 2026-02-24 00:00:00 to 2026-03-02 08:25:13.454778
+Musical Classics schedule extents: 2026-02-24 00:00:00 to 2026-03-02 07:19:23.422000
+
+[1;4;34mFinished running FieldStation42.[0m
+
+
+[1;4;32mI had successes![0m
+[32mI printed the schedule summary[0m

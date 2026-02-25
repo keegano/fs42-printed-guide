@@ -1,0 +1,213 @@
+[02/24/26 22:15:46] INFO     [root] Loading and checking guide channel                                                                                                                      station_manager.py:60
+                    INFO     [root] Guide channel checks completed.                                                                                                                         station_manager.py:72
+02/24 00:00 - 00:42 - Burn Notice - Burn Notice - S02E11 - Hot Spot Bluray-1080p.mkv
+02/24 00:42 - 01:27 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E06 - Who Are You Bluray-1080p.mkv
+02/24 01:27 - 02:10 - Burn Notice - Burn Notice - S01E04 - Old Friends WEBDL-1080p.mkv
+02/24 02:10 - 02:53 - Monk - Monk - S02E10 - Mr. Monk and the Paperboy Bluray-1080p.mkv
+02/24 02:53 - 03:36 - Psych - Psych - S01E03 - Speak Now or Forever Hold Your Piece Bluray-1080p.mkv
+02/24 03:36 - 04:19 - Psych - Psych - S01E11 - He Loves Me, He Loves Me Not, He Loves Me, Oops He's Dead Bluray-1080p.mkv
+02/24 04:19 - 05:02 - Psych - Psych - S01E02 - The Spellingg Bee Bluray-1080p.mkv
+02/24 05:02 - 05:48 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E05 - Friends & Lovers Bluray-1080p.mkv
+02/24 05:48 - 06:32 - Monk - Monk - S01E10 - Mr. Monk Takes a Vacation Bluray-1080p.mkv
+02/24 06:32 - 07:15 - Psych - Psych - S02E09 - Bounty Hunters! Bluray-1080p.mkv
+02/24 07:15 - 08:00 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E22 - Evaluation Day Bluray-1080p.mkv
+02/24 08:00 - 08:45 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E01 - Pilot Bluray-1080p.mkv
+02/24 08:45 - 09:28 - Psych - Psych - S01E06 - Weekend Warriors Bluray-1080p.mkv
+02/24 09:28 - 10:11 - Psych - Psych - S01E08 - Shawn vs. The Red Phantom Bluray-1080p.mkv
+02/24 10:11 - 10:54 - Psych - Psych - S02E13 - Lights, Camera. Homicidio Bluray-1080p.mkv
+02/24 10:54 - 11:40 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E20 - Sounds of Silence Bluray-1080p.mkv
+02/24 11:40 - 12:23 - Psych - Psych - S01E12 - Cloudy.With A Chance Of Murder Bluray-1080p.mkv
+02/24 12:23 - 13:06 - Psych - Psych - S02E14 - Dis-Lodged Bluray-1080p.mkv
+02/24 13:06 - 13:50 - Monk - Monk - S01E02 - Mr. Monk Meets the Candidate (2) Bluray-1080p.mkv
+02/24 13:50 - 14:33 - Psych - Psych - S02E02 - 65 Million Years Off Bluray-1080p.mkv
+02/24 14:33 - 15:16 - Burn Notice - Burn Notice - S02E09 - Good Soldier Bluray-1080p.mkv
+02/24 15:16 - 15:59 - Monk - Monk - S02E12 - Mr. Monk and the T.V. Star Bluray-1080p.mkv
+02/24 15:59 - 16:42 - Psych - Psych - S02E15 - Black and Tan - A Crime of Fashion Bluray-1080p.mkv
+02/24 16:42 - 17:25 - Burn Notice - Burn Notice - S02E07 - Rough Seas Bluray-1080p.mkv
+02/24 17:25 - 18:09 - Burn Notice - Burn Notice - S02E01 - Breaking and Entering Bluray-1080p.mkv
+02/24 18:09 - 18:52 - Psych - Psych - S01E14 - Poker! I Barely Know Her Bluray-1080p.mkv
+02/24 18:52 - 19:34 - Psych - Psych - S02E07 - If You're So Smart, Then Why Are You Dead Bluray-1080p.mkv
+02/24 19:34 - 20:17 - Psych - Psych - S02E06 - Meat Is Murder, But Murder Is Also Murder Bluray-1080p.mkv
+02/24 20:17 - 21:00 - Monk - Monk - S02E13 - Mr. Monk and the Missing Granny Bluray-1080p.mkv
+02/24 21:00 - 21:43 - Monk - Monk - S02E03 - Mr. Monk Goes to the Ballgame Bluray-1080p.mkv
+02/24 21:43 - 22:26 - Psych - Psych - S02E08 - Rob-a-Bye Baby Bluray-1080p.mkv
+02/24 22:26 - 23:10 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E21 - Justice Is Served Bluray-1080p.mkv
+02/24 23:10 - 23:54 - Burn Notice - Burn Notice - S02E12 - Seek and Destroy Bluray-1080p.mkv
+02/24 23:54 - 00:35 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E08 - Anonymous WEBDL-1080p.mkv
+02/25 00:35 - 01:19 - Burn Notice - Burn Notice - S01E05 - Family Business WEBDL-1080p.mkv
+02/25 01:19 - 02:02 - Psych - Psych - S01E15 - Scary Sherry - Bianca's Toast Bluray-1080p.mkv
+02/25 02:02 - 02:45 - Psych - Psych - S02E03 - Psy vs. Psy Bluray-1080p.mkv
+02/25 02:45 - 03:29 - Monk - Monk - S01E03 - Mr. Monk and the Psychic Bluray-1080p.mkv
+02/25 03:29 - 04:11 - Burn Notice - Burn Notice - S01E06 - Unpaid Debts WEBDL-1080p.mkv
+02/25 04:11 - 04:55 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E16 - Too Tough to Die Bluray-1080p.mkv
+02/25 04:55 - 05:38 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E14 - To Halve and to Hold Bluray-1080p.mkv
+02/25 05:38 - 06:21 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E07 - Blood Drops WEBDL-1080p.mkv
+02/25 06:21 - 07:04 - Burn Notice - Burn Notice - S02E13 - Bad Breaks Bluray-1080p.mkv
+02/25 07:04 - 07:46 - Monk - Monk - S01E01 - Mr. Monk Meets the Candidate (1) Bluray-1080p.mkv
+02/25 07:46 - 08:29 - Burn Notice - Burn Notice - S01E11 - Dead Drop WEBDL-1080p.mkv
+02/25 08:29 - 09:12 - Monk - Monk - S02E02 - Mr. Monk Goes to Mexico Bluray-1080p.mkv
+02/25 09:12 - 09:55 - Psych - Psych - S01E07 - Who Ya Gonna Call Bluray-1080p.mkv
+02/25 09:55 - 10:37 - Burn Notice - Burn Notice - S02E15 - Sins of Omission Bluray-1080p.mkv
+02/25 10:37 - 11:22 - Monk - Monk - S01E12 - Mr. Monk and the Red-Headed Stranger Bluray-1080p.mkv
+02/25 11:22 - 12:04 - Burn Notice - Burn Notice - S02E14 - Truth & Reconciliation Bluray-1080p.mkv
+02/25 12:04 - 12:48 - Monk - Monk - S01E04 - Mr. Monk Meets Dale the Whale Bluray-1080p.mkv
+02/25 12:48 - 13:31 - Psych - Psych - S02E12 - The Old and the Restless Bluray-1080p.mkv
+02/25 13:31 - 14:14 - Psych - Psych - S01E13 - Game Set. Muuurder Bluray-1080p.mkv
+02/25 14:14 - 14:58 - Monk - Monk - S02E04 - Mr. Monk Goes to the Circus Bluray-1080p.mkv
+02/25 14:58 - 15:43 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E12 - Fahrenheit 932 Bluray-1080p.mkv
+02/25 15:43 - 16:26 - Burn Notice - Burn Notice - S02E04 - Comrades Bluray-1080p.mkv
+02/25 16:26 - 17:09 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E19 - Gentle, Gentle WEBDL-1080p.mkv
+02/25 17:09 - 17:54 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E23 - The Strip Strangler Bluray-1080p.mkv
+02/25 17:54 - 18:37 - Psych - Psych - S02E16 - Shawn (and Gus) of the Dead Bluray-1080p.mkv
+02/25 18:37 - 19:21 - Burn Notice - Burn Notice - S02E02 - Turn and Burn Bluray-1080p.mkv
+02/25 19:21 - 20:03 - Burn Notice - Burn Notice - S02E05 - Scatter Point Bluray-1080p.mkv
+02/25 20:03 - 20:48 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E13 - Boom Bluray-1080p.mkv
+02/25 20:48 - 21:33 - Monk - Monk - S02E08 - Mr. Monk Meets the Playboy Bluray-1080p.mkv
+02/25 21:33 - 22:39 - Burn Notice - Burn Notice - S01E01 - Burn Notice WEBDL-1080p.mkv
+02/25 22:39 - 23:24 - Monk - Monk - S01E13 - Mr. Monk and the Airplane Bluray-1080p.mkv
+02/25 23:24 - 00:07 - Monk - Monk - S02E09 - Mr. Monk and the 12th Man Bluray-1080p.mkv
+02/26 00:07 - 00:50 - Burn Notice - Burn Notice - S02E08 - Double Booked Bluray-1080p.mkv
+02/26 00:50 - 01:33 - Psych - Psych - S02E01 - American Duos Bluray-1080p.mkv
+02/26 01:33 - 02:16 - Psych - Psych - S02E10 - Gus' Dad May Have Killed An Old Guy! Bluray-1080p.mkv
+02/26 02:16 - 03:01 - Monk - Monk - S01E08 - Mr. Monk and the Other Woman Bluray-1080p.mkv
+02/26 03:01 - 03:43 - Burn Notice - Burn Notice - S01E10 - False Flag WEBDL-1080p.mkv
+02/26 03:43 - 04:27 - Monk - Monk - S02E16 - Mr. Monk Goes to Jail Bluray-1080p.mkv
+02/26 04:27 - 05:11 - Monk - Monk - S02E07 - Mr. Monk and the Sleeping Suspect Bluray-1080p.mkv
+02/26 05:11 - 05:56 - Monk - Monk - S02E05 - Mr. Monk and the Very, Very Old Man Bluray-1080p.mkv
+02/26 05:56 - 06:41 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E10 - Sex, Lies and Larvae Bluray-1080p.mkv
+02/26 06:41 - 07:24 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E02 - Cool Change Bluray-1080p.mkv
+02/26 07:24 - 08:30 - Psych - Psych - S01E01 - Pilot Bluray-1080p.mkv
+02/26 08:30 - 09:13 - Monk - Monk - S01E07 - Mr. Monk and the Billionaire Mugger Bluray-1080p.mkv
+02/26 09:13 - 09:55 - Burn Notice - Burn Notice - S01E09 - Hard Bargain WEBDL-1080p.mkv
+02/26 09:55 - 10:38 - Psych - Psych - S02E05 - And Down the Stretch Comes Murder Bluray-1080p.mkv
+02/26 10:38 - 11:21 - Psych - Psych - S01E05 - 9 Lives Bluray-1080p.mkv
+02/26 11:21 - 12:03 - Burn Notice - Burn Notice - S01E08 - Wanted Man WEBDL-1080p.mkv
+02/26 12:03 - 12:49 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E15 - Table Stakes Bluray-1080p.mkv
+02/26 12:49 - 13:34 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E04 - Pledging Mr. Johnson Bluray-1080p.mkv
+02/26 13:34 - 14:15 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E03 - Crate 'n' Burial WEBDL-1080p.mkv
+02/26 14:15 - 14:59 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E18 - $35K O.B.O Bluray-1080p.mkv
+02/26 14:59 - 15:43 - Monk - Monk - S02E11 - Mr. Monk and the Three Pies Bluray-1080p.mkv
+02/26 15:43 - 16:27 - Monk - Monk - S02E06 - Mr. Monk Goes to the Theater Bluray-1080p.mkv
+02/26 16:27 - 17:10 - Burn Notice - Burn Notice - S02E03 - Trust Me Bluray-1080p.mkv
+02/26 17:10 - 17:53 - Psych - Psych - S01E09 - Forget Me Not Bluray-1080p.mkv
+02/26 17:53 - 18:35 - Psych - Psych - S01E04 - Woman Seeking Dead Husband - Smokers Okay, No Pets Bluray-1080p.mkv
+02/26 18:35 - 19:20 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E09 - Unfriendly Skies Bluray-1080p.mkv
+02/26 19:20 - 20:04 - Monk - Monk - S01E06 - Mr. Monk Goes to the Asylum Bluray-1080p.mkv
+02/26 20:04 - 20:46 - Monk - Monk - S02E14 - Mr. Monk and the Captain's Wife Bluray-1080p.mkv
+02/26 20:46 - 21:28 - Burn Notice - Burn Notice - S01E07 - Broken Rules WEBDL-1080p.mkv
+02/26 21:28 - 22:13 - Monk - Monk - S01E11 - Mr. Monk and the Earthquake Bluray-1080p.mkv
+02/26 22:13 - 22:56 - Psych - Psych - S02E04 - Zero to Murder in Sixty Seconds Bluray-1080p.mkv
+02/26 22:56 - 23:38 - Burn Notice - Burn Notice - S02E16 - Lesser Evil Bluray-1080p.mkv
+02/26 23:38 - 00:20 - Burn Notice - Burn Notice - S01E03 - Fight or Flight WEBDL-1080p.mkv
+02/27 00:20 - 01:02 - Burn Notice - Burn Notice - S01E02 - Identity WEBDL-1080p.mkv
+02/27 01:02 - 01:45 - Burn Notice - Burn Notice - S01E12 - Loose Ends WEBDL-1080p.mkv
+02/27 01:45 - 02:28 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E11 - I-15 Murders Bluray-1080p.mkv
+02/27 02:28 - 03:11 - Psych - Psych - S02E11 - There's Something About Mira Bluray-1080p.mkv
+02/27 03:11 - 03:54 - Psych - Psych - S01E10 - From the Earth to Starbucks Bluray-1080p.mkv
+02/27 03:54 - 04:39 - Monk - Monk - S02E01 - Mr. Monk Goes Back to School Bluray-1080p.mkv
+02/27 04:39 - 05:23 - Monk - Monk - S01E09 - Mr. Monk and the Marathon Man Bluray-1080p.mkv
+02/27 05:23 - 06:08 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E17 - Face Lift Bluray-1080p.mkv
+02/27 06:08 - 06:52 - Monk - Monk - S02E15 - Mr. Monk Gets Married Bluray-1080p.mkv
+02/27 06:52 - 07:34 - Burn Notice - Burn Notice - S02E10 - Do No Harm Bluray-1080p.mkv
+02/27 07:34 - 08:16 - Burn Notice - Burn Notice - S02E06 - Bad Blood Bluray-1080p.mkv
+02/27 08:16 - 09:00 - Monk - Monk - S01E05 - Mr. Monk Goes to the Carnival Bluray-1080p.mkv
+02/27 09:00 - 09:42 - Burn Notice - Burn Notice - S01E10 - False Flag WEBDL-1080p.mkv
+02/27 09:42 - 10:25 - Psych - Psych - S02E10 - Gus' Dad May Have Killed An Old Guy! Bluray-1080p.mkv
+02/27 10:25 - 11:08 - Burn Notice - Burn Notice - S01E02 - Identity WEBDL-1080p.mkv
+02/27 11:08 - 11:51 - Psych - Psych - S01E08 - Shawn vs. The Red Phantom Bluray-1080p.mkv
+02/27 11:51 - 12:34 - Monk - Monk - S01E05 - Mr. Monk Goes to the Carnival Bluray-1080p.mkv
+02/27 12:34 - 13:16 - Psych - Psych - S02E07 - If You're So Smart, Then Why Are You Dead Bluray-1080p.mkv
+02/27 13:16 - 14:01 - Monk - Monk - S02E04 - Mr. Monk Goes to the Circus Bluray-1080p.mkv
+02/27 14:01 - 14:42 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E03 - Crate 'n' Burial WEBDL-1080p.mkv
+02/27 14:42 - 15:26 - Psych - Psych - S02E08 - Rob-a-Bye Baby Bluray-1080p.mkv
+02/27 15:26 - 16:10 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E18 - $35K O.B.O Bluray-1080p.mkv
+02/27 16:10 - 16:53 - Psych - Psych - S01E12 - Cloudy.With A Chance Of Murder Bluray-1080p.mkv
+02/27 16:53 - 17:37 - Monk - Monk - S01E11 - Mr. Monk and the Earthquake Bluray-1080p.mkv
+02/27 17:37 - 18:22 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E20 - Sounds of Silence Bluray-1080p.mkv
+02/27 18:22 - 19:05 - Burn Notice - Burn Notice - S02E16 - Lesser Evil Bluray-1080p.mkv
+02/27 19:05 - 19:49 - Monk - Monk - S01E12 - Mr. Monk and the Red-Headed Stranger Bluray-1080p.mkv
+02/27 19:49 - 20:32 - Psych - Psych - S02E16 - Shawn (and Gus) of the Dead Bluray-1080p.mkv
+02/27 20:32 - 21:15 - Monk - Monk - S02E09 - Mr. Monk and the 12th Man Bluray-1080p.mkv
+02/27 21:15 - 21:58 - Burn Notice - Burn Notice - S02E04 - Comrades Bluray-1080p.mkv
+02/27 21:58 - 22:41 - Psych - Psych - S01E06 - Weekend Warriors Bluray-1080p.mkv
+02/27 22:41 - 23:23 - Burn Notice - Burn Notice - S02E06 - Bad Blood Bluray-1080p.mkv
+02/27 23:23 - 00:09 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E15 - Table Stakes Bluray-1080p.mkv
+02/28 00:09 - 00:52 - Monk - Monk - S02E03 - Mr. Monk Goes to the Ballgame Bluray-1080p.mkv
+02/28 00:52 - 01:37 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E01 - Pilot Bluray-1080p.mkv
+02/28 01:37 - 02:20 - Psych - Psych - S01E10 - From the Earth to Starbucks Bluray-1080p.mkv
+02/28 02:20 - 03:03 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E19 - Gentle, Gentle WEBDL-1080p.mkv
+02/28 03:03 - 04:10 - Burn Notice - Burn Notice - S01E01 - Burn Notice WEBDL-1080p.mkv
+02/28 04:10 - 04:55 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E13 - Boom Bluray-1080p.mkv
+02/28 04:55 - 05:38 - Burn Notice - Burn Notice - S02E11 - Hot Spot Bluray-1080p.mkv
+02/28 05:38 - 06:22 - Monk - Monk - S01E02 - Mr. Monk Meets the Candidate (2) Bluray-1080p.mkv
+02/28 06:22 - 07:06 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E22 - Evaluation Day Bluray-1080p.mkv
+02/28 07:06 - 07:49 - Psych - Psych - S01E04 - Woman Seeking Dead Husband - Smokers Okay, No Pets Bluray-1080p.mkv
+02/28 07:49 - 08:32 - Psych - Psych - S02E13 - Lights, Camera. Homicidio Bluray-1080p.mkv
+02/28 08:32 - 09:15 - Burn Notice - Burn Notice - S02E07 - Rough Seas Bluray-1080p.mkv
+02/28 09:15 - 09:58 - Psych - Psych - S02E03 - Psy vs. Psy Bluray-1080p.mkv
+02/28 09:58 - 10:40 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E08 - Anonymous WEBDL-1080p.mkv
+02/28 10:40 - 11:23 - Monk - Monk - S02E16 - Mr. Monk Goes to Jail Bluray-1080p.mkv
+02/28 11:23 - 12:07 - Psych - Psych - S02E04 - Zero to Murder in Sixty Seconds Bluray-1080p.mkv
+02/28 12:07 - 12:52 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E10 - Sex, Lies and Larvae Bluray-1080p.mkv
+02/28 12:52 - 13:35 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E16 - Too Tough to Die Bluray-1080p.mkv
+02/28 13:35 - 14:17 - Burn Notice - Burn Notice - S01E03 - Fight or Flight WEBDL-1080p.mkv
+02/28 14:17 - 15:00 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E07 - Blood Drops WEBDL-1080p.mkv
+02/28 15:00 - 15:43 - Psych - Psych - S02E05 - And Down the Stretch Comes Murder Bluray-1080p.mkv
+02/28 15:43 - 16:25 - Burn Notice - Burn Notice - S02E15 - Sins of Omission Bluray-1080p.mkv
+02/28 16:25 - 17:08 - Monk - Monk - S02E15 - Mr. Monk Gets Married Bluray-1080p.mkv
+02/28 17:08 - 17:53 - Monk - Monk - S01E10 - Mr. Monk Takes a Vacation Bluray-1080p.mkv
+02/28 17:53 - 18:36 - Monk - Monk - S02E12 - Mr. Monk and the T.V. Star Bluray-1080p.mkv
+02/28 18:36 - 19:19 - Burn Notice - Burn Notice - S02E10 - Do No Harm Bluray-1080p.mkv
+02/28 19:19 - 20:03 - Monk - Monk - S02E08 - Mr. Monk Meets the Playboy Bluray-1080p.mkv
+02/28 20:03 - 20:47 - Psych - Psych - S01E13 - Game Set. Muuurder Bluray-1080p.mkv
+02/28 20:47 - 21:31 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E04 - Pledging Mr. Johnson Bluray-1080p.mkv
+02/28 21:31 - 22:14 - Monk - Monk - S01E07 - Mr. Monk and the Billionaire Mugger Bluray-1080p.mkv
+02/28 22:14 - 22:59 - Monk - Monk - S01E08 - Mr. Monk and the Other Woman Bluray-1080p.mkv
+02/28 22:59 - 23:42 - Psych - Psych - S01E09 - Forget Me Not Bluray-1080p.mkv
+02/28 23:42 - 00:26 - Monk - Monk - S01E13 - Mr. Monk and the Airplane Bluray-1080p.mkv
+03/01 00:26 - 01:10 - Monk - Monk - S01E03 - Mr. Monk and the Psychic Bluray-1080p.mkv
+03/01 01:10 - 01:53 - Burn Notice - Burn Notice - S01E07 - Broken Rules WEBDL-1080p.mkv
+03/01 01:53 - 02:36 - Burn Notice - Burn Notice - S02E01 - Breaking and Entering Bluray-1080p.mkv
+03/01 02:36 - 03:19 - Monk - Monk - S01E06 - Mr. Monk Goes to the Asylum Bluray-1080p.mkv
+03/01 03:19 - 04:03 - Burn Notice - Burn Notice - S02E12 - Seek and Destroy Bluray-1080p.mkv
+03/01 04:03 - 04:46 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E02 - Cool Change Bluray-1080p.mkv
+03/01 04:46 - 05:29 - Psych - Psych - S02E12 - The Old and the Restless Bluray-1080p.mkv
+03/01 05:29 - 06:12 - Monk - Monk - S02E02 - Mr. Monk Goes to Mexico Bluray-1080p.mkv
+03/01 06:12 - 06:55 - Burn Notice - Burn Notice - S02E08 - Double Booked Bluray-1080p.mkv
+03/01 06:55 - 07:38 - Psych - Psych - S02E02 - 65 Million Years Off Bluray-1080p.mkv
+03/01 07:38 - 08:22 - Monk - Monk - S02E01 - Mr. Monk Goes Back to School Bluray-1080p.mkv
+03/01 08:22 - 09:05 - Psych - Psych - S02E11 - There's Something About Mira Bluray-1080p.mkv
+03/01 09:05 - 09:48 - Psych - Psych - S01E15 - Scary Sherry - Bianca's Toast Bluray-1080p.mkv
+03/01 09:48 - 10:30 - Burn Notice - Burn Notice - S01E06 - Unpaid Debts WEBDL-1080p.mkv
+03/01 10:30 - 11:14 - Burn Notice - Burn Notice - S02E13 - Bad Breaks Bluray-1080p.mkv
+03/01 11:14 - 11:58 - Monk - Monk - S02E06 - Mr. Monk Goes to the Theater Bluray-1080p.mkv
+03/01 11:58 - 12:41 - Psych - Psych - S01E03 - Speak Now or Forever Hold Your Piece Bluray-1080p.mkv
+03/01 12:41 - 13:24 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E11 - I-15 Murders Bluray-1080p.mkv
+03/01 13:24 - 14:07 - Psych - Psych - S02E01 - American Duos Bluray-1080p.mkv
+03/01 14:07 - 14:51 - Psych - Psych - S01E02 - The Spellingg Bee Bluray-1080p.mkv
+03/01 14:51 - 15:34 - Monk - Monk - S02E11 - Mr. Monk and the Three Pies Bluray-1080p.mkv
+03/01 15:34 - 16:19 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E09 - Unfriendly Skies Bluray-1080p.mkv
+03/01 16:19 - 17:02 - Monk - Monk - S02E10 - Mr. Monk and the Paperboy Bluray-1080p.mkv
+03/01 17:02 - 17:47 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E12 - Fahrenheit 932 Bluray-1080p.mkv
+03/01 17:47 - 18:29 - Burn Notice - Burn Notice - S01E09 - Hard Bargain WEBDL-1080p.mkv
+03/01 18:29 - 19:12 - Burn Notice - Burn Notice - S01E11 - Dead Drop WEBDL-1080p.mkv
+03/01 19:12 - 19:57 - Monk - Monk - S02E07 - Mr. Monk and the Sleeping Suspect Bluray-1080p.mkv
+03/01 19:57 - 20:38 - Monk - Monk - S01E01 - Mr. Monk Meets the Candidate (1) Bluray-1080p.mkv
+03/01 20:38 - 21:21 - Psych - Psych - S01E05 - 9 Lives Bluray-1080p.mkv
+03/01 21:21 - 22:05 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E21 - Justice Is Served Bluray-1080p.mkv
+03/01 22:05 - 22:48 - Burn Notice - Burn Notice - S01E05 - Family Business WEBDL-1080p.mkv
+03/01 22:48 - 23:31 - Psych - Psych - S02E15 - Black and Tan - A Crime of Fashion Bluray-1080p.mkv
+03/01 23:31 - 00:13 - Psych - Psych - S02E14 - Dis-Lodged Bluray-1080p.mkv
+03/02 00:13 - 00:57 - Monk - Monk - S02E13 - Mr. Monk and the Missing Granny Bluray-1080p.mkv
+03/02 00:57 - 01:40 - Psych - Psych - S02E09 - Bounty Hunters! Bluray-1080p.mkv
+03/02 01:40 - 02:24 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E14 - To Halve and to Hold Bluray-1080p.mkv
+03/02 02:24 - 03:09 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E06 - Who Are You Bluray-1080p.mkv
+03/02 03:09 - 03:54 - Csi Crime Scene Investigation - CSI - Crime Scene Investigation - S01E17 - Face Lift Bluray-1080p.mkv
+03/02 03:54 - 04:37 - Burn Notice - Burn Notice - S02E14 - Truth & Reconciliation Bluray-1080p.mkv
+03/02 04:37 - 05:20 - Burn Notice - Burn Notice - S02E09 - Good Soldier Bluray-1080p.mkv
+03/02 05:20 - 06:03 - Psych - Psych - S01E07 - Who Ya Gonna Call Bluray-1080p.mkv
+[1;4;34mFinished running FieldStation42.[0m
+
+
+[1;4;32mI had successes![0m
+[32mI printed the schedule for USA[0m

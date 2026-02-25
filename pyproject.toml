@@ -1,0 +1,15 @@
+[project]
+name = "printed-guide"
+version = "0.1.0"
+description = "Printable TV guide PDF generator from FieldStation42 schedules"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "reportlab>=4.0",
+]
+
+[dependency-groups]
+dev = [
+    "pypdf>=6.7.3",
+    "pytest>=9.0.2",
+]

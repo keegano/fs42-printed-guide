@@ -1,0 +1,207 @@
+[02/24/26 22:14:22] INFO     [root] Loading and checking guide channel                                                                                                                      station_manager.py:60
+                    INFO     [root] Guide channel checks completed.                                                                                                                         station_manager.py:72
+02/24 00:00 - 00:45 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E07 - Angel WEBDL-1080p.mkv
+02/24 00:45 - 01:34 - Dollhouse - Dollhouse - S01E05 - True Believer Bluray-1080p.mkv
+02/24 01:34 - 02:18 - Firefly - Firefly - S01E07 - Safe Bluray-1080p Remux.mkv
+02/24 02:18 - 03:08 - Dollhouse - Dollhouse - S01E02 - The Target Bluray-1080p.mkv
+02/24 03:08 - 03:48 - Angel - Angel - S01E06 - Sense & Sensitivity WEBDL-1080p.mkv
+02/24 03:48 - 04:30 - Angel - Angel - S01E18 - Five by Five WEBRip-1080p.mkv
+02/24 04:30 - 05:14 - Firefly - Firefly - S01E08 - Ariel Bluray-1080p Remux.mkv
+02/24 05:14 - 05:59 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E02 - The Harvest (2) WEBDL-1080p.mkv
+02/24 05:59 - 06:42 - Angel - Angel - S01E01 - City Of WEBRip-1080p.mkv
+02/24 06:42 - 07:26 - Firefly - Firefly - S01E05 - Out of Gas Bluray-1080p.mkv
+02/24 07:26 - 08:07 - Angel - Angel - S01E11 - Somnambulist WEBRip-1080p.mkv
+02/24 08:07 - 08:56 - Dollhouse - Dollhouse - S01E07 - Echoes Bluray-1080p.mkv
+02/24 08:56 - 09:46 - Dollhouse - Dollhouse - S01E09 - A Spy in the House of Love Bluray-1080p.mkv
+02/24 09:46 - 10:31 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E05 - Never Kill a Boy on the First Date WEBDL-1080p.mkv
+02/24 10:31 - 11:13 - Angel - Angel - S01E07 - Bachelor Party WEBRip-1080p.mkv
+02/24 11:13 - 12:03 - Dollhouse - Dollhouse - S01E10 - Haunted Bluray-1080p.mkv
+02/24 12:03 - 12:42 - Angel - Angel - S01E15 - The Prodigal WEBRip-1080p.mkv
+02/24 12:42 - 13:26 - Firefly - Firefly - S01E03 - Our Mrs. Reynolds Bluray-1080p Remux.mkv
+02/24 13:26 - 14:10 - Firefly - Firefly - S01E06 - Shindig Bluray-1080p Remux.mkv
+02/24 14:10 - 14:58 - Dollhouse - Dollhouse - S01E11 - Briar Rose Bluray-1080p.mkv
+02/24 14:58 - 15:47 - Dollhouse - Dollhouse - S01E04 - Gray Hour Bluray-1080p.mkv
+02/24 15:47 - 16:36 - Dollhouse - Dollhouse - S01E12 - Omega Bluray-1080p.mkv
+02/24 16:36 - 17:19 - Angel - Angel - S01E17 - Eternity WEBRip-1080p.mkv
+02/24 17:19 - 18:01 - Angel - Angel - S01E02 - Lonely Heart WEBRip-1080p.mkv
+02/24 18:01 - 18:44 - Firefly - Firefly - S01E02 - Bushwhacked Bluray-1080p Remux.mkv
+02/24 18:44 - 19:29 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E03 - Witch WEBDL-1080p.mkv
+02/24 19:29 - 20:14 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E12 - Prophecy Girl WEBDL-1080p.mkv
+02/24 20:14 - 20:58 - Firefly - Firefly - S01E11 - Serenity Bluray-1080p Remux.mkv
+02/24 20:58 - 21:40 - Angel - Angel - S01E21 - Blind Date WEBRip-1080p.mkv
+02/24 21:40 - 22:22 - Angel - Angel - S01E05 - Rm w+a Vu WEBRip-1080p.mkv
+02/24 22:22 - 23:06 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E11 - Out of Mind, Out of Sight WEBDL-1080p.mkv
+02/24 23:06 - 23:50 - Firefly - Firefly - S01E04 - Jaynestown Bluray-1080p Remux.mkv
+02/24 23:50 - 00:32 - Angel - Angel - S01E19 - Sanctuary WEBRip-1080p.mkv
+02/25 00:32 - 01:14 - Angel - Angel - S01E22 - To Shanshu in L.A WEBRip-1080p.mkv
+02/25 01:14 - 01:55 - Angel - Angel - S01E04 - I Fall to Pieces WEBRip-1080p.mkv
+02/25 01:55 - 02:36 - Angel - Angel - S01E12 - Expecting WEBRip-1080p.mkv
+02/25 02:36 - 04:03 - Firefly - Firefly - S01E01 - The Train Job Bluray-1080p.mkv
+02/25 04:03 - 04:53 - Dollhouse - Dollhouse - S01E08 - Needs Bluray-1080p.mkv
+02/25 04:53 - 05:38 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E06 - The Pack WEBDL-1080p.mkv
+02/25 05:38 - 06:23 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E08 - I Robot, You Jane WEBDL-1080p.mkv
+02/25 06:23 - 07:06 - Firefly - Firefly - S01E10 - Objects in Space Bluray-1080p Remux.mkv
+02/25 07:06 - 07:56 - Dollhouse - Dollhouse - S01E01 - Ghost Bluray-1080p.mkv
+02/25 07:56 - 08:38 - Angel - Angel - S01E09 - Hero WEBRip-1080p.mkv
+02/25 08:38 - 09:21 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E01 - Welcome to the Hellmouth (1) WEBDL-1080p.mkv
+02/25 09:21 - 10:01 - Angel - Angel - S01E20 - War Zone WEBRip-1080p.mkv
+02/25 10:01 - 10:45 - Firefly - Firefly - S01E12 - Heart of Gold Bluray-1080p Remux Proper.mkv
+02/25 10:45 - 11:28 - Angel - Angel - S01E13 - She WEBRip-1080p.mkv
+02/25 11:28 - 12:11 - Firefly - Firefly - S01E09 - War Stories Bluray-1080p Remux.mkv
+02/25 12:11 - 12:51 - Angel - Angel - S01E03 - In the Dark WEBRip-1080p.mkv
+02/25 12:51 - 13:41 - Dollhouse - Dollhouse - S01E06 - Man on the Street Bluray-1080p.mkv
+02/25 13:41 - 14:23 - Angel - Angel - S01E08 - I Will Remember You WEBRip-1080p.mkv
+02/25 14:23 - 15:04 - Angel - Angel - S01E16 - The Ring WEBRip-1080p.mkv
+02/25 15:04 - 15:46 - Angel - Angel - S01E10 - Parting Gifts WEBRip-1080p.mkv
+02/25 15:46 - 16:31 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E04 - Teacher's Pet WEBDL-1080p.mkv
+02/25 16:31 - 17:13 - Firefly - Firefly - S01E13 - Trash Bluray-1080p Remux.mkv
+02/25 17:13 - 18:03 - Dollhouse - Dollhouse - S01E03 - Stage Fright Bluray-1080p.mkv
+02/25 18:03 - 18:45 - Angel - Angel - S01E14 - I've Got You Under My Skin WEBRip-1080p.mkv
+02/25 18:45 - 19:30 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E09 - The Puppet Show WEBDL-1080p.mkv
+02/25 19:30 - 20:15 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E10 - Nightmares WEBDL-1080p.mkv
+02/25 20:15 - 20:59 - Firefly - Firefly - S01E14 - The Message Bluray-1080p Remux Proper.mkv
+02/25 20:59 - 21:44 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E08 - I Robot, You Jane WEBDL-1080p.mkv
+02/25 21:44 - 22:29 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E09 - The Puppet Show WEBDL-1080p.mkv
+02/25 22:29 - 23:14 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E11 - Out of Mind, Out of Sight WEBDL-1080p.mkv
+02/25 23:14 - 23:59 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E04 - Teacher's Pet WEBDL-1080p.mkv
+02/25 23:59 - 00:49 - Dollhouse - Dollhouse - S01E12 - Omega Bluray-1080p.mkv
+02/26 00:49 - 01:33 - Firefly - Firefly - S01E03 - Our Mrs. Reynolds Bluray-1080p Remux.mkv
+02/26 01:33 - 02:17 - Firefly - Firefly - S01E14 - The Message Bluray-1080p Remux Proper.mkv
+02/26 02:17 - 03:01 - Firefly - Firefly - S01E12 - Heart of Gold Bluray-1080p Remux Proper.mkv
+02/26 03:01 - 03:51 - Dollhouse - Dollhouse - S01E10 - Haunted Bluray-1080p.mkv
+02/26 03:51 - 04:34 - Firefly - Firefly - S01E09 - War Stories Bluray-1080p Remux.mkv
+02/26 04:34 - 05:23 - Dollhouse - Dollhouse - S01E06 - Man on the Street Bluray-1080p.mkv
+02/26 05:23 - 06:50 - Firefly - Firefly - S01E01 - The Train Job Bluray-1080p.mkv
+02/26 06:50 - 07:31 - Angel - Angel - S01E03 - In the Dark WEBRip-1080p.mkv
+02/26 07:31 - 08:13 - Firefly - Firefly - S01E02 - Bushwhacked Bluray-1080p Remux.mkv
+02/26 08:13 - 08:55 - Angel - Angel - S01E10 - Parting Gifts WEBRip-1080p.mkv
+02/26 08:55 - 09:40 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E07 - Angel WEBDL-1080p.mkv
+02/26 09:40 - 10:22 - Angel - Angel - S01E07 - Bachelor Party WEBRip-1080p.mkv
+02/26 10:22 - 11:11 - Dollhouse - Dollhouse - S01E03 - Stage Fright Bluray-1080p.mkv
+02/26 11:11 - 11:54 - Firefly - Firefly - S01E13 - Trash Bluray-1080p Remux.mkv
+02/26 11:54 - 12:36 - Angel - Angel - S01E08 - I Will Remember You WEBRip-1080p.mkv
+02/26 12:36 - 13:20 - Firefly - Firefly - S01E06 - Shindig Bluray-1080p Remux.mkv
+02/26 13:20 - 14:11 - Dollhouse - Dollhouse - S01E01 - Ghost Bluray-1080p.mkv
+02/26 14:11 - 15:00 - Dollhouse - Dollhouse - S01E09 - A Spy in the House of Love Bluray-1080p.mkv
+02/26 15:00 - 15:50 - Dollhouse - Dollhouse - S01E05 - True Believer Bluray-1080p.mkv
+02/26 15:50 - 16:39 - Dollhouse - Dollhouse - S01E07 - Echoes Bluray-1080p.mkv
+02/26 16:39 - 17:22 - Firefly - Firefly - S01E10 - Objects in Space Bluray-1080p Remux.mkv
+02/26 17:22 - 18:06 - Firefly - Firefly - S01E04 - Jaynestown Bluray-1080p Remux.mkv
+02/26 18:06 - 18:51 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E03 - Witch WEBDL-1080p.mkv
+02/26 18:51 - 19:37 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E12 - Prophecy Girl WEBDL-1080p.mkv
+02/26 19:37 - 20:20 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E01 - Welcome to the Hellmouth (1) WEBDL-1080p.mkv
+02/26 20:20 - 21:05 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E05 - Never Kill a Boy on the First Date WEBDL-1080p.mkv
+02/26 21:05 - 21:48 - Angel - Angel - S01E17 - Eternity WEBRip-1080p.mkv
+02/26 21:48 - 22:28 - Angel - Angel - S01E11 - Somnambulist WEBRip-1080p.mkv
+02/26 22:28 - 23:12 - Firefly - Firefly - S01E07 - Safe Bluray-1080p Remux.mkv
+02/26 23:12 - 23:52 - Angel - Angel - S01E20 - War Zone WEBRip-1080p.mkv
+02/26 23:52 - 00:35 - Angel - Angel - S01E13 - She WEBRip-1080p.mkv
+02/27 00:35 - 01:23 - Dollhouse - Dollhouse - S01E11 - Briar Rose Bluray-1080p.mkv
+02/27 01:23 - 02:12 - Dollhouse - Dollhouse - S01E04 - Gray Hour Bluray-1080p.mkv
+02/27 02:12 - 02:53 - Angel - Angel - S01E09 - Hero WEBRip-1080p.mkv
+02/27 02:53 - 03:33 - Angel - Angel - S01E15 - The Prodigal WEBRip-1080p.mkv
+02/27 03:33 - 04:15 - Angel - Angel - S01E01 - City Of WEBRip-1080p.mkv
+02/27 04:15 - 04:58 - Angel - Angel - S01E02 - Lonely Heart WEBRip-1080p.mkv
+02/27 04:58 - 05:39 - Angel - Angel - S01E19 - Sanctuary WEBRip-1080p.mkv
+02/27 05:39 - 06:22 - Angel - Angel - S01E14 - I've Got You Under My Skin WEBRip-1080p.mkv
+02/27 06:22 - 07:07 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E06 - The Pack WEBDL-1080p.mkv
+02/27 07:07 - 07:49 - Angel - Angel - S01E21 - Blind Date WEBRip-1080p.mkv
+02/27 07:49 - 08:30 - Angel - Angel - S01E06 - Sense & Sensitivity WEBDL-1080p.mkv
+02/27 08:30 - 09:14 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E10 - Nightmares WEBDL-1080p.mkv
+02/27 09:14 - 09:58 - Firefly - Firefly - S01E08 - Ariel Bluray-1080p Remux.mkv
+02/27 09:58 - 10:40 - Angel - Angel - S01E12 - Expecting WEBRip-1080p.mkv
+02/27 10:40 - 11:22 - Angel - Angel - S01E18 - Five by Five WEBRip-1080p.mkv
+02/27 11:22 - 12:11 - Dollhouse - Dollhouse - S01E08 - Needs Bluray-1080p.mkv
+02/27 12:11 - 12:53 - Angel - Angel - S01E22 - To Shanshu in L.A WEBRip-1080p.mkv
+02/27 12:53 - 13:34 - Angel - Angel - S01E16 - The Ring WEBRip-1080p.mkv
+02/27 13:34 - 14:18 - Firefly - Firefly - S01E11 - Serenity Bluray-1080p Remux.mkv
+02/27 14:18 - 15:02 - Firefly - Firefly - S01E05 - Out of Gas Bluray-1080p.mkv
+02/27 15:02 - 15:43 - Angel - Angel - S01E04 - I Fall to Pieces WEBRip-1080p.mkv
+02/27 15:43 - 16:32 - Dollhouse - Dollhouse - S01E02 - The Target Bluray-1080p.mkv
+02/27 16:32 - 17:18 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E02 - The Harvest (2) WEBDL-1080p.mkv
+02/27 17:18 - 17:59 - Angel - Angel - S01E05 - Rm w+a Vu WEBRip-1080p.mkv
+02/27 17:59 - 18:40 - Angel - Angel - S01E09 - Hero WEBRip-1080p.mkv
+02/27 18:40 - 19:24 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E01 - Welcome to the Hellmouth (1) WEBDL-1080p.mkv
+02/27 19:24 - 20:14 - Dollhouse - Dollhouse - S01E10 - Haunted Bluray-1080p.mkv
+02/27 20:14 - 21:04 - Dollhouse - Dollhouse - S01E01 - Ghost Bluray-1080p.mkv
+02/27 21:04 - 21:48 - Firefly - Firefly - S01E05 - Out of Gas Bluray-1080p.mkv
+02/27 21:48 - 22:31 - Firefly - Firefly - S01E09 - War Stories Bluray-1080p Remux.mkv
+02/27 22:31 - 23:15 - Firefly - Firefly - S01E07 - Safe Bluray-1080p Remux.mkv
+02/27 23:15 - 00:00 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E12 - Prophecy Girl WEBDL-1080p.mkv
+02/28 00:00 - 00:45 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E07 - Angel WEBDL-1080p.mkv
+02/28 00:45 - 01:28 - Angel - Angel - S01E21 - Blind Date WEBRip-1080p.mkv
+02/28 01:28 - 02:08 - Angel - Angel - S01E11 - Somnambulist WEBRip-1080p.mkv
+02/28 02:08 - 02:49 - Angel - Angel - S01E10 - Parting Gifts WEBRip-1080p.mkv
+02/28 02:49 - 03:32 - Angel - Angel - S01E07 - Bachelor Party WEBRip-1080p.mkv
+02/28 03:32 - 04:21 - Dollhouse - Dollhouse - S01E05 - True Believer Bluray-1080p.mkv
+02/28 04:21 - 05:05 - Firefly - Firefly - S01E06 - Shindig Bluray-1080p Remux.mkv
+02/28 05:05 - 05:55 - Dollhouse - Dollhouse - S01E07 - Echoes Bluray-1080p.mkv
+02/28 05:55 - 06:39 - Firefly - Firefly - S01E03 - Our Mrs. Reynolds Bluray-1080p Remux.mkv
+02/28 06:39 - 07:24 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E10 - Nightmares WEBDL-1080p.mkv
+02/28 07:24 - 08:08 - Firefly - Firefly - S01E12 - Heart of Gold Bluray-1080p Remux Proper.mkv
+02/28 08:08 - 08:49 - Angel - Angel - S01E16 - The Ring WEBRip-1080p.mkv
+02/28 08:49 - 09:31 - Firefly - Firefly - S01E13 - Trash Bluray-1080p Remux.mkv
+02/28 09:31 - 10:20 - Dollhouse - Dollhouse - S01E04 - Gray Hour Bluray-1080p.mkv
+02/28 10:20 - 11:46 - Firefly - Firefly - S01E01 - The Train Job Bluray-1080p.mkv
+02/28 11:46 - 12:32 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E02 - The Harvest (2) WEBDL-1080p.mkv
+02/28 12:32 - 13:14 - Angel - Angel - S01E02 - Lonely Heart WEBRip-1080p.mkv
+02/28 13:14 - 13:58 - Firefly - Firefly - S01E08 - Ariel Bluray-1080p Remux.mkv
+02/28 13:58 - 14:41 - Firefly - Firefly - S01E02 - Bushwhacked Bluray-1080p Remux.mkv
+02/28 14:41 - 15:30 - Dollhouse - Dollhouse - S01E02 - The Target Bluray-1080p.mkv
+02/28 15:30 - 16:11 - Angel - Angel - S01E12 - Expecting WEBRip-1080p.mkv
+02/28 16:11 - 16:54 - Angel - Angel - S01E08 - I Will Remember You WEBRip-1080p.mkv
+02/28 16:54 - 17:42 - Dollhouse - Dollhouse - S01E11 - Briar Rose Bluray-1080p.mkv
+02/28 17:42 - 18:32 - Dollhouse - Dollhouse - S01E06 - Man on the Street Bluray-1080p.mkv
+02/28 18:32 - 19:17 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E11 - Out of Mind, Out of Sight WEBDL-1080p.mkv
+02/28 19:17 - 19:59 - Angel - Angel - S01E01 - City Of WEBRip-1080p.mkv
+02/28 19:59 - 20:41 - Angel - Angel - S01E17 - Eternity WEBRip-1080p.mkv
+02/28 20:41 - 21:31 - Dollhouse - Dollhouse - S01E12 - Omega Bluray-1080p.mkv
+02/28 21:31 - 22:16 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E06 - The Pack WEBDL-1080p.mkv
+02/28 22:16 - 23:01 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E03 - Witch WEBDL-1080p.mkv
+02/28 23:01 - 23:45 - Firefly - Firefly - S01E14 - The Message Bluray-1080p Remux Proper.mkv
+02/28 23:45 - 00:28 - Angel - Angel - S01E22 - To Shanshu in L.A WEBRip-1080p.mkv
+03/01 00:28 - 01:07 - Angel - Angel - S01E15 - The Prodigal WEBRip-1080p.mkv
+03/01 01:07 - 01:52 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E05 - Never Kill a Boy on the First Date WEBDL-1080p.mkv
+03/01 01:52 - 02:41 - Dollhouse - Dollhouse - S01E03 - Stage Fright Bluray-1080p.mkv
+03/01 02:41 - 03:26 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E08 - I Robot, You Jane WEBDL-1080p.mkv
+03/01 03:26 - 04:08 - Angel - Angel - S01E05 - Rm w+a Vu WEBRip-1080p.mkv
+03/01 04:08 - 04:57 - Dollhouse - Dollhouse - S01E09 - A Spy in the House of Love Bluray-1080p.mkv
+03/01 04:57 - 05:41 - Firefly - Firefly - S01E11 - Serenity Bluray-1080p Remux.mkv
+03/01 05:41 - 06:24 - Firefly - Firefly - S01E10 - Objects in Space Bluray-1080p Remux.mkv
+03/01 06:24 - 07:04 - Angel - Angel - S01E20 - War Zone WEBRip-1080p.mkv
+03/01 07:04 - 07:54 - Dollhouse - Dollhouse - S01E08 - Needs Bluray-1080p.mkv
+03/01 07:54 - 08:39 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E04 - Teacher's Pet WEBDL-1080p.mkv
+03/01 08:39 - 09:24 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E09 - The Puppet Show WEBDL-1080p.mkv
+03/01 09:24 - 10:06 - Angel - Angel - S01E13 - She WEBRip-1080p.mkv
+03/01 10:06 - 10:47 - Angel - Angel - S01E03 - In the Dark WEBRip-1080p.mkv
+03/01 10:47 - 11:28 - Angel - Angel - S01E19 - Sanctuary WEBRip-1080p.mkv
+03/01 11:28 - 12:11 - Angel - Angel - S01E14 - I've Got You Under My Skin WEBRip-1080p.mkv
+03/01 12:11 - 12:53 - Angel - Angel - S01E18 - Five by Five WEBRip-1080p.mkv
+03/01 12:53 - 13:34 - Angel - Angel - S01E04 - I Fall to Pieces WEBRip-1080p.mkv
+03/01 13:34 - 14:18 - Firefly - Firefly - S01E04 - Jaynestown Bluray-1080p Remux.mkv
+03/01 14:18 - 14:59 - Angel - Angel - S01E06 - Sense & Sensitivity WEBDL-1080p.mkv
+03/01 14:59 - 15:40 - Angel - Angel - S01E18 - Five by Five WEBRip-1080p.mkv
+03/01 15:40 - 16:29 - Dollhouse - Dollhouse - S01E11 - Briar Rose Bluray-1080p.mkv
+03/01 16:29 - 17:12 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E01 - Welcome to the Hellmouth (1) WEBDL-1080p.mkv
+03/01 17:12 - 18:03 - Dollhouse - Dollhouse - S01E01 - Ghost Bluray-1080p.mkv
+03/01 18:03 - 18:47 - Firefly - Firefly - S01E04 - Jaynestown Bluray-1080p Remux.mkv
+03/01 18:47 - 19:31 - Firefly - Firefly - S01E12 - Heart of Gold Bluray-1080p Remux Proper.mkv
+03/01 19:31 - 20:21 - Dollhouse - Dollhouse - S01E10 - Haunted Bluray-1080p.mkv
+03/01 20:21 - 21:06 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E03 - Witch WEBDL-1080p.mkv
+03/01 21:06 - 22:33 - Firefly - Firefly - S01E01 - The Train Job Bluray-1080p.mkv
+03/01 22:33 - 23:17 - Buffy The Vampire Slayer - Buffy the Vampire Slayer - S01E08 - I Robot, You Jane WEBDL-1080p.mkv
+03/01 23:17 - 23:59 - Angel - Angel - S01E09 - Hero WEBRip-1080p.mkv
+03/01 23:59 - 00:42 - Firefly - Firefly - S01E02 - Bushwhacked Bluray-1080p Remux.mkv
+03/02 00:42 - 01:32 - Dollhouse - Dollhouse - S01E06 - Man on the Street Bluray-1080p.mkv
+03/02 01:32 - 02:21 - Dollhouse - Dollhouse - S01E09 - A Spy in the House of Love Bluray-1080p.mkv
+03/02 02:21 - 03:05 - Firefly - Firefly - S01E07 - Safe Bluray-1080p Remux.mkv
+03/02 03:05 - 03:47 - Angel - Angel - S01E05 - Rm w+a Vu WEBRip-1080p.mkv
+03/02 03:47 - 04:28 - Angel - Angel - S01E12 - Expecting WEBRip-1080p.mkv
+03/02 04:28 - 05:10 - Angel - Angel - S01E22 - To Shanshu in L.A WEBRip-1080p.mkv
+03/02 05:10 - 05:59 - Dollhouse - Dollhouse - S01E02 - The Target Bluray-1080p.mkv
+03/02 05:59 - 06:48 - Dollhouse - Dollhouse - S01E07 - Echoes Bluray-1080p.mkv
+[1;4;34mFinished running FieldStation42.[0m
+
+
+[1;4;32mI had successes![0m
+[32mI printed the schedule for Joss[0m
