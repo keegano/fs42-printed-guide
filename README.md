@@ -13,6 +13,7 @@ Current rendering supports:
 - Single-window guide output and multi-page compilation output
 - Optional ad insertion and optional cover page with image art
 - Progress status messages during station scanning and PDF assembly
+- Progress status messages while generating "On Tonight" blocks
 - Catalog dump/load to reuse scanned schedules without re-running FieldStation42
 - Configurable folded safe-gap at center fold for print tolerance
 - Cover styling controls (background color, border inset, and title/date fonts)
@@ -171,6 +172,8 @@ Compilation extras:
 - `--tvdb-api-key KEY`
 - `--tvdb-pin PIN`
 - `--omdb-api-key KEY`
+- `--api-cache-file PATH`
+- `--no-api-cache`
 - `--dump-catalog PATH`
 - `--load-catalog PATH`
 - `--status-messages` / `--no-status-messages`
@@ -189,6 +192,8 @@ Movie metadata:
   like `[PG-13 3.8*]` in the guide.
 - "On Tonight" description fallback will use OMDb plot summaries for movies,
   TVDB overviews for series.
+- TVDB/OMDb responses are cached to disk by default (`.cache/printed_guide_api_cache.json`)
+  to reduce API usage and avoid free-tier overages.
 
 ## Example
 

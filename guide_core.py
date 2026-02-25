@@ -153,6 +153,40 @@ class MovieMeta:
     rated: str
 
 
+def _ensure_api_cache_struct(cache: Optional[Dict[str, object]]) -> Dict[str, object]:
+    out: Dict[str, object]
+    if cache is None:
+        out = {}
+    else:
+        out = cache
+    for key in ("tvdb_token", "tvdb_overview", "tvdb_cover_image", "omdb_movie"):
+        if not isinstance(out.get(key), dict):
+            out[key] = {}
+    return out
+
+
+def _load_api_cache(path: Optional[Path]) -> Dict[str, object]:
+    if not path or not path.exists() or not path.is_file():
+        return _ensure_api_cache_struct({})
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            return _ensure_api_cache_struct(data)
+    except Exception:
+        pass
+    return _ensure_api_cache_struct({})
+
+
+def _save_api_cache(path: Optional[Path], cache: Dict[str, object]) -> None:
+    if not path:
+        return
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(cache, indent=2), encoding="utf-8")
+    except Exception:
+        pass
+
+
 def run_fs42(fs42_dir: Path, args: List[str]) -> str:
     """
     Runs: python station_42.py <args...> inside fs42_dir and returns stdout+stderr merged.
@@ -506,43 +540,51 @@ def fetch_tvdb_cover_art(
     show_names: List[str],
     api_key: str,
     pin: str = "",
+    api_cache: Optional[Dict[str, object]] = None,
 ) -> Optional[Path]:
     if not show_names or not api_key:
         return None
     try:
-        login_payload = {"apikey": api_key}
-        if pin:
-            login_payload["pin"] = pin
-        auth = _http_json("https://api4.thetvdb.com/v4/login", method="POST", payload=login_payload)
-        token = auth.get("data", {}).get("token") or ""
+        cache = _ensure_api_cache_struct(api_cache)
+        token = _fetch_tvdb_token(api_key, pin, api_cache=cache)
         if not token:
             return None
 
         show = random.choice(show_names)
-        q = urllib.parse.quote(show)
-        search = _http_json(
-            f"https://api4.thetvdb.com/v4/search?query={q}&type=series",
-            headers={"Authorization": f"Bearer {token}"},
-        )
-        results = search.get("data") or []
-        if not results:
-            return None
-        series_id = results[0].get("tvdb_id") or results[0].get("id")
-        if not series_id:
-            return None
+        show_key = clean_text(show).lower()
+        cover_cache = cache.get("tvdb_cover_image", {})
+        if not isinstance(cover_cache, dict):
+            cover_cache = {}
+            cache["tvdb_cover_image"] = cover_cache
 
-        detail = _http_json(
-            f"https://api4.thetvdb.com/v4/series/{series_id}/extended",
-            headers={"Authorization": f"Bearer {token}"},
-        )
-        d = detail.get("data", {}) or {}
-        img_url = d.get("image") or ""
+        img_url = clean_text(str(cover_cache.get(show_key, "")))
         if not img_url:
-            arts = d.get("artworks") or []
-            for a in arts:
-                if a.get("image"):
-                    img_url = a["image"]
-                    break
+            q = urllib.parse.quote(show)
+            search = _http_json(
+                f"https://api4.thetvdb.com/v4/search?query={q}&type=series",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            results = search.get("data") or []
+            if not results:
+                return None
+            series_id = results[0].get("tvdb_id") or results[0].get("id")
+            if not series_id:
+                return None
+
+            detail = _http_json(
+                f"https://api4.thetvdb.com/v4/series/{series_id}/extended",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            d = detail.get("data", {}) or {}
+            img_url = d.get("image") or ""
+            if not img_url:
+                arts = d.get("artworks") or []
+                for a in arts:
+                    if a.get("image"):
+                        img_url = a["image"]
+                        break
+            if img_url:
+                cover_cache[show_key] = clean_text(img_url)
         if not img_url:
             return None
 
@@ -556,19 +598,39 @@ def fetch_tvdb_cover_art(
         return None
 
 
-def _fetch_tvdb_token(api_key: str, pin: str = "") -> str:
+def _fetch_tvdb_token(api_key: str, pin: str = "", api_cache: Optional[Dict[str, object]] = None) -> str:
     if not api_key:
         return ""
+    cache = _ensure_api_cache_struct(api_cache)
+    token_cache = cache.get("tvdb_token", {})
+    if not isinstance(token_cache, dict):
+        token_cache = {}
+        cache["tvdb_token"] = token_cache
+    cache_key = f"{api_key}|{pin}"
+    cached = clean_text(str(token_cache.get(cache_key, "")))
+    if cached:
+        return cached
     login_payload = {"apikey": api_key}
     if pin:
         login_payload["pin"] = pin
     auth = _http_json("https://api4.thetvdb.com/v4/login", method="POST", payload=login_payload)
-    return auth.get("data", {}).get("token") or ""
+    token = auth.get("data", {}).get("token") or ""
+    if token:
+        token_cache[cache_key] = token
+    return token
 
 
-def _fetch_tvdb_overview_by_title(title: str, token: str) -> str:
+def _fetch_tvdb_overview_by_title(title: str, token: str, api_cache: Optional[Dict[str, object]] = None) -> str:
     if not title or not token:
         return ""
+    cache = _ensure_api_cache_struct(api_cache)
+    ov_cache = cache.get("tvdb_overview", {})
+    if not isinstance(ov_cache, dict):
+        ov_cache = {}
+        cache["tvdb_overview"] = ov_cache
+    cache_key = clean_text(title).lower()
+    if cache_key in ov_cache:
+        return clean_text(str(ov_cache.get(cache_key, "")))
     q = urllib.parse.quote(title)
     search = _http_json(
         f"https://api4.thetvdb.com/v4/search?query={q}&type=series",
@@ -585,26 +647,57 @@ def _fetch_tvdb_overview_by_title(title: str, token: str) -> str:
         headers={"Authorization": f"Bearer {token}"},
     )
     d = detail.get("data", {}) or {}
-    return clean_text(d.get("overview") or "")
+    overview = clean_text(d.get("overview") or "")
+    ov_cache[cache_key] = overview
+    return overview
 
 
-def _fetch_omdb_movie_meta(title: str, year: str, api_key: str) -> Optional[MovieMeta]:
+def _fetch_omdb_movie_meta(
+    title: str,
+    year: str,
+    api_key: str,
+    api_cache: Optional[Dict[str, object]] = None,
+) -> Optional[MovieMeta]:
     if not title or not api_key:
         return None
+    cache = _ensure_api_cache_struct(api_cache)
+    om_cache = cache.get("omdb_movie", {})
+    if not isinstance(om_cache, dict):
+        om_cache = {}
+        cache["omdb_movie"] = om_cache
+    cache_key = f"{clean_text(title).lower()}|{clean_text(year)}"
+    cached = om_cache.get(cache_key)
+    if isinstance(cached, dict):
+        return MovieMeta(
+            title=clean_text(str(cached.get("title", title))),
+            year=clean_text(str(cached.get("year", year))),
+            plot=clean_text(str(cached.get("plot", ""))),
+            imdb_rating=clean_text(str(cached.get("imdb_rating", ""))),
+            rated=clean_text(str(cached.get("rated", ""))),
+        )
     params = {"t": clean_text(title), "apikey": api_key}
     if year:
         params["y"] = year
     url = f"http://www.omdbapi.com/?{urllib.parse.urlencode(params)}"
     data = _http_json(url)
     if clean_text(str(data.get("Response", ""))).lower() == "false":
+        om_cache[cache_key] = {}
         return None
-    return MovieMeta(
+    meta = MovieMeta(
         title=clean_text(str(data.get("Title", title))),
         year=clean_text(str(data.get("Year", year))),
         plot=clean_text(str(data.get("Plot", ""))),
         imdb_rating=clean_text(str(data.get("imdbRating", ""))),
         rated=clean_text(str(data.get("Rated", ""))),
     )
+    om_cache[cache_key] = {
+        "title": meta.title,
+        "year": meta.year,
+        "plot": meta.plot,
+        "imdb_rating": meta.imdb_rating,
+        "rated": meta.rated,
+    }
+    return meta
 
 
 def _movie_meta_badge(meta: Optional[MovieMeta]) -> str:
@@ -635,6 +728,7 @@ def _get_movie_meta_for_event(
     event: Event,
     omdb_api_key: str,
     movie_cache: Dict[str, MovieMeta],
+    api_cache: Optional[Dict[str, object]] = None,
 ) -> Optional[MovieMeta]:
     if not is_movie_event(event.title, event.filename):
         return None
@@ -647,7 +741,7 @@ def _get_movie_meta_for_event(
     if not omdb_api_key:
         return None
     try:
-        meta = _fetch_omdb_movie_meta(key, _extract_year_hint(event.filename), omdb_api_key)
+        meta = _fetch_omdb_movie_meta(key, _extract_year_hint(event.filename), omdb_api_key, api_cache=api_cache)
     except Exception:
         meta = None
     if meta:
@@ -793,6 +887,7 @@ def _build_block_descriptions(
     desc_cache: Dict[str, str],
     movie_cache: Dict[str, MovieMeta],
     token_holder: Dict[str, str],
+    api_cache: Optional[Dict[str, object]] = None,
     max_items: int = 8,
 ) -> List[OnTonightEntry]:
     candidates = _block_show_events(schedules, start_dt, end_dt, max_items=max_items * 3)
@@ -802,7 +897,7 @@ def _build_block_descriptions(
     token = token_holder.get("token", "")
     if tvdb_api_key and not token:
         try:
-            token = _fetch_tvdb_token(tvdb_api_key, tvdb_pin)
+            token = _fetch_tvdb_token(tvdb_api_key, tvdb_pin, api_cache=api_cache)
         except Exception:
             token = ""
         token_holder["token"] = token
@@ -814,7 +909,7 @@ def _build_block_descriptions(
             meta = movie_cache.get(key)
             if not meta and omdb_api_key:
                 try:
-                    meta = _fetch_omdb_movie_meta(title, _extract_year_hint(ev.filename), omdb_api_key)
+                    meta = _fetch_omdb_movie_meta(title, _extract_year_hint(ev.filename), omdb_api_key, api_cache=api_cache)
                 except Exception:
                     meta = None
                 if meta:
@@ -824,7 +919,7 @@ def _build_block_descriptions(
             desc = desc_cache.get(title, "")
             if not desc and token:
                 try:
-                    desc = _fetch_tvdb_overview_by_title(title, token)
+                    desc = _fetch_tvdb_overview_by_title(title, token, api_cache=api_cache)
                 except Exception:
                     desc = ""
                 desc_cache[title] = desc
@@ -851,6 +946,7 @@ class GuideTimelineFlowable(Flowable):
         omdb_api_key: str = "",
         movie_cache: Optional[Dict[str, MovieMeta]] = None,
         movie_inline_meta: bool = True,
+        api_cache: Optional[Dict[str, object]] = None,
     ) -> None:
         super().__init__()
         self.channels = channels
@@ -862,6 +958,7 @@ class GuideTimelineFlowable(Flowable):
         self.omdb_api_key = clean_text(omdb_api_key)
         self.movie_cache = movie_cache if movie_cache is not None else {}
         self.movie_inline_meta = movie_inline_meta
+        self.api_cache = api_cache
         self.first_col = (1.15 * 0.75) * inch
         self.header_h = 0.26 * inch
         self.row_h = 0.24 * inch
@@ -973,7 +1070,7 @@ class GuideTimelineFlowable(Flowable):
 
                 shown = display_title(e.title, e.filename)
                 if self.movie_inline_meta:
-                    meta = _get_movie_meta_for_event(e, self.omdb_api_key, self.movie_cache)
+                    meta = _get_movie_meta_for_event(e, self.omdb_api_key, self.movie_cache, api_cache=self.api_cache)
                     badge = _movie_meta_badge(meta)
                     if badge:
                         shown = fit_title_with_badge(shown, badge, "Helvetica-Bold", 6.5, text_w)
@@ -1005,6 +1102,7 @@ class FoldedGuideTimelineFlowable(Flowable):
         omdb_api_key: str = "",
         movie_cache: Optional[Dict[str, MovieMeta]] = None,
         movie_inline_meta: bool = True,
+        api_cache: Optional[Dict[str, object]] = None,
     ) -> None:
         super().__init__()
         cache = movie_cache if movie_cache is not None else {}
@@ -1018,6 +1116,7 @@ class FoldedGuideTimelineFlowable(Flowable):
             omdb_api_key=omdb_api_key,
             movie_cache=cache,
             movie_inline_meta=movie_inline_meta,
+            api_cache=api_cache,
         )
         self.right = GuideTimelineFlowable(
             channels=channels,
@@ -1029,6 +1128,7 @@ class FoldedGuideTimelineFlowable(Flowable):
             omdb_api_key=omdb_api_key,
             movie_cache=cache,
             movie_inline_meta=movie_inline_meta,
+            api_cache=api_cache,
         )
         self.gap = (0.12 + max(0.0, safe_gap)) * inch
 
@@ -1549,6 +1649,7 @@ class BookletHalfPageFlowable(Flowable):
         omdb_api_key: str = "",
         movie_cache: Optional[Dict[str, MovieMeta]] = None,
         movie_inline_meta: bool = True,
+        api_cache: Optional[Dict[str, object]] = None,
     ) -> None:
         super().__init__()
         self.frame_height = frame_height
@@ -1560,6 +1661,7 @@ class BookletHalfPageFlowable(Flowable):
         self.omdb_api_key = clean_text(omdb_api_key)
         self.movie_cache = movie_cache if movie_cache is not None else {}
         self.movie_inline_meta = movie_inline_meta
+        self.api_cache = api_cache
         self.header_h = 0.14 * inch
         self.gap = 0.06 * inch
 
@@ -1615,6 +1717,7 @@ class BookletHalfPageFlowable(Flowable):
             omdb_api_key=self.omdb_api_key,
             movie_cache=self.movie_cache,
             movie_inline_meta=self.movie_inline_meta,
+            api_cache=self.api_cache,
         )
         content: Flowable = guide
         if self.spec.bottom_ad or self.spec.bottom_descriptions:
@@ -1680,6 +1783,7 @@ def make_pdf(
     fold_safe_gap: float = 0.0,
     omdb_api_key: str = "",
     movie_inline_meta: bool = True,
+    api_cache: Optional[Dict[str, object]] = None,
 ) -> None:
     page_size = landscape(letter)
     doc = SimpleDocTemplate(
@@ -1703,6 +1807,7 @@ def make_pdf(
     )
     story = []
     movie_cache: Dict[str, MovieMeta] = {}
+    runtime_api_cache = _ensure_api_cache_struct(api_cache)
 
     if double_sided_fold:
         split_dt = _compute_fold_split(start_dt, end_dt, step_minutes)
@@ -1728,6 +1833,7 @@ def make_pdf(
                 omdb_api_key=omdb_api_key,
                 movie_cache=movie_cache,
                 movie_inline_meta=movie_inline_meta,
+                api_cache=runtime_api_cache,
             )
         )
     else:
@@ -1744,6 +1850,7 @@ def make_pdf(
                 omdb_api_key=omdb_api_key,
                 movie_cache=movie_cache,
                 movie_inline_meta=movie_inline_meta,
+                api_cache=runtime_api_cache,
             )
         )
     doc.build(story)
@@ -1793,6 +1900,8 @@ def make_compilation_pdf(
     tvdb_pin: str = "",
     omdb_api_key: str = "",
     movie_inline_meta: bool = True,
+    api_cache_enabled: bool = True,
+    api_cache_file: Optional[Path] = Path(".cache/printed_guide_api_cache.json"),
     status_messages: bool = False,
     fold_safe_gap: float = 0.0,
 ) -> None:
@@ -1814,6 +1923,7 @@ def make_compilation_pdf(
     frame_h = max(1.0, doc.height - 12.0)
     story: List[Flowable] = []
     tmp_files: List[Path] = []
+    runtime_api_cache = _load_api_cache(api_cache_file) if api_cache_enabled else _ensure_api_cache_struct({})
 
     full_ads = list_image_files(ads_dir)
     bottom_ads = list_image_files(bottom_ads_dir)
@@ -1836,7 +1946,7 @@ def make_compilation_pdf(
                 {normalize_title_text(e.title) for evs in schedules.values() for e in evs if e.title}
             )
             _status(f"Trying TVDB cover lookup from {len(candidates)} title candidate(s)")
-            fetched = fetch_tvdb_cover_art(candidates, api_key=tvdb_api_key, pin=tvdb_pin)
+            fetched = fetch_tvdb_cover_art(candidates, api_key=tvdb_api_key, pin=tvdb_pin, api_cache=runtime_api_cache)
             if fetched:
                 cover_art = fetched
                 tmp_files.append(fetched)
@@ -1927,6 +2037,9 @@ def make_compilation_pdf(
             bottom_desc_left: List[OnTonightEntry] = []
             bottom_desc_right: List[OnTonightEntry] = []
             if not bottom_ad_left:
+                _status(
+                    f"Generating On Tonight fallback for {b0.strftime('%m/%d %H:%M')} - {split_dt.strftime('%H:%M')} (left half)"
+                )
                 bottom_desc_left = _build_block_descriptions(
                     schedules=schedules,
                     start_dt=b0,
@@ -1937,8 +2050,13 @@ def make_compilation_pdf(
                     desc_cache=desc_cache,
                     movie_cache=movie_cache,
                     token_holder=token_holder,
+                    api_cache=runtime_api_cache,
                 )
+                _status(f"On Tonight entries (left): {len(bottom_desc_left)}")
             if not bottom_ad_right:
+                _status(
+                    f"Generating On Tonight fallback for {split_dt.strftime('%m/%d %H:%M')} - {b1.strftime('%H:%M')} (right half)"
+                )
                 bottom_desc_right = _build_block_descriptions(
                     schedules=schedules,
                     start_dt=split_dt,
@@ -1949,7 +2067,9 @@ def make_compilation_pdf(
                     desc_cache=desc_cache,
                     movie_cache=movie_cache,
                     token_holder=token_holder,
+                    api_cache=runtime_api_cache,
                 )
+                _status(f"On Tonight entries (right): {len(bottom_desc_right)}")
             logical_pages.append(
                 BookletPageSpec(
                     kind="guide",
@@ -1995,6 +2115,7 @@ def make_compilation_pdf(
                         omdb_api_key=omdb_api_key,
                         movie_cache=movie_cache,
                         movie_inline_meta=movie_inline_meta,
+                        api_cache=runtime_api_cache,
                     ),
                     right=BookletHalfPageFlowable(
                         frame_height=frame_h,
@@ -2006,6 +2127,7 @@ def make_compilation_pdf(
                         omdb_api_key=omdb_api_key,
                         movie_cache=movie_cache,
                         movie_inline_meta=movie_inline_meta,
+                        api_cache=runtime_api_cache,
                     ),
                     safe_gap=fold_safe_gap,
                 )
@@ -2013,6 +2135,8 @@ def make_compilation_pdf(
 
         doc.build(story)
         _status("PDF build complete (booklet mode)")
+        if api_cache_enabled:
+            _save_api_cache(api_cache_file, runtime_api_cache)
         for p in tmp_files:
             try:
                 p.unlink(missing_ok=True)
@@ -2039,6 +2163,7 @@ def make_compilation_pdf(
                 omdb_api_key=omdb_api_key,
                 movie_cache=movie_cache,
                 movie_inline_meta=movie_inline_meta,
+                api_cache=runtime_api_cache,
             )
         else:
             guide_flow = GuideTimelineFlowable(
@@ -2051,11 +2176,13 @@ def make_compilation_pdf(
                 omdb_api_key=omdb_api_key,
                 movie_cache=movie_cache,
                 movie_inline_meta=movie_inline_meta,
+                api_cache=runtime_api_cache,
             )
 
         bottom_ad = choose_random(bottom_ads) if bottom_ads else None
         bottom_desc: List[OnTonightEntry] = []
         if not bottom_ad:
+            _status(f"Generating On Tonight fallback for {b0.strftime('%m/%d %H:%M')} - {b1.strftime('%H:%M')}")
             bottom_desc = _build_block_descriptions(
                 schedules=schedules,
                 start_dt=b0,
@@ -2066,7 +2193,9 @@ def make_compilation_pdf(
                 desc_cache=desc_cache,
                 movie_cache=movie_cache,
                 token_holder=token_holder,
+                api_cache=runtime_api_cache,
             )
+            _status(f"On Tonight entries: {len(bottom_desc)}")
         header_left = "CABLE GUIDE"
         header_right = f"{b0.strftime('%a %b %d, %Y %H:%M')} - {b1.strftime('%H:%M')}"
         story.append(
@@ -2086,6 +2215,8 @@ def make_compilation_pdf(
 
     doc.build(story)
     _status("PDF build complete")
+    if api_cache_enabled:
+        _save_api_cache(api_cache_file, runtime_api_cache)
 
     for p in tmp_files:
         try:

@@ -240,6 +240,8 @@ def main(argv: List[str] | None = None) -> None:
             tvdb_pin=args.tvdb_pin,
             omdb_api_key=args.omdb_api_key,
             movie_inline_meta=args.movie_inline_meta,
+            api_cache_enabled=args.api_cache_enabled,
+            api_cache_file=args.api_cache_file,
             status_messages=args.status_messages,
             fold_safe_gap=args.fold_safe_gap,
         )

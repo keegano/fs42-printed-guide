@@ -58,6 +58,8 @@ DEFAULTS: Dict[str, Any] = {
     "tvdb_pin": "",
     "omdb_api_key": "",
     "movie_inline_meta": True,
+    "api_cache_enabled": True,
+    "api_cache_file": Path(".cache/printed_guide_api_cache.json"),
     "load_catalog": None,
     "dump_catalog": None,
     "status_messages": True,
@@ -125,7 +127,17 @@ def load_config_file(path: Optional[Path]) -> Dict[str, Any]:
 def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
     out = dict(cfg)
 
-    path_keys = ("fs42_dir", "out", "ads_dir", "bottom_ads_dir", "cover_art_dir", "confs_dir", "load_catalog", "dump_catalog")
+    path_keys = (
+        "fs42_dir",
+        "out",
+        "ads_dir",
+        "bottom_ads_dir",
+        "cover_art_dir",
+        "confs_dir",
+        "load_catalog",
+        "dump_catalog",
+        "api_cache_file",
+    )
     for k in path_keys:
         if k in out and out[k] is not None and not isinstance(out[k], Path):
             out[k] = Path(str(out[k]))
@@ -157,7 +169,14 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
         if k in out and out[k] is not None and not isinstance(out[k], float):
             out[k] = float(out[k])
 
-    bool_keys = ("double_sided_fold", "cover_page", "status_messages", "cover_airing_label_enabled", "movie_inline_meta")
+    bool_keys = (
+        "double_sided_fold",
+        "cover_page",
+        "status_messages",
+        "cover_airing_label_enabled",
+        "movie_inline_meta",
+        "api_cache_enabled",
+    )
     for k in bool_keys:
         if k in out and not isinstance(out[k], bool):
             if isinstance(out[k], str):
@@ -221,6 +240,8 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--omdb-api-key", type=str, help="OMDb API key for movie descriptions/ratings metadata.")
     p.add_argument("--movie-inline-meta", action="store_true", help="Render movie rating/parential metadata inline in guide cells (default on).")
     p.add_argument("--no-movie-inline-meta", dest="movie_inline_meta", action="store_false", help="Disable inline movie metadata in guide cells.")
+    p.add_argument("--api-cache-file", type=Path, help="Path to persistent API cache JSON file (TVDB/OMDb).")
+    p.add_argument("--no-api-cache", dest="api_cache_enabled", action="store_false", help="Disable persistent API caching.")
     p.add_argument("--load-catalog", type=Path, help="Load pre-scanned channel schedules/catalog JSON instead of querying station_42.py.")
     p.add_argument("--dump-catalog", type=Path, help="Write scanned channel schedules/catalog JSON for later reuse.")
     p.add_argument("--status-messages", action="store_true", help="Print progress/status messages while scanning and rendering (default on).")

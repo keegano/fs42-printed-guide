@@ -32,3 +32,5 @@ cover_airing_label_week_format = "Catch {show} on {weekday} at {time}!"
 cover_art_source = "auto"
 omdb_api_key = "YOUR_OMDB_API_KEY"
 out = "out/week_cached.pdf"
+
+api_cache_file = "./cache/api_cache.json"

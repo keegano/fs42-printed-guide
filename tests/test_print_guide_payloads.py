@@ -307,7 +307,7 @@ def test_tvdb_cover_adds_airing_label_from_catalog(tmp_path: Path, monkeypatch):
 def test_bottom_descriptions_used_when_no_bottom_ads(tmp_path: Path, monkeypatch):
     channels, _, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
     monkeypatch.setattr(core, "_fetch_tvdb_token", lambda *_a, **_k: "tok")
-    monkeypatch.setattr(core, "_fetch_tvdb_overview_by_title", lambda title, token: f"{title} overview from TVDB")
+    monkeypatch.setattr(core, "_fetch_tvdb_overview_by_title", lambda title, token, api_cache=None: f"{title} overview from TVDB")
     monkeypatch.setattr(core.random, "shuffle", lambda items: None)
 
     out = tmp_path / "desc_fallback.pdf"

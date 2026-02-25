@@ -150,6 +150,9 @@ def test_catalog_options_and_status_toggle():
             "Catch {show} on {weekday} at {time}!",
             "--omdb-api-key",
             "omdb-key",
+            "--api-cache-file",
+            "cache.json",
+            "--no-api-cache",
             "--no-movie-inline-meta",
             "--no-status-messages",
         ]
@@ -172,6 +175,8 @@ def test_catalog_options_and_status_toggle():
     assert args.cover_airing_y == 0.1
     assert "{show}" in args.cover_airing_label_week_format
     assert args.omdb_api_key == "omdb-key"
+    assert args.api_cache_file == Path("cache.json")
+    assert args.api_cache_enabled is False
     assert args.movie_inline_meta is False
     assert args.status_messages is False
 

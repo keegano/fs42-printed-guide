@@ -35,3 +35,5 @@ ad_insert_every = 4
 bottom_ads_dir = "./assets/ads/bottom"
 omdb_api_key = "YOUR_OMDB_API_KEY"
 out = "out/march_booklet.pdf"
+
+api_cache_file = "./cache/api_cache.json"

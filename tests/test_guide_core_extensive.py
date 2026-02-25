@@ -270,6 +270,39 @@ def test_fetch_tvdb_cover_art_no_token(monkeypatch):
     assert core.fetch_tvdb_cover_art(["Some Show"], api_key="k") is None
 
 
+def test_api_cache_reuses_tvdb_and_omdb_calls(monkeypatch):
+    calls = {"n": 0}
+
+    def fake_http(url: str, method: str = "GET", payload=None, headers=None):
+        calls["n"] += 1
+        if "thetvdb.com/v4/login" in url:
+            return {"data": {"token": "tok"}}
+        if "thetvdb.com/v4/search" in url:
+            return {"data": [{"id": 123}]}
+        if "thetvdb.com/v4/series/123/extended" in url:
+            return {"data": {"overview": "Overview text", "image": "http://example.com/poster.jpg"}}
+        if "omdbapi.com" in url:
+            return {"Response": "True", "Title": "The Matrix", "Year": "1999", "Plot": "Plot text", "imdbRating": "7.6", "Rated": "R"}
+        return {}
+
+    monkeypatch.setattr(core, "_http_json", fake_http)
+    cache = {}
+
+    t1 = core._fetch_tvdb_token("k", api_cache=cache)
+    t2 = core._fetch_tvdb_token("k", api_cache=cache)
+    assert t1 == t2 == "tok"
+
+    o1 = core._fetch_tvdb_overview_by_title("Rugrats", "tok", api_cache=cache)
+    o2 = core._fetch_tvdb_overview_by_title("Rugrats", "tok", api_cache=cache)
+    assert o1 == o2 == "Overview text"
+
+    m1 = core._fetch_omdb_movie_meta("The Matrix", "1999", "ok", api_cache=cache)
+    m2 = core._fetch_omdb_movie_meta("The Matrix", "1999", "ok", api_cache=cache)
+    assert m1 is not None and m2 is not None
+    # login + tvdb search + tvdb detail + omdb = 4 network calls total when cache works
+    assert calls["n"] == 4
+
+
 def test_draw_image_fit(tmp_path: Path):
     png = tmp_path / "tiny.png"
     _write_tiny_png(png)
