@@ -10,7 +10,7 @@ Rendering is now file-first and offline:
 2. Prepare editable content files in `content/`:
 - `content/covers/*.json`
 - `content/promos/*.json`
-3. Populate media metadata into Plex-compatible `.nfo` files under FieldStation42 `catalog/`.
+3. Populate media metadata into local `.nfo` files under `content/nfo/` (separate from FieldStation42 catalog).
 4. Run `print_guide.py` to render. Guide generation does not call external APIs.
 
 If content/metadata is missing, rendering continues and prints status messages about what was skipped.
@@ -67,7 +67,7 @@ Notes:
 
 ## NFO Metadata
 
-Guide descriptions and movie ratings come from `.nfo` files.
+Guide descriptions and movie ratings come from local `.nfo` files in `content/nfo/`.
 
 Lookup behavior:
 - First by filename stem from the scheduled filename.
@@ -113,13 +113,15 @@ Poster files are reused if already present so they are not re-fetched each run.
 ```bash
 python3 tools/populate_nfo_metadata.py \
   --catalog ./cache/march_week_catalog.json \
-  --fs42-dir ../FieldStation42 \
+  --nfo-out-dir ./content/nfo \
   --tvdb-api-key "$TVDB_API_KEY" \
   --tvdb-pin "$TVDB_PIN" \
   --omdb-api-key "$OMDB_API_KEY"
 ```
 
 Run with `--dry-run` first to preview writes.
+By default this writes one `tvshow.nfo` per show (deduped); use `--episode-nfo`
+only if you explicitly want per-episode files.
 
 ## Rendering
 
@@ -129,6 +131,7 @@ Run with `--dry-run` first to preview writes.
 python3 print_guide.py \
   --station42-dir ../FieldStation42 \
   --content-dir ./content \
+  --nfo-dir ./content/nfo \
   --load-catalog ./cache/march_week_catalog.json \
   --date 2026-03-01 \
   --range-mode week \

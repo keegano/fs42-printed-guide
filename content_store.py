@@ -164,8 +164,7 @@ def pick_promo_spec(
     return random.choice(top)
 
 
-def load_nfo_index(fs42_dir: Path) -> NfoIndex:
-    root = fs42_dir / "catalog"
+def load_nfo_index(root: Path) -> NfoIndex:
     by_stem: Dict[str, NfoMeta] = {}
     by_title: Dict[str, NfoMeta] = {}
     if not root.exists() or not root.is_dir():

@@ -226,8 +226,8 @@ def main(argv: List[str] | None = None) -> None:
     title = clean_text(args.title.strip()) or clean_text(
         f"TIME TRAVEL CABLE GUIDE - {args.date.strftime('%a %b %d, %Y')} ({start_dt.strftime('%H:%M')}-{end_dt.strftime('%H:%M')})"
     )
-    _status(args.status_messages, f"Loading NFO metadata from {args.fs42_dir / 'catalog'}")
-    nfo_index = load_nfo_index(args.fs42_dir)
+    _status(args.status_messages, f"Loading NFO metadata from {args.nfo_dir}")
+    nfo_index = load_nfo_index(args.nfo_dir)
     _status(
         args.status_messages,
         f"NFO index loaded: filename keys={len(nfo_index.by_filename_stem)}, title keys={len(nfo_index.by_title)}",
@@ -302,7 +302,7 @@ def main(argv: List[str] | None = None) -> None:
             api_cache_enabled=args.api_cache_enabled,
             api_cache_file=args.api_cache_file,
             content_dir=args.content_dir,
-            fs42_dir=args.fs42_dir,
+            nfo_dir=args.nfo_dir,
             ignored_channels=ignored_channels,
             ignored_titles=ignored_titles,
             status_messages=args.status_messages,

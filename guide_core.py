@@ -2057,7 +2057,7 @@ def make_compilation_pdf(
     api_cache_enabled: bool = True,
     api_cache_file: Optional[Path] = Path(".cache/printed_guide_api_cache.json"),
     content_dir: Optional[Path] = Path("content"),
-    fs42_dir: Optional[Path] = None,
+    nfo_dir: Optional[Path] = Path("content/nfo"),
     status_messages: bool = False,
     fold_safe_gap: float = 0.0,
 ) -> None:
@@ -2092,12 +2092,10 @@ def make_compilation_pdf(
     content_root = content_dir or Path("content")
     cover_specs = cs.load_cover_specs(content_root)
     promo_specs = cs.load_promo_specs(content_root)
-    nfo_index = cs.load_nfo_index(fs42_dir) if fs42_dir else cs.NfoIndex(by_filename_stem={}, by_title={})
+    nfo_root = nfo_dir or Path("content/nfo")
+    nfo_index = cs.load_nfo_index(nfo_root)
     _status(f"Loaded content manifests: covers={len(cover_specs)} promos={len(promo_specs)} from {content_root}")
-    _status(
-        f"Loaded NFO index entries: by_filename={len(nfo_index.by_filename_stem)} by_title={len(nfo_index.by_title)}"
-        if fs42_dir else "No fs42_dir provided; NFO metadata disabled"
-    )
+    _status(f"Loaded NFO index entries: by_filename={len(nfo_index.by_filename_stem)} by_title={len(nfo_index.by_title)}")
 
     full_ads = list_image_files(ads_dir)
     bottom_ads = list_image_files(bottom_ads_dir)
