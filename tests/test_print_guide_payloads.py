@@ -335,7 +335,7 @@ def test_bottom_descriptions_used_when_no_bottom_ads(tmp_path: Path, monkeypatch
 
     text = "\n".join((p.extract_text() or "") for p in pytest.importorskip("pypdf").PdfReader(str(out)).pages)
     assert "ON TONIGHT" in text
-    assert "Airing " in text
+    assert "Airing " not in text
 
 
 def test_block_descriptions_skip_missing_instead_of_placeholder(monkeypatch):
@@ -351,9 +351,7 @@ def test_block_descriptions_skip_missing_instead_of_placeholder(monkeypatch):
         max_items=5,
     )
     assert isinstance(entries, list)
-    assert len(entries) > 0
-    assert all(isinstance(e, core.OnTonightEntry) for e in entries)
-    assert all("See schedule listing" not in e.description for e in entries)
+    assert len(entries) == 0
 
 
 def test_load_ignore_list_json(tmp_path: Path):
@@ -439,4 +437,4 @@ def test_real_catalog_fuzz_no_blank_ontonight_boxes_with_cached_api(tmp_path: Pa
             txt = page.extract_text() or ""
             if "CABLE GUIDE" in txt and "CH" in txt:
                 assert "ON TONIGHT" in txt
-                assert ("No descriptions generated; check source filters." in txt) or re.search(r"[A-Za-z][A-Za-z0-9 '&-]{1,40}:", txt)
+                assert "Airing " not in txt

@@ -944,8 +944,14 @@ def test_booklet_padding_uses_promos_before_blanks(tmp_path: Path, capsys):
 def test_ontonight_generation_retries_until_renderable(tmp_path: Path, monkeypatch, capsys):
     channels, numbers, schedules = _sample_schedules()
     attempts = {"n": 0}
+    nfo_dir = tmp_path / "nfo"
+    nfo_dir.mkdir(parents=True, exist_ok=True)
+    (nfo_dir / "test show.nfo").write_text(
+        "<tvshow><title>Test Show</title><plot>Test Show has a valid plot. Another sentence.</plot></tvshow>",
+        encoding="utf-8",
+    )
 
-    def _mock_renderable(_entries, _box_width=250.0):
+    def _mock_renderable(_entries, _box_width=250.0, **_kwargs):
         attempts["n"] += 1
         return attempts["n"] >= 3
 
@@ -963,12 +969,67 @@ def test_ontonight_generation_retries_until_renderable(tmp_path: Path, monkeypat
         page_block_hours=3,
         step_minutes=30,
         cover_enabled=False,
+        nfo_dir=nfo_dir,
         status_messages=True,
     )
     captured = capsys.readouterr().out
     assert "WARNING: On Tonight generation attempt 1/10 had no renderable entries" in captured
     assert "WARNING: On Tonight generation attempt 2/10 had no renderable entries" in captured
     assert "On Tonight generation recovered" in captured
+
+
+def test_build_block_descriptions_avoids_repeats_until_exhausted():
+    schedules = {
+        "NBC": [
+            core.Event(
+                start=datetime(2026, 3, 5, 9, 0),
+                end=datetime(2026, 3, 5, 10, 0),
+                title="Alpha Show",
+                filename="alpha_show.mkv",
+            ),
+            core.Event(
+                start=datetime(2026, 3, 5, 10, 0),
+                end=datetime(2026, 3, 5, 11, 0),
+                title="Beta Show",
+                filename="beta_show.mkv",
+            ),
+        ]
+    }
+    nfo = core.cs.NfoIndex(
+        by_filename_stem={},
+        by_title={
+            "alpha show": core.cs.NfoMeta(title="Alpha Show", plot="Alpha plot.", rated="", imdb_rating=""),
+            "beta show": core.cs.NfoMeta(title="Beta Show", plot="Beta plot.", rated="", imdb_rating=""),
+        },
+    )
+    used = {"alpha show"}
+
+    entries = core._build_block_descriptions(
+        schedules=schedules,
+        start_dt=datetime(2026, 3, 5, 9, 0),
+        end_dt=datetime(2026, 3, 5, 12, 0),
+        ignored_channels=None,
+        ignored_titles=None,
+        nfo_index=nfo,
+        used_titles=used,
+        max_items=2,
+    )
+    assert [e.title.lower() for e in entries] == ["beta show"]
+
+    # Now everything is used; repeats are allowed.
+    used.update({"beta show"})
+    entries2 = core._build_block_descriptions(
+        schedules=schedules,
+        start_dt=datetime(2026, 3, 5, 9, 0),
+        end_dt=datetime(2026, 3, 5, 12, 0),
+        ignored_channels=None,
+        ignored_titles=None,
+        nfo_index=nfo,
+        used_titles=used,
+        max_items=2,
+    )
+    assert len(entries2) >= 1
+    assert entries2[0].title.lower() in {"alpha show", "beta show"}
 
 
 def test_flowable_wraps():

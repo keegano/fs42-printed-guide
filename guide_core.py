@@ -1053,13 +1053,162 @@ def _has_renderable_ontonight_content(descriptions: List[OnTonightEntry], box_wi
     return False
 
 
-def _schedule_blurb(ev: Event, title: str) -> str:
-    """Show-specific fallback text when external metadata is unavailable."""
-    s = f"Airing {ev.start.strftime('%-I:%M %p')} to {ev.end.strftime('%-I:%M %p')}."
-    base = clean_text(title)
-    if base:
-        return f"{base} {s}"
-    return s
+def _analyze_ontonight_layout(
+    descriptions: List[OnTonightEntry],
+    box_width: float,
+    box_height: float,
+    status_cb: Optional[Callable[[str], None]] = None,
+    label: str = "",
+) -> Dict[str, object]:
+    """Simulate ON TONIGHT layout and emit detailed diagnostics."""
+    padding = 6.0
+    if box_width <= 20 or box_height <= 16:
+        return {
+            "drew_any": False,
+            "entries_drawn": 0,
+            "chars_drawn": 0,
+            "reason": "box-too-small",
+            "box_width": box_width,
+            "box_height": box_height,
+            "cols": 0,
+            "col_width": 0.0,
+        }
+
+    body_y = padding
+    body_w = max(10.0, box_width - (2.0 * padding))
+    cols = 2 if body_w >= 320 else 1
+    col_gap = 10.0
+    col_w = max(20.0, (body_w - ((cols - 1) * col_gap)) / cols)
+    text_top = box_height - 22
+    cursor_y = text_top
+    col = 0
+    para_style = ParagraphStyle(
+        "on_tonight_diag_body",
+        fontName="Helvetica",
+        fontSize=7,
+        leading=8.5,
+        alignment=TA_JUSTIFY,
+        spaceAfter=2,
+    )
+    drew_any = False
+    drew_in_col = False
+    entries_drawn = 0
+    chars_drawn = 0
+    dropped_no_title = 0
+    dropped_no_sentences = 0
+    dropped_overflow_sentences = 0
+    dropped_no_usable = 0
+    dropped_no_space = 0
+
+    for idx, entry in enumerate(descriptions, start=1):
+        title = clean_text(entry.title)
+        if not title:
+            dropped_no_title += 1
+            if status_cb:
+                status_cb(f"On Tonight diag {label} entry#{idx}: dropped (empty title)")
+            continue
+
+        sentences = _split_sentences(entry.description)
+        if not sentences:
+            dropped_no_sentences += 1
+            if status_cb:
+                status_cb(f"On Tonight diag {label} entry#{idx} '{title}': dropped (no sentences)")
+            if drew_in_col:
+                col += 1
+                if col >= cols:
+                    dropped_no_space += 1
+                    break
+                cursor_y = text_top
+                drew_in_col = False
+            continue
+
+        usable_lines: List[str] = []
+        kept_sent = 0
+        drop_sent = 0
+        for sent in sentences:
+            sent_lines = _wrap_text_lines(sent, "Helvetica", 7, col_w)
+            if any(pdfmetrics.stringWidth(ln, "Helvetica", 7) > col_w for ln in sent_lines):
+                drop_sent += 1
+                dropped_overflow_sentences += 1
+                continue
+            usable_lines.extend(sent_lines)
+            kept_sent += 1
+
+        if not usable_lines:
+            dropped_no_usable += 1
+            if status_cb:
+                status_cb(
+                    f"On Tonight diag {label} entry#{idx} '{title}': dropped "
+                    f"(all sentences overflow/invalid, kept={kept_sent}, dropped={drop_sent})"
+                )
+            if drew_in_col:
+                col += 1
+                if col >= cols:
+                    dropped_no_space += 1
+                    break
+                cursor_y = text_top
+                drew_in_col = False
+            continue
+
+        paragraph = Paragraph(f"<b>{escape(title)}:</b> {escape(' '.join(usable_lines))}", para_style)
+        _, needed_h = paragraph.wrap(col_w, box_height)
+        moved_col = False
+        if cursor_y - needed_h < body_y:
+            col += 1
+            moved_col = True
+            if col >= cols:
+                dropped_no_space += 1
+                if status_cb:
+                    status_cb(
+                        f"On Tonight diag {label} entry#{idx} '{title}': dropped (no space after col advance)"
+                    )
+                break
+            cursor_y = text_top
+            drew_in_col = False
+            if cursor_y - needed_h < body_y:
+                dropped_no_space += 1
+                if status_cb:
+                    status_cb(
+                        f"On Tonight diag {label} entry#{idx} '{title}': dropped "
+                        f"(entry too tall for empty column, needed_h={needed_h:.1f}, box_h={box_height:.1f})"
+                    )
+                continue
+
+        cursor_y -= needed_h + para_style.spaceAfter
+        drew_any = True
+        drew_in_col = True
+        entries_drawn += 1
+        chars_drawn += len(" ".join(usable_lines))
+        if status_cb:
+            status_cb(
+                f"On Tonight diag {label} entry#{idx} '{title}': draw col={col + 1}/{cols} "
+                f"needed_h={needed_h:.1f} moved_col={'yes' if moved_col else 'no'} "
+                f"sentences_kept={kept_sent} sentences_dropped={drop_sent} chars={len(' '.join(usable_lines))}"
+            )
+
+    summary: Dict[str, object] = {
+        "drew_any": drew_any,
+        "entries_drawn": entries_drawn,
+        "chars_drawn": chars_drawn,
+        "box_width": box_width,
+        "box_height": box_height,
+        "cols": cols,
+        "col_width": col_w,
+        "dropped_no_title": dropped_no_title,
+        "dropped_no_sentences": dropped_no_sentences,
+        "dropped_overflow_sentences": dropped_overflow_sentences,
+        "dropped_no_usable": dropped_no_usable,
+        "dropped_no_space": dropped_no_space,
+        "entries_in": len(descriptions),
+    }
+    if status_cb:
+        status_cb(
+            f"On Tonight diag {label}: box={box_width:.1f}x{box_height:.1f} cols={cols} col_w={col_w:.1f} "
+            f"entries_in={len(descriptions)} drawn={entries_drawn} chars={chars_drawn} "
+            f"dropped(no_title={dropped_no_title}, no_sent={dropped_no_sentences}, "
+            f"overflow_sent={dropped_overflow_sentences}, no_usable={dropped_no_usable}, no_space={dropped_no_space})"
+        )
+    return summary
 
 
 def _build_block_descriptions(
@@ -1069,9 +1218,37 @@ def _build_block_descriptions(
     ignored_channels: Optional[set[str]],
     ignored_titles: Optional[set[str]],
     nfo_index: Optional[cs.NfoIndex] = None,
+    used_titles: Optional[set[str]] = None,
     status_cb: Optional[Callable[[str], None]] = None,
     max_items: int = 8,
 ) -> List[OnTonightEntry]:
+    def _collect_nfo_pool(title_events: List[Tuple[str, Event]], source: str) -> Tuple[List[OnTonightEntry], int, int]:
+        pool: List[OnTonightEntry] = []
+        skipped_missing = 0
+        skipped_empty_plot = 0
+        for title, ev in title_events:
+            if not nfo_index:
+                break
+            meta = nfo_index.lookup(title=title, filename=ev.filename)
+            if not meta:
+                skipped_missing += 1
+                if status_cb:
+                    status_cb(
+                        f"On Tonight skip ({source}, no NFO): title='{clean_text(title)}' file='{clean_text(ev.filename)}'"
+                    )
+                continue
+            desc = clean_text(meta.plot)
+            if not desc:
+                skipped_empty_plot += 1
+                if status_cb:
+                    status_cb(
+                        f"On Tonight skip ({source}, empty NFO plot): "
+                        f"title='{clean_text(title)}' file='{clean_text(ev.filename)}'"
+                    )
+                continue
+            pool.append(OnTonightEntry(title=title, description=desc))
+        return pool, skipped_missing, skipped_empty_plot
+
     candidates = _block_show_events(
         schedules,
         start_dt,
@@ -1082,21 +1259,68 @@ def _build_block_descriptions(
     )
     if status_cb:
         status_cb(f"On Tonight candidates considered: {len(candidates)}")
-    out: List[OnTonightEntry] = []
+    used = used_titles if used_titles is not None else set()
+    nfo_pool, nfo_skipped_missing, nfo_skipped_empty_plot = _collect_nfo_pool(candidates, "block")
+    if not nfo_pool:
+        fallback_candidates: List[Tuple[str, Event]] = []
+        seen_global = set()
+        ignore_ch = ignored_channels or set()
+        ignore_t = ignored_titles or set()
+        for ch, evs in schedules.items():
+            if clean_text(ch).lower() in ignore_ch:
+                continue
+            for ev in evs:
+                shown = display_title(ev.title, ev.filename)
+                shown_key = clean_text(shown).lower()
+                if not shown_key or shown_key in ignore_t or shown_key in seen_global:
+                    continue
+                seen_global.add(shown_key)
+                fallback_candidates.append((shown, ev))
+        random.shuffle(fallback_candidates)
+        fallback_candidates = fallback_candidates[: max_items * 40]
+        if status_cb:
+            status_cb(
+                f"On Tonight block had no NFO matches; trying global NFO fallback pool "
+                f"(candidates={len(fallback_candidates)})"
+            )
+        global_pool, global_missing, global_empty = _collect_nfo_pool(fallback_candidates, "global")
+        nfo_pool = global_pool
+        nfo_skipped_missing += global_missing
+        nfo_skipped_empty_plot += global_empty
 
-    for title, ev in candidates:
-        desc = ""
-        if nfo_index:
-            meta = nfo_index.lookup(title=title, filename=ev.filename)
-            if meta:
-                desc = clean_text(meta.plot)
-        if not desc:
-            desc = _schedule_blurb(ev, title)
-        out.append(OnTonightEntry(title=title, description=desc))
-        if len(out) >= max_items:
-            break
+    unseen_pool = [e for e in nfo_pool if clean_text(e.title).lower() not in used]
+    out: List[OnTonightEntry] = []
+    if unseen_pool:
+        out = unseen_pool[:max_items]
+        for e in out:
+            used.add(clean_text(e.title).lower())
+        if status_cb:
+            status_cb(
+                f"On Tonight selected unseen NFO entries: {len(out)} of {len(unseen_pool)} unseen "
+                f"(pool={len(nfo_pool)})"
+            )
+    elif nfo_pool:
+        out = nfo_pool[:max_items]
+        if status_cb:
+            status_cb(
+                "On Tonight unseen NFO pool exhausted; repeating prior titles "
+                f"({len(out)} selected from pool={len(nfo_pool)})"
+            )
+    else:
+        if status_cb:
+            status_cb("On Tonight had no usable NFO-backed entries in this block")
+    if status_cb:
+        status_cb(
+            f"On Tonight NFO filtering stats: pool={len(nfo_pool)} skipped_missing={nfo_skipped_missing} "
+            f"skipped_empty_plot={nfo_skipped_empty_plot} used_titles={len(used)}"
+        )
+    if status_cb and out:
+        preview = ", ".join(clean_text(e.title) for e in out[:5])
+        status_cb(f"On Tonight selected preview: {preview}")
     if status_cb:
         status_cb(f"On Tonight entries after filtering/descriptions: {len(out)}")
+    if len(out) > max_items:
+        out = out[:max_items]
     return out
 
 
@@ -2197,6 +2421,7 @@ def make_compilation_pdf(
     blocks = split_into_blocks(range_start, range_end, page_block_hours)
     movie_cache: Dict[str, MovieMeta] = {}
     used_promo_ids: set[str] = set()
+    used_ontonight_titles: set[str] = set()
     enforce_unique_promos = bool(double_sided_fold)
     _status(f"Computed {len(blocks)} schedule block(s) for compilation")
 
@@ -2320,9 +2545,15 @@ def make_compilation_pdf(
         block_start: datetime,
         block_end: datetime,
         label: str,
+        box_width: float,
+        box_height: float,
     ) -> List[OnTonightEntry]:
         max_attempts = 10
         for attempt in range(1, max_attempts + 1):
+            _status(
+                f"On Tonight attempt {attempt}/{max_attempts} for {label} "
+                f"(box={box_width:.1f}x{box_height:.1f})"
+            )
             entries = _build_block_descriptions(
                 schedules=schedules,
                 start_dt=block_start,
@@ -2330,9 +2561,18 @@ def make_compilation_pdf(
                 ignored_channels=ignore_ch,
                 ignored_titles=ignore_t,
                 nfo_index=nfo_index,
+                used_titles=used_ontonight_titles,
                 status_cb=_status,
             )
-            if _has_renderable_ontonight_content(entries):
+            diag = _analyze_ontonight_layout(
+                entries,
+                box_width=box_width,
+                box_height=box_height,
+                status_cb=_status,
+                label=label,
+            )
+            preflight_ok = _has_renderable_ontonight_content(entries, box_width=box_width)
+            if preflight_ok and bool(diag.get("drew_any")):
                 if attempt > 1:
                     _status(
                         f"On Tonight generation recovered for {label} on attempt {attempt}/{max_attempts}"
@@ -2340,13 +2580,18 @@ def make_compilation_pdf(
                 return entries
             _status(
                 f"WARNING: On Tonight generation attempt {attempt}/{max_attempts} "
-                f"had no renderable entries for {label}; retrying"
+                f"had no renderable entries for {label}; retrying "
+                f"(drawn={diag.get('entries_drawn', 0)} chars={diag.get('chars_drawn', 0)})"
             )
         _status(f"WARNING: On Tonight generation failed after {max_attempts} attempts for {label}")
         return []
 
     if double_sided_fold:
         logical_pages: List[BookletPageSpec] = []
+        booklet_panel_w = max(1.0, (doc.width - (max(0.0, fold_safe_gap) * inch)) / 2.0)
+        guide_h = (0.26 * inch) + (len(channels) * (0.24 * inch))
+        booklet_content_h = frame_h - (0.14 * inch) - (0.06 * inch)
+        booklet_desc_h = max(0.0, booklet_content_h - guide_h - (0.08 * inch))
         if cover_enabled:
             period = clean_text(cover_period_label) or pick_cover_period_label(range_mode, range_start)
             logical_pages.append(
@@ -2389,6 +2634,8 @@ def make_compilation_pdf(
                     block_start=b0,
                     block_end=split_dt,
                     label=f"{b0.strftime('%m/%d %H:%M')}-{split_dt.strftime('%H:%M')} left",
+                    box_width=booklet_panel_w,
+                    box_height=booklet_desc_h,
                 )
                 _status(f"On Tonight entries (left): {len(bottom_desc_left)}")
                 if not bottom_desc_left:
@@ -2401,6 +2648,8 @@ def make_compilation_pdf(
                     block_start=split_dt,
                     block_end=b1,
                     label=f"{split_dt.strftime('%m/%d %H:%M')}-{b1.strftime('%H:%M')} right",
+                    box_width=booklet_panel_w,
+                    box_height=booklet_desc_h,
                 )
                 _status(f"On Tonight entries (right): {len(bottom_desc_right)}")
                 if not bottom_desc_right:
@@ -2587,11 +2836,16 @@ def make_compilation_pdf(
         bottom_ad = choose_random(bottom_ads) if bottom_ads else None
         bottom_desc: List[OnTonightEntry] = []
         if not bottom_ad:
+            guide_h = (0.26 * inch) + (len(channels) * (0.24 * inch))
+            content_h = frame_h - (0.14 * inch) - (0.06 * inch)
+            desc_h = max(0.0, content_h - guide_h - (0.06 * inch))
             _status(f"Generating On Tonight fallback for {b0.strftime('%m/%d %H:%M')} - {b1.strftime('%H:%M')}")
             bottom_desc = _build_ontonight_with_retries(
                 block_start=b0,
                 block_end=b1,
                 label=f"{b0.strftime('%m/%d %H:%M')}-{b1.strftime('%H:%M')}",
+                box_width=doc.width,
+                box_height=desc_h,
             )
             _status(f"On Tonight entries: {len(bottom_desc)}")
             if not bottom_desc:
