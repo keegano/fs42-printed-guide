@@ -2137,6 +2137,10 @@ def make_compilation_pdf(
     _status(f"Computed {len(blocks)} schedule block(s) for compilation")
 
     def _pick_promo_asset(block_start: datetime, block_end: datetime, purpose: str) -> tuple[str, str, Optional[Path]]:
+        _status(
+            f"Selecting promo for {purpose} block "
+            f"{block_start.strftime('%m/%d %H:%M')}->{block_end.strftime('%m/%d %H:%M')}"
+        )
         block_candidates: List[Tuple[str, Event, str]] = []
         seen = set()
         for ch, evs in schedules.items():
@@ -2154,6 +2158,14 @@ def make_compilation_pdf(
                 block_candidates.append((shown, ev, clean_text(ch)))
         random.shuffle(block_candidates)
         block_candidates = block_candidates[:20]
+        _status(f"Promo candidate events after filters: {len(block_candidates)}")
+        if block_candidates:
+            preview = ", ".join(
+                f"{clean_text(t)}@{e.start.strftime('%H:%M')}" for t, e, _c in block_candidates[:5]
+            )
+            _status(f"Promo candidate preview: {preview}")
+        else:
+            _status("No candidate events in block for promo matching")
 
         title_hints = [shown for shown, _ev, _ch in block_candidates]
         channel_hints = [ch for _shown, _ev, ch in block_candidates]
@@ -2163,12 +2175,20 @@ def make_compilation_pdf(
             title_hints=title_hints,
             channel_hints=channel_hints,
         )
+        if promo:
+            _status(
+                "Promo manifest candidate "
+                f"id={promo.id} title_matches={len(promo.match_titles)} channel_matches={len(promo.match_channels)}"
+            )
+        else:
+            _status("No promo manifest selected by matcher")
 
         matched_event: Optional[Event] = None
         matched_title = ""
         matched_channel = ""
         if promo:
             if promo.match_titles or promo.match_channels:
+                _status(f"Promo {promo.id} requires explicit title/channel match; scanning events")
                 for shown, ev, ch in block_candidates:
                     tkey = clean_text(shown).lower()
                     ckey = clean_text(ch).lower()
@@ -2178,9 +2198,21 @@ def make_compilation_pdf(
                         matched_event = ev
                         matched_title = shown
                         matched_channel = ch
+                        _status(
+                            f"Promo {promo.id} matched show='{matched_title}' channel='{matched_channel}' "
+                            f"time={matched_event.start.strftime('%H:%M')}"
+                        )
                         break
+                if not matched_event:
+                    _status(f"Promo {promo.id} had no concrete event match in this block")
             elif block_candidates:
                 matched_title, matched_event, matched_channel = block_candidates[0]
+                _status(
+                    f"Promo {promo.id} is generic; using first block event "
+                    f"show='{matched_title}' channel='{matched_channel}'"
+                )
+            else:
+                _status(f"Promo {promo.id} is generic but block has no events")
 
         def _render_promo_message(template: str) -> str:
             t = clean_text(template)
@@ -2204,6 +2236,10 @@ def make_compilation_pdf(
         if promo and (clean_text(promo.title) or clean_text(promo.message_template) or promo.image):
             _status(f"Selected {purpose} promo manifest: {promo.id}")
             rendered = _render_promo_message(promo.message_template or promo.message)
+            _status(
+                f"Rendered promo payload title_len={len(clean_text(promo.title))} "
+                f"message_len={len(rendered)} image={'yes' if promo.image else 'no'}"
+            )
             return promo.title, rendered, promo.image
 
         # Must never be blank on back cover; generate minimal promo text from schedule.

@@ -120,21 +120,42 @@ def _save_poster_for_event(
 
 def main() -> None:
     args = parse_args()
+    print(
+        "[status] generating promo templates "
+        f"catalog={args.catalog} out_dir={args.out_dir} mode={args.range_mode}"
+    )
+    print(
+        "[status] options "
+        f"date={args.date} start={args.start} hours={args.hours} "
+        f"page_block_hours={args.page_block_hours} max={args.max} "
+        f"poster_source={args.poster_source} overwrite={args.overwrite}"
+    )
     _channels, _year, schedules = load_catalog_file(args.catalog)
+    print(f"[status] loaded catalog channels={len(schedules)}")
     anchor = datetime.strptime(args.date, "%Y-%m-%d").date()
     start_t = datetime.strptime(args.start, "%H:%M").time()
     range_start, range_end = compute_range_bounds(args.range_mode, anchor, start_t, args.hours)
+    print(
+        "[status] resolved range "
+        f"{range_start.strftime('%Y-%m-%d %H:%M')} -> {range_end.strftime('%Y-%m-%d %H:%M')}"
+    )
     blocks = split_into_blocks(range_start, range_end, args.page_block_hours)
+    print(f"[status] computed blocks={len(blocks)}")
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     emitted = 0
     seen_ids: set[str] = set()
-    for b0, b1 in blocks:
-        for shown, ch, ev in _events_in_range(schedules, b0, b1):
+    for idx, (b0, b1) in enumerate(blocks, start=1):
+        print(f"[status] scanning block {idx}/{len(blocks)} {b0.strftime('%m/%d %H:%M')}->{b1.strftime('%m/%d %H:%M')}")
+        block_events = _events_in_range(schedules, b0, b1)
+        print(f"[status] block candidates={len(block_events)}")
+        for shown, ch, ev in block_events:
             sid = _slug(shown)
             if sid in seen_ids:
+                print(f"[status] skip duplicate show slug={sid} show='{shown}'")
                 continue
             seen_ids.add(sid)
+            print(f"[status] building promo for show='{shown}' channel='{ch}' slug={sid}")
             poster_name = ""
             if args.poster_source != "none":
                 poster_name = _save_poster_for_event(
