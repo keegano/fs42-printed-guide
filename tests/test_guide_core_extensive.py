@@ -555,6 +555,33 @@ def test_draw_description_columns_flow_truncates_at_final_column(tmp_path: Path)
     assert tail_marker not in txt
 
 
+def test_draw_description_columns_flow_drops_partial_final_sentence(tmp_path: Path):
+    from reportlab.pdfgen import canvas
+
+    marker = "UNIQUE_LAST_SENTENCE_MARKER"
+    entries = [
+        core.OnTonightEntry(
+            title="Feature",
+            description=(
+                ("Filler sentence consumes vertical room. " * 40)
+                + (
+                    f"This is the final sentence with {marker} and additional words "
+                    "so it needs multiple wrapped lines in the last column."
+                )
+            ),
+        )
+    ]
+
+    out = tmp_path / "ontonight_flow_sentence_drop.pdf"
+    c = canvas.Canvas(str(out))
+    core._draw_description_columns(c, entries, 0, 0, 363.6, 113.3, flow_columns=True)
+    c.showPage()
+    c.save()
+
+    txt = _extract_pdf_text(out)
+    assert marker not in txt
+
+
 def test_draw_description_columns_never_draws_third_column_after_exhaustion(monkeypatch):
     from reportlab.pdfgen import canvas
 

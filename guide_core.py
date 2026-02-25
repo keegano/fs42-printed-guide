@@ -986,6 +986,40 @@ def _split_sentences(text: str) -> List[str]:
     return [t] if t else []
 
 
+def _max_fitting_sentence_count(
+    title: str,
+    sentences: List[str],
+    include_title: bool,
+    col_w: float,
+    avail_h: float,
+    para_style: ParagraphStyle,
+    wrap_h: float,
+) -> Tuple[int, float]:
+    """
+    Return (count, needed_h) for the largest number of whole sentences that fit.
+    """
+    if not sentences:
+        return 0, 0.0
+    lo, hi = 0, len(sentences)
+    best_n = 0
+    best_h = 0.0
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if mid <= 0:
+            lo = 1
+            continue
+        prefix = f"<b>{escape(title)}:</b> " if include_title else ""
+        paragraph = Paragraph(prefix + escape(" ".join(sentences[:mid])), para_style)
+        _, needed_h = paragraph.wrap(col_w, wrap_h)
+        if needed_h <= avail_h:
+            best_n = mid
+            best_h = needed_h
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return best_n, best_h
+
+
 def _draw_description_columns(
     c,
     descriptions: List[OnTonightEntry],
@@ -1048,15 +1082,15 @@ def _draw_description_columns(
                 drew_in_col = False
             continue
 
-        usable_lines: List[str] = []
+        usable_sentences: List[str] = []
         for sent in sentences:
             sent_lines = _wrap_text_lines(sent, "Helvetica", 7, col_w)
             # If a sentence overflows width with long token, drop the whole sentence.
             if any(pdfmetrics.stringWidth(ln, "Helvetica", 7) > col_w for ln in sent_lines):
                 continue
-            usable_lines.extend(sent_lines)
+            usable_sentences.append(sent)
 
-        if not usable_lines:
+        if not usable_sentences:
             # Remove whole show and end this column if it already has content.
             # Otherwise keep trying additional shows to avoid empty boxes.
             if drew_in_col and not flow_columns:
@@ -1067,7 +1101,64 @@ def _draw_description_columns(
                 drew_in_col = False
             continue
 
-        paragraph = Paragraph(f"<b>{escape(title)}:</b> {escape(' '.join(usable_lines))}", para_style)
+        if flow_columns:
+            remaining = list(usable_sentences)
+            include_title = True
+            while remaining:
+                if exhausted_columns or col >= cols:
+                    break
+                available_h = cursor_y - body_y
+                if available_h <= (para_style.leading + 2.0):
+                    col += 1
+                    if col >= cols:
+                        exhausted_columns = True
+                        break
+                    cursor_y = text_top
+                    drew_in_col = False
+                    continue
+
+                count, needed_h = _max_fitting_sentence_count(
+                    title=title,
+                    sentences=remaining,
+                    include_title=include_title,
+                    col_w=col_w,
+                    avail_h=available_h,
+                    para_style=para_style,
+                    wrap_h=h,
+                )
+                if count <= 0:
+                    # Nothing fits here; move to next column.
+                    col += 1
+                    if col >= cols:
+                        exhausted_columns = True
+                        break
+                    cursor_y = text_top
+                    drew_in_col = False
+                    continue
+
+                prefix = f"<b>{escape(title)}:</b> " if include_title else ""
+                paragraph = Paragraph(prefix + escape(" ".join(remaining[:count])), para_style)
+                paragraph.wrap(col_w, h)
+                cx = body_x + col * (col_w + col_gap)
+                paragraph.drawOn(c, cx, cursor_y - needed_h)
+                cursor_y -= needed_h + para_style.spaceAfter
+                drew_any = True
+                drew_in_col = True
+
+                if count >= len(remaining):
+                    break
+                # More full sentences remain. Continue in next column.
+                remaining = remaining[count:]
+                include_title = False
+                col += 1
+                if col >= cols:
+                    exhausted_columns = True
+                    break
+                cursor_y = text_top
+                drew_in_col = False
+            continue
+
+        paragraph = Paragraph(f"<b>{escape(title)}:</b> {escape(' '.join(usable_sentences))}", para_style)
         while True:
             _, needed_h = paragraph.wrap(col_w, h)
             available_h = cursor_y - body_y
