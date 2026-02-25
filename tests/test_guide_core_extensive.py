@@ -132,6 +132,21 @@ def test_build_airing_label_formats():
     assert day == "5:00"
 
 
+def test_wrap_cover_text_for_catch_message_width():
+    label = "Catch The Really Long Adventures of Captain Super Cartoon Squad at 8:30!"
+    lines = core._wrap_cover_text(label, "Helvetica-Bold", 14, max_width=220, max_lines=2)
+    assert 1 <= len(lines) <= 2
+    for line in lines:
+        assert core.pdfmetrics.stringWidth(line, "Helvetica-Bold", 14) <= 220.5
+
+
+def test_wrap_cover_text_truncates_when_needed():
+    label = "Catch " + ("VeryLongShowName " * 30) + "at 9:00!"
+    lines = core._wrap_cover_text(label, "Helvetica-Bold", 14, max_width=180, max_lines=2)
+    assert len(lines) == 2
+    assert lines[-1].endswith("...")
+
+
 def test_list_image_files_and_choose_random(tmp_path: Path, monkeypatch):
     (tmp_path / "a.jpg").write_text("x")
     (tmp_path / "b.png").write_text("x")

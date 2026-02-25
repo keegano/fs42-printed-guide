@@ -369,6 +369,7 @@ def _build_airing_label(
     }.get(range_mode, day_fmt)
     values = {
         "title": clean_text(title),
+        "show": clean_text(title),
         "weekday": when_dt.strftime("%A"),
         "dow": when_dt.strftime("%a"),
         "time": _clock_no_ampm(when_dt),
@@ -489,6 +490,162 @@ def fetch_tvdb_cover_art(
         return tmp_path
     except Exception:
         return None
+
+
+def _fetch_tvdb_token(api_key: str, pin: str = "") -> str:
+    if not api_key:
+        return ""
+    login_payload = {"apikey": api_key}
+    if pin:
+        login_payload["pin"] = pin
+    auth = _http_json("https://api4.thetvdb.com/v4/login", method="POST", payload=login_payload)
+    return auth.get("data", {}).get("token") or ""
+
+
+def _fetch_tvdb_overview_by_title(title: str, token: str) -> str:
+    if not title or not token:
+        return ""
+    q = urllib.parse.quote(title)
+    search = _http_json(
+        f"https://api4.thetvdb.com/v4/search?query={q}&type=series",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    results = search.get("data") or []
+    if not results:
+        return ""
+    series_id = results[0].get("tvdb_id") or results[0].get("id")
+    if not series_id:
+        return ""
+    detail = _http_json(
+        f"https://api4.thetvdb.com/v4/series/{series_id}/extended",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    d = detail.get("data", {}) or {}
+    return clean_text(d.get("overview") or "")
+
+
+def _block_show_titles(
+    schedules: Dict[str, List[Event]],
+    start_dt: datetime,
+    end_dt: datetime,
+    max_titles: int = 20,
+) -> List[str]:
+    names: List[str] = []
+    seen = set()
+    for evs in schedules.values():
+        for e in evs:
+            if e.end <= start_dt or e.start >= end_dt:
+                continue
+            t = normalize_title_text(e.title)
+            if not t or t in seen:
+                continue
+            seen.add(t)
+            names.append(t)
+    random.shuffle(names)
+    return names[:max_titles]
+
+
+def _wrap_text_lines(text: str, font_name: str, font_size: float, max_width: float) -> List[str]:
+    words = clean_text(text).split()
+    if not words:
+        return []
+    lines: List[str] = []
+    cur = words[0]
+    for w in words[1:]:
+        candidate = f"{cur} {w}"
+        if pdfmetrics.stringWidth(candidate, font_name, font_size) <= max_width:
+            cur = candidate
+        else:
+            lines.append(cur)
+            cur = w
+    lines.append(cur)
+    return lines
+
+
+def _draw_description_columns(c, descriptions: List[str], x: float, y: float, w: float, h: float) -> None:
+    if not descriptions or w <= 20 or h <= 16:
+        return
+    c.setFillColorRGB(0, 0, 0)
+    c.setStrokeColorRGB(0, 0, 0)
+    c.rect(x, y, w, h, stroke=1, fill=0)
+
+    padding = 6.0
+    body_x = x + padding
+    body_y = y + padding
+    body_w = max(10.0, w - (2.0 * padding))
+    body_h = max(10.0, h - (2.0 * padding))
+
+    c.setFont("Helvetica-Bold", 8)
+    c.drawString(body_x, y + h - 12, "ON TONIGHT")
+    body_h -= 10
+    body_y += 0
+
+    cols = 2 if body_w >= 320 else 1
+    col_gap = 10.0
+    col_w = max(20.0, (body_w - ((cols - 1) * col_gap)) / cols)
+    line_h = 8.5
+    max_lines = max(2, int(body_h / line_h))
+    lines_per_col = max(2, max_lines)
+
+    col = 0
+    line_idx = 0
+    text_top = y + h - 22
+    c.setFont("Helvetica", 7)
+    for desc in descriptions:
+        lines = _wrap_text_lines(desc, "Helvetica", 7, col_w)
+        for ln in lines:
+            if line_idx >= lines_per_col:
+                col += 1
+                line_idx = 0
+            if col >= cols:
+                return
+            cx = body_x + col * (col_w + col_gap)
+            cy = text_top - (line_idx * line_h)
+            if cy < body_y:
+                return
+            c.drawString(cx, cy, ln)
+            line_idx += 1
+
+
+def _build_block_descriptions(
+    schedules: Dict[str, List[Event]],
+    start_dt: datetime,
+    end_dt: datetime,
+    tvdb_api_key: str,
+    tvdb_pin: str,
+    desc_cache: Dict[str, str],
+    token_holder: Dict[str, str],
+    max_items: int = 8,
+) -> List[str]:
+    titles = _block_show_titles(schedules, start_dt, end_dt, max_titles=max_items * 2)
+    if not titles:
+        return []
+    out: List[str] = []
+    token = token_holder.get("token", "")
+    if tvdb_api_key and not token:
+        try:
+            token = _fetch_tvdb_token(tvdb_api_key, tvdb_pin)
+        except Exception:
+            token = ""
+        token_holder["token"] = token
+
+    for title in titles:
+        desc = desc_cache.get(title, "")
+        if not desc and token:
+            try:
+                desc = _fetch_tvdb_overview_by_title(title, token)
+            except Exception:
+                desc = ""
+            desc_cache[title] = desc
+        if desc:
+            out.append(f"{title}: {desc}")
+        else:
+            out.append(f"{title}: See schedule listing.")
+        if len(out) >= max_items:
+            break
+    return out
+
+
 def time_label(dt: datetime) -> str:
     return dt.strftime("%I:%M").lstrip("0").replace(":00", "") + ("p" if dt.hour >= 12 else "a")
 
@@ -782,9 +939,11 @@ def draw_cover_panel(
     subtitle_size: float = 13.0,
     date_font: str = "Helvetica-Bold",
     date_size: float = 18.0,
+    date_y: float = 0.18,
     airing_label: str = "",
     airing_font: str = "Helvetica-Bold",
     airing_size: float = 14.0,
+    airing_y: float = 0.11,
 ) -> None:
     bg = _parse_hex_color(bg_color_hex, fallback=(1.0, 1.0, 1.0))
     text_rgb = _parse_hex_color(text_color_hex, fallback=(1.0, 1.0, 1.0))
@@ -795,6 +954,7 @@ def draw_cover_panel(
     border = max(0.0, border_size_in) * inch
     inner_w = max(0.0, width - (2.0 * border))
     inner_h = max(0.0, height - (2.0 * border))
+    text_max_w = max(24.0, width - (2.0 * max(border, 0.12 * inch)))
     if art_path and inner_w > 0 and inner_h > 0:
         draw_image_cover(c, art_path, x + border, y + border, inner_w, inner_h)
 
@@ -817,7 +977,7 @@ def draw_cover_panel(
             c,
             clean_text(period_label),
             cx,
-            y + height * 0.72,
+            y + height * max(0.0, min(1.0, date_y)),
             date_font,
             date_size,
             text_rgb,
@@ -825,16 +985,18 @@ def draw_cover_panel(
             text_outline_width,
         )
     if airing_label:
-        _draw_outlined_centered_text(
+        _draw_outlined_centered_wrapped_text(
             c,
             clean_text(airing_label),
             cx,
-            y + height * 0.64,
+            y + height * max(0.0, min(1.0, airing_y)),
             airing_font,
             airing_size,
             text_rgb,
             outline_rgb,
             text_outline_width,
+            max_width=text_max_w,
+            max_lines=2,
         )
 
 
@@ -860,6 +1022,55 @@ def _draw_outlined_centered_text(
             c.drawCentredString(center_x + dx, y + dy, t)
     c.setFillColorRGB(*fill_rgb)
     c.drawCentredString(center_x, y, t)
+
+
+def _truncate_with_ellipsis(text: str, font_name: str, font_size: float, max_width: float) -> str:
+    t = clean_text(text)
+    if not t:
+        return t
+    if pdfmetrics.stringWidth(t, font_name, font_size) <= max_width:
+        return t
+    ell = "..."
+    fit = hard_truncate_to_width(t, font_name, font_size, max_width - pdfmetrics.stringWidth(ell, font_name, font_size))
+    return clean_text(f"{fit}{ell}")
+
+
+def _wrap_cover_text(
+    text: str,
+    font_name: str,
+    font_size: float,
+    max_width: float,
+    max_lines: int,
+) -> List[str]:
+    lines = _wrap_text_lines(text, font_name, font_size, max_width)
+    if len(lines) <= max_lines:
+        return lines
+    head = lines[: max_lines - 1]
+    tail = " ".join(lines[max_lines - 1 :])
+    head.append(_truncate_with_ellipsis(tail, font_name, font_size, max_width))
+    return head
+
+
+def _draw_outlined_centered_wrapped_text(
+    c,
+    text: str,
+    center_x: float,
+    bottom_line_y: float,
+    font_name: str,
+    font_size: float,
+    fill_rgb: Tuple[float, float, float],
+    outline_rgb: Tuple[float, float, float],
+    outline_width: float,
+    max_width: float,
+    max_lines: int = 2,
+    line_gap: float = 1.15,
+) -> None:
+    lines = _wrap_cover_text(text, font_name, font_size, max_width, max_lines=max_lines)
+    if not lines:
+        return
+    for i, line in enumerate(reversed(lines)):
+        y = bottom_line_y + (i * font_size * line_gap)
+        _draw_outlined_centered_text(c, line, center_x, y, font_name, font_size, fill_rgb, outline_rgb, outline_width)
 
 
 class FullPageImageFlowable(Flowable):
@@ -897,8 +1108,10 @@ class CoverPageFlowable(Flowable):
         subtitle_size: float = 13.0,
         date_font: str = "Helvetica-Bold",
         date_size: float = 18.0,
+        date_y: float = 0.18,
         airing_font: str = "Helvetica-Bold",
         airing_size: float = 14.0,
+        airing_y: float = 0.11,
     ) -> None:
         super().__init__()
         self.frame_height = frame_height
@@ -918,8 +1131,10 @@ class CoverPageFlowable(Flowable):
         self.subtitle_size = max(1.0, subtitle_size)
         self.date_font = clean_text(date_font) or "Helvetica-Bold"
         self.date_size = max(1.0, date_size)
+        self.date_y = max(0.0, min(1.0, date_y))
         self.airing_font = clean_text(airing_font) or "Helvetica-Bold"
         self.airing_size = max(1.0, airing_size)
+        self.airing_y = max(0.0, min(1.0, airing_y))
 
     def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
         self.width = availWidth
@@ -949,18 +1164,27 @@ class CoverPageFlowable(Flowable):
             subtitle_size=self.subtitle_size,
             date_font=self.date_font,
             date_size=self.date_size,
+            date_y=self.date_y,
             airing_font=self.airing_font,
             airing_size=self.airing_size,
+            airing_y=self.airing_y,
         )
 
 
 class GuideWithBottomAdFlowable(Flowable):
-    def __init__(self, guide: Flowable, ad_path: Optional[Path], frame_height: float) -> None:
+    def __init__(
+        self,
+        guide: Flowable,
+        ad_path: Optional[Path],
+        frame_height: float,
+        descriptions: Optional[List[str]] = None,
+    ) -> None:
         super().__init__()
         self.guide = guide
         self.ad_path = ad_path
         self.frame_height = frame_height
         self.gap = 0.08 * inch
+        self.descriptions = descriptions or []
 
     def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
         self.width = availWidth
@@ -973,9 +1197,11 @@ class GuideWithBottomAdFlowable(Flowable):
         guide_y = max(0.0, self.frame_height - gh)
         self.guide.drawOn(c, 0, guide_y)
 
-        if not self.ad_path:
-            return
         available = guide_y - self.gap
+        if not self.ad_path:
+            if self.descriptions and available > 24:
+                _draw_description_columns(c, self.descriptions, 0, 0, self.width, available)
+            return
         if available <= 12:
             return
         draw_image_fit(c, self.ad_path, 0, 0, self.width, available)
@@ -989,6 +1215,7 @@ class CompilationGuidePageFlowable(Flowable):
         right_header: str,
         guide: Flowable,
         bottom_ad: Optional[Path] = None,
+        bottom_descriptions: Optional[List[str]] = None,
     ) -> None:
         super().__init__()
         self.frame_height = frame_height
@@ -996,6 +1223,7 @@ class CompilationGuidePageFlowable(Flowable):
         self.right_header = clean_text(right_header)
         self.guide = guide
         self.bottom_ad = bottom_ad
+        self.bottom_descriptions = bottom_descriptions or []
         self.header_h = 0.14 * inch
         self.gap = 0.06 * inch
 
@@ -1020,6 +1248,10 @@ class CompilationGuidePageFlowable(Flowable):
 
         if ad_h > 0:
             draw_image_fit(c, self.bottom_ad, 0, 0, self.width, ad_h)
+        elif self.bottom_descriptions and content_h - guide_h > 24:
+            desc_h = content_h - guide_h - self.gap
+            _draw_description_columns(c, self.bottom_descriptions, 0, 0, self.width, desc_h)
+            ad_h = desc_h
 
         guide_y = ad_h + (self.gap if ad_h > 0 else 0.0)
         self.guide.drawOn(c, 0, guide_y)
@@ -1033,6 +1265,7 @@ class BookletPageSpec:
     header_left: str = ""
     header_right: str = ""
     bottom_ad: Optional[Path] = None
+    bottom_descriptions: Optional[List[str]] = None
     cover_title: str = ""
     cover_subtitle: str = ""
     cover_period_label: str = ""
@@ -1049,8 +1282,10 @@ class BookletPageSpec:
     cover_subtitle_size: float = 13.0
     cover_date_font: str = "Helvetica-Bold"
     cover_date_size: float = 18.0
+    cover_date_y: float = 0.18
     cover_airing_font: str = "Helvetica-Bold"
     cover_airing_size: float = 14.0
+    cover_airing_y: float = 0.11
 
 
 def _compute_fold_split(start_dt: datetime, end_dt: datetime, step_minutes: int) -> datetime:
@@ -1137,8 +1372,10 @@ class BookletHalfPageFlowable(Flowable):
             subtitle_size=self.spec.cover_subtitle_size,
             date_font=self.spec.cover_date_font,
             date_size=self.spec.cover_date_size,
+            date_y=self.spec.cover_date_y,
             airing_font=self.spec.cover_airing_font,
             airing_size=self.spec.cover_airing_size,
+            airing_y=self.spec.cover_airing_y,
         )
 
     def _draw_guide(self, c) -> None:
@@ -1158,8 +1395,13 @@ class BookletHalfPageFlowable(Flowable):
             step_minutes=self.step_minutes,
         )
         content: Flowable = guide
-        if self.spec.bottom_ad:
-            content = GuideWithBottomAdFlowable(guide=guide, ad_path=self.spec.bottom_ad, frame_height=content_h)
+        if self.spec.bottom_ad or self.spec.bottom_descriptions:
+            content = GuideWithBottomAdFlowable(
+                guide=guide,
+                ad_path=self.spec.bottom_ad,
+                frame_height=content_h,
+                descriptions=self.spec.bottom_descriptions,
+            )
 
         self.guide = content
         _, guide_h = self.guide.wrap(self.width, content_h)
@@ -1305,13 +1547,15 @@ def make_compilation_pdf(
     cover_subtitle_size: float = 13.0,
     cover_date_font: str = "Helvetica-Bold",
     cover_date_size: float = 18.0,
+    cover_date_y: float = 0.18,
     cover_airing_font: str = "Helvetica-Bold",
     cover_airing_size: float = 14.0,
+    cover_airing_y: float = 0.11,
     cover_airing_label_enabled: bool = True,
     cover_airing_label_single_format: str = "{time}",
-    cover_airing_label_day_format: str = "{time}",
-    cover_airing_label_week_format: str = "{title} playing {weekday} at {time}",
-    cover_airing_label_month_format: str = "{md} at {time}",
+    cover_airing_label_day_format: str = "Catch {show} at {time}!",
+    cover_airing_label_week_format: str = "Catch {show} on {weekday} at {time}!",
+    cover_airing_label_month_format: str = "Catch {show} on {md} at {time}!",
     cover_art_source: str = "none",
     cover_art_dir: Optional[Path] = None,
     tvdb_api_key: str = "",
@@ -1401,12 +1645,16 @@ def make_compilation_pdf(
                     subtitle_size=cover_subtitle_size,
                     date_font=cover_date_font,
                     date_size=cover_date_size,
+                    date_y=cover_date_y,
                     airing_font=cover_airing_font,
                     airing_size=cover_airing_size,
+                    airing_y=cover_airing_y,
                 )
             )
 
     blocks = split_into_blocks(range_start, range_end, page_block_hours)
+    desc_cache: Dict[str, str] = {}
+    token_holder: Dict[str, str] = {}
     _status(f"Computed {len(blocks)} schedule block(s) for compilation")
     if double_sided_fold:
         logical_pages: List[BookletPageSpec] = []
@@ -1431,8 +1679,10 @@ def make_compilation_pdf(
                     cover_subtitle_size=cover_subtitle_size,
                     cover_date_font=cover_date_font,
                     cover_date_size=cover_date_size,
+                    cover_date_y=cover_date_y,
                     cover_airing_font=cover_airing_font,
                     cover_airing_size=cover_airing_size,
+                    cover_airing_y=cover_airing_y,
                 )
             )
 
@@ -1440,6 +1690,28 @@ def make_compilation_pdf(
             split_dt = _compute_fold_split(b0, b1, step_minutes)
             bottom_ad_left = choose_random(bottom_ads) if bottom_ads else None
             bottom_ad_right = choose_random(bottom_ads) if bottom_ads else None
+            bottom_desc_left: List[str] = []
+            bottom_desc_right: List[str] = []
+            if not bottom_ad_left:
+                bottom_desc_left = _build_block_descriptions(
+                    schedules=schedules,
+                    start_dt=b0,
+                    end_dt=split_dt,
+                    tvdb_api_key=tvdb_api_key,
+                    tvdb_pin=tvdb_pin,
+                    desc_cache=desc_cache,
+                    token_holder=token_holder,
+                )
+            if not bottom_ad_right:
+                bottom_desc_right = _build_block_descriptions(
+                    schedules=schedules,
+                    start_dt=split_dt,
+                    end_dt=b1,
+                    tvdb_api_key=tvdb_api_key,
+                    tvdb_pin=tvdb_pin,
+                    desc_cache=desc_cache,
+                    token_holder=token_holder,
+                )
             logical_pages.append(
                 BookletPageSpec(
                     kind="guide",
@@ -1448,6 +1720,7 @@ def make_compilation_pdf(
                     header_left="CABLE GUIDE",
                     header_right=f"{b0.strftime('%a %b %d, %Y %H:%M')} - {split_dt.strftime('%H:%M')}",
                     bottom_ad=bottom_ad_left,
+                    bottom_descriptions=bottom_desc_left,
                 )
             )
             logical_pages.append(
@@ -1458,6 +1731,7 @@ def make_compilation_pdf(
                     header_left="CABLE GUIDE",
                     header_right=f"{split_dt.strftime('%a %b %d, %Y %H:%M')} - {b1.strftime('%H:%M')}",
                     bottom_ad=bottom_ad_right,
+                    bottom_descriptions=bottom_desc_right,
                 )
             )
 
@@ -1530,6 +1804,17 @@ def make_compilation_pdf(
             )
 
         bottom_ad = choose_random(bottom_ads) if bottom_ads else None
+        bottom_desc: List[str] = []
+        if not bottom_ad:
+            bottom_desc = _build_block_descriptions(
+                schedules=schedules,
+                start_dt=b0,
+                end_dt=b1,
+                tvdb_api_key=tvdb_api_key,
+                tvdb_pin=tvdb_pin,
+                desc_cache=desc_cache,
+                token_holder=token_holder,
+            )
         header_left = "CABLE GUIDE"
         header_right = f"{b0.strftime('%a %b %d, %Y %H:%M')} - {b1.strftime('%H:%M')}"
         story.append(
@@ -1539,6 +1824,7 @@ def make_compilation_pdf(
                 right_header=header_right,
                 guide=guide_flow,
                 bottom_ad=bottom_ad,
+                bottom_descriptions=bottom_desc,
             )
         )
 
