@@ -2137,24 +2137,74 @@ def make_compilation_pdf(
     _status(f"Computed {len(blocks)} schedule block(s) for compilation")
 
     def _pick_promo_asset(block_start: datetime, block_end: datetime, purpose: str) -> tuple[str, str, Optional[Path]]:
-        candidates = _block_show_events(
-            schedules=schedules,
-            start_dt=block_start,
-            end_dt=block_end,
-            ignored_channels=ignore_ch,
-            ignored_titles=ignore_t,
-            max_items=20,
-        )
-        title_hints = [shown for shown, _ in candidates]
+        block_candidates: List[Tuple[str, Event, str]] = []
+        seen = set()
+        for ch, evs in schedules.items():
+            ch_key = clean_text(ch).lower()
+            if ch_key in ignore_ch:
+                continue
+            for ev in evs:
+                if ev.end <= block_start or ev.start >= block_end:
+                    continue
+                shown = display_title(ev.title, ev.filename)
+                shown_key = clean_text(shown).lower()
+                if not shown_key or shown_key in ignore_t or shown_key in seen:
+                    continue
+                seen.add(shown_key)
+                block_candidates.append((shown, ev, clean_text(ch)))
+        random.shuffle(block_candidates)
+        block_candidates = block_candidates[:20]
+
+        title_hints = [shown for shown, _ev, _ch in block_candidates]
+        channel_hints = [ch for _shown, _ev, ch in block_candidates]
         promo = cs.pick_promo_spec(
             promo_specs,
             range_mode=range_mode,
             title_hints=title_hints,
-            channel_hints=channels,
+            channel_hints=channel_hints,
         )
-        if promo and (clean_text(promo.title) or clean_text(promo.message) or promo.image):
+
+        matched_event: Optional[Event] = None
+        matched_title = ""
+        matched_channel = ""
+        if promo:
+            if promo.match_titles or promo.match_channels:
+                for shown, ev, ch in block_candidates:
+                    tkey = clean_text(shown).lower()
+                    ckey = clean_text(ch).lower()
+                    title_ok = (not promo.match_titles) or (tkey in promo.match_titles)
+                    channel_ok = (not promo.match_channels) or (ckey in promo.match_channels)
+                    if title_ok and channel_ok:
+                        matched_event = ev
+                        matched_title = shown
+                        matched_channel = ch
+                        break
+            elif block_candidates:
+                matched_title, matched_event, matched_channel = block_candidates[0]
+
+        def _render_promo_message(template: str) -> str:
+            t = clean_text(template)
+            if not t:
+                return ""
+            ev_dt = matched_event.start if matched_event else block_start
+            values = {
+                "show": clean_text(matched_title),
+                "title": clean_text(matched_title),
+                "channel": clean_text(matched_channel),
+                "time": ev_dt.strftime("%I:%M").lstrip("0"),
+                "weekday": ev_dt.strftime("%A"),
+                "md": f"{ev_dt.month}/{ev_dt.day}",
+                "date": ev_dt.strftime("%Y-%m-%d"),
+            }
+            try:
+                return clean_text(t.format(**values))
+            except Exception:
+                return t
+
+        if promo and (clean_text(promo.title) or clean_text(promo.message_template) or promo.image):
             _status(f"Selected {purpose} promo manifest: {promo.id}")
-            return promo.title, promo.message, promo.image
+            rendered = _render_promo_message(promo.message_template or promo.message)
+            return promo.title, rendered, promo.image
 
         # Must never be blank on back cover; generate minimal promo text from schedule.
         if purpose == "back-cover":

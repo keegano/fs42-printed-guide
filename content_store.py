@@ -33,6 +33,7 @@ class PromoSpec:
     id: str
     title: str
     message: str
+    message_template: str
     image: Optional[Path]
     enabled: bool
     match_titles: List[str]
@@ -115,6 +116,7 @@ def load_promo_specs(content_dir: Path) -> List[PromoSpec]:
                 id=clean_text(row.get("id")) or (src.stem if isinstance(src, Path) else "promo"),
                 title=clean_text(row.get("title")),
                 message=clean_text(row.get("message")),
+                message_template=clean_text(row.get("message_template")) or clean_text(row.get("message")),
                 image=image_path if image_path and image_path.exists() else None,
                 enabled=bool(row.get("enabled", True)),
                 match_titles=[normalize_key(v) for v in row.get("match_titles", []) if clean_text(v)],

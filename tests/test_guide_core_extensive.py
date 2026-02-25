@@ -619,6 +619,9 @@ def test_make_compilation_pdf_folded_booklet_imposition(tmp_path: Path, monkeypa
 def test_make_compilation_pdf_interstitial_catch_page(tmp_path: Path, monkeypatch):
     channels, numbers, schedules = _sample_schedules()
     monkeypatch.setattr(core, "pick_cover_airing_event", lambda *a, **k: schedules["NBC"][0])
+    content_dir = tmp_path / "content"
+    (content_dir / "covers").mkdir(parents=True)
+    (content_dir / "promos").mkdir(parents=True)
 
     out = tmp_path / "catch_interstitial.pdf"
     core.make_compilation_pdf(
@@ -634,6 +637,7 @@ def test_make_compilation_pdf_interstitial_catch_page(tmp_path: Path, monkeypatc
         ad_insert_every=1,
         interstitial_source="catch",
         cover_enabled=False,
+        content_dir=content_dir,
     )
     text = _extract_pdf_text(out)
     assert "Catch Tonight" not in text
@@ -645,6 +649,9 @@ def test_make_compilation_pdf_interstitial_catch_page(tmp_path: Path, monkeypatc
 def test_make_compilation_pdf_booklet_back_cover_catch(tmp_path: Path, monkeypatch):
     channels, numbers, schedules = _sample_schedules()
     monkeypatch.setattr(core, "pick_cover_airing_event", lambda *a, **k: schedules["NBC"][0])
+    content_dir = tmp_path / "content"
+    (content_dir / "covers").mkdir(parents=True)
+    (content_dir / "promos").mkdir(parents=True)
 
     out = tmp_path / "booklet_back_catch.pdf"
     core.make_compilation_pdf(
@@ -660,6 +667,7 @@ def test_make_compilation_pdf_booklet_back_cover_catch(tmp_path: Path, monkeypat
         double_sided_fold=True,
         cover_enabled=True,
         back_cover_catch_enabled=True,
+        content_dir=content_dir,
     )
     text = _extract_pdf_text(out)
     assert "Catch Tonight" not in text
@@ -669,6 +677,9 @@ def test_make_compilation_pdf_booklet_back_cover_catch(tmp_path: Path, monkeypat
 def test_make_compilation_pdf_booklet_back_cover_catch_without_front_cover(tmp_path: Path, monkeypatch):
     channels, numbers, schedules = _sample_schedules()
     monkeypatch.setattr(core, "pick_cover_airing_event", lambda *a, **k: schedules["NBC"][0])
+    content_dir = tmp_path / "content"
+    (content_dir / "covers").mkdir(parents=True)
+    (content_dir / "promos").mkdir(parents=True)
 
     out = tmp_path / "booklet_back_only_catch.pdf"
     core.make_compilation_pdf(
@@ -684,9 +695,52 @@ def test_make_compilation_pdf_booklet_back_cover_catch_without_front_cover(tmp_p
         double_sided_fold=True,
         cover_enabled=False,
         back_cover_catch_enabled=True,
+        content_dir=content_dir,
     )
     text = _extract_pdf_text(out)
     assert "Catch " in text
+
+
+def test_make_compilation_pdf_interstitial_promo_template_fills_placeholders(tmp_path: Path):
+    channels, numbers, schedules = _sample_schedules()
+    content_dir = tmp_path / "content"
+    (content_dir / "covers").mkdir(parents=True)
+    promos = content_dir / "promos"
+    promos.mkdir(parents=True)
+    (promos / "promo_nbc.json").write_text(
+        json.dumps(
+            {
+                "id": "promo-nbc",
+                "enabled": True,
+                "range_modes": ["day"],
+                "title": "",
+                "message_template": "Catch {show} on {weekday} at {time}!",
+                "image": "",
+                "match_titles": ["test show"],
+                "match_channels": ["nbc"],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    out = tmp_path / "interstitial_placeholder.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 3, 5, 0, 0),
+        range_end=datetime(2026, 3, 6, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        ad_insert_every=1,
+        interstitial_source="catch",
+        cover_enabled=False,
+        content_dir=content_dir,
+    )
+    text = _extract_pdf_text(out)
+    assert "Catch Test Show on Thursday at 9:00!" in text
 
 
 def test_flowable_wraps():

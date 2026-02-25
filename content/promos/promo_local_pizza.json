@@ -1,0 +1,10 @@
+{
+  "id": "promo-local-pizza",
+  "enabled": true,
+  "range_modes": ["day", "week", "month", "single"],
+  "title": "Tony's Pizza",
+  "message_template": "Open late every night. Call 555-0123.",
+  "image": "",
+  "match_titles": [],
+  "match_channels": []
+}

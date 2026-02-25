@@ -1,0 +1,10 @@
+{
+  "id": "promo-rugrats",
+  "enabled": true,
+  "range_modes": ["day", "week", "month"],
+  "title": "",
+  "message_template": "Catch {show} on {weekday} at {time}!",
+  "image": "rugrats_promo.jpg",
+  "match_titles": ["rugrats"],
+  "match_channels": []
+}

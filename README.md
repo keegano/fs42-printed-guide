@@ -43,7 +43,7 @@ If content/metadata is missing, rendering continues and prints status messages a
 }
 ```
 
-### Promo manifest (`content/promos/*.json`)
+### Promo manifest (`content/promos/*.json`, one promo per file)
 
 ```json
 {
@@ -51,7 +51,7 @@ If content/metadata is missing, rendering continues and prints status messages a
   "enabled": true,
   "range_modes": ["day", "week", "month"],
   "title": "",
-  "message": "Catch Rugrats at 7:00 PM!",
+  "message_template": "Catch {show} on {weekday} at {time}!",
   "image": "rugrats_promo.jpg",
   "match_titles": ["rugrats"],
   "match_channels": ["nickelodeon"]
@@ -61,7 +61,9 @@ If content/metadata is missing, rendering continues and prints status messages a
 Notes:
 - `image` paths are relative to the manifest file directory.
 - Matching is case-insensitive.
+- Placeholders supported in `message_template`: `{show}`, `{title}`, `{channel}`, `{time}`, `{weekday}`, `{md}`, `{date}`.
 - Empty promo entries are ignored.
+- You can add unrelated promos (for example local business ads) by leaving `match_titles` and `match_channels` empty.
 
 ## NFO Metadata
 
@@ -97,8 +99,14 @@ python3 tools/generate_promo_templates.py \
   --date 2026-03-01 \
   --range-mode week \
   --page-block-hours 4 \
+  --tvdb-api-key "$TVDB_API_KEY" \
+  --tvdb-pin "$TVDB_PIN" \
+  --omdb-api-key "$OMDB_API_KEY" \
   --out-dir ./content/promos
 ```
+
+This generates one JSON file per promo and downloads poster images into the same folder.
+Poster files are reused if already present so they are not re-fetched each run.
 
 ### Populate NFO metadata
 
