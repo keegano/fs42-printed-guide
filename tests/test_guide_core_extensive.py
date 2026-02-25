@@ -1165,7 +1165,7 @@ def test_build_block_descriptions_avoids_repeats_until_exhausted():
         used_titles=used,
         max_items=2,
     )
-    assert [e.title.lower() for e in entries] == ["beta show"]
+    assert [e.title.lower() for e in entries] == ["beta show", "alpha show"]
 
     # Now everything is used; repeats are allowed.
     used.update({"beta show"})

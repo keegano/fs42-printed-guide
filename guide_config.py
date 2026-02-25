@@ -68,7 +68,7 @@ DEFAULTS: Dict[str, Any] = {
     "dump_catalog": None,
     "ignore_list_file": None,
     "status_messages": True,
-    "ontonight_flow_columns": False,
+    "ontonight_flow_columns": True,
 }
 
 REQUIRED_KEYS = ("date",)

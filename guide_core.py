@@ -1377,6 +1377,16 @@ def _build_block_descriptions(
                 f"On Tonight selected unseen NFO entries: {len(out)} of {len(unseen_pool)} unseen "
                 f"(pool={len(nfo_pool)})"
             )
+        if len(out) < max_items and nfo_pool:
+            selected_keys = {clean_text(e.title).lower() for e in out}
+            repeat_pool = [e for e in nfo_pool if clean_text(e.title).lower() not in selected_keys]
+            add = repeat_pool[: max_items - len(out)]
+            out.extend(add)
+            if status_cb and add:
+                status_cb(
+                    "On Tonight unseen pool partially exhausted; backfilling with repeated entries "
+                    f"({len(add)} added)"
+                )
     elif nfo_pool:
         out = nfo_pool[:max_items]
         if status_cb:
