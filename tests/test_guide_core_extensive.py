@@ -405,7 +405,7 @@ def test_draw_description_columns_renders_bold_title_and_sentence(tmp_path: Path
     c.save()
 
     txt = _extract_pdf_text(out)
-    assert "Rugrats" in txt
+    assert "Rugrats:" in txt
     assert "Tommy leads a toy hunt." in txt
 
 

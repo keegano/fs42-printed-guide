@@ -33,11 +33,13 @@ from typing import Dict, List, Optional, Tuple
 # ReportLab
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Flowable, PageBreak
+from reportlab.lib.enums import TA_JUSTIFY
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.utils import ImageReader
+from xml.sax.saxutils import escape
 
 
 LINE_RE = re.compile(
@@ -867,26 +869,21 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
     cols = 2 if body_w >= 320 else 1
     col_gap = 10.0
     col_w = max(20.0, (body_w - ((cols - 1) * col_gap)) / cols)
-    line_h = 8.5
-    max_lines = max(2, int(body_h / line_h))
-    lines_per_col = max(2, max_lines)
-
     col = 0
-    line_idx = 0
     text_top = y + h - 22
+    cursor_y = text_top
+    para_style = ParagraphStyle(
+        "on_tonight_body",
+        fontName="Helvetica",
+        fontSize=7,
+        leading=8.5,
+        alignment=TA_JUSTIFY,
+        spaceAfter=2,
+    )
     for entry in descriptions:
-        if line_idx >= lines_per_col:
-            col += 1
-            line_idx = 0
-        if col >= cols:
-            return
-
         title = clean_text(entry.title)
         if not title:
             continue
-        if pdfmetrics.stringWidth(title, "Helvetica-Bold", 7) > col_w:
-            # Title itself cannot fit safely; stop this column as requested.
-            return
 
         sentences = _split_sentences(entry.description)
         if not sentences:
@@ -894,38 +891,31 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
             return
 
         usable_lines: List[str] = []
-        prospective_idx = line_idx + 1  # reserve title line
         for sent in sentences:
             sent_lines = _wrap_text_lines(sent, "Helvetica", 7, col_w)
-            # If a sentence overflows width with long token, or would exceed remaining lines,
-            # drop the whole sentence.
+            # If a sentence overflows width with long token, drop the whole sentence.
             if any(pdfmetrics.stringWidth(ln, "Helvetica", 7) > col_w for ln in sent_lines):
                 continue
-            remaining = lines_per_col - prospective_idx
-            if len(sent_lines) > remaining:
-                continue
             usable_lines.extend(sent_lines)
-            prospective_idx += len(sent_lines)
 
         if not usable_lines:
             # Remove whole show and end this column.
             return
 
-        cx = body_x + col * (col_w + col_gap)
-        cy = text_top - (line_idx * line_h)
-        if cy < body_y:
-            return
-        c.setFont("Helvetica-Bold", 7)
-        c.drawString(cx, cy, title)
-        line_idx += 1
+        paragraph = Paragraph(f"<b>{escape(title)}:</b> {escape(' '.join(usable_lines))}", para_style)
+        _, needed_h = paragraph.wrap(col_w, h)
 
-        c.setFont("Helvetica", 7)
-        for ln in usable_lines:
-            cy = text_top - (line_idx * line_h)
-            if cy < body_y:
+        if cursor_y - needed_h < body_y:
+            col += 1
+            if col >= cols:
                 return
-            c.drawString(cx, cy, ln)
-            line_idx += 1
+            cursor_y = text_top
+            if cursor_y - needed_h < body_y:
+                return
+
+        cx = body_x + col * (col_w + col_gap)
+        paragraph.drawOn(c, cx, cursor_y - needed_h)
+        cursor_y -= needed_h + para_style.spaceAfter
 
 
 def _build_block_descriptions(
