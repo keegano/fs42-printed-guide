@@ -1025,6 +1025,7 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
         _, needed_h = paragraph.wrap(col_w, h)
 
         if cursor_y - needed_h < body_y:
+            had_content_in_col = drew_in_col
             col += 1
             if col >= cols:
                 break
@@ -1032,6 +1033,11 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
             drew_in_col = False
             if cursor_y - needed_h < body_y:
                 # Entry cannot fit in an empty column; skip it and try another.
+                # If we had no content in the prior column, don't burn that column.
+                if not had_content_in_col:
+                    col = max(0, col - 1)
+                    cursor_y = text_top
+                    drew_in_col = False
                 continue
 
         cx = body_x + col * (col_w + col_gap)
@@ -1165,6 +1171,7 @@ def _analyze_ontonight_layout(
         _, needed_h = paragraph.wrap(col_w, box_height)
         moved_col = False
         if cursor_y - needed_h < body_y:
+            had_content_in_col = drew_in_col
             col += 1
             moved_col = True
             if col >= cols:
@@ -1183,6 +1190,10 @@ def _analyze_ontonight_layout(
                         f"On Tonight diag {label} entry#{idx} '{title}': dropped "
                         f"(entry too tall for empty column, needed_h={needed_h:.1f}, box_h={box_height:.1f})"
                     )
+                if not had_content_in_col:
+                    col = max(0, col - 1)
+                    cursor_y = text_top
+                    drew_in_col = False
                 continue
 
         cursor_y -= needed_h + para_style.spaceAfter

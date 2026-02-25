@@ -409,6 +409,28 @@ def test_draw_description_columns_renders_bold_title_and_sentence(tmp_path: Path
     assert "Tommy leads a toy hunt." in txt
 
 
+def test_ontonight_diag_does_not_burn_empty_first_column(capsys):
+    entries = [
+        core.OnTonightEntry(
+            title="Very Long Show",
+            description=("This is a very long sentence. " * 40).strip(),
+        ),
+        core.OnTonightEntry(
+            title="Judge Judy",
+            description="Quick case. Fast ruling. Next case.",
+        ),
+    ]
+    core._analyze_ontonight_layout(
+        entries,
+        box_width=363.6,
+        box_height=113.3,
+        status_cb=lambda msg: print(msg),
+        label="regression",
+    )
+    out = capsys.readouterr().out
+    assert "entry#2 'Judge Judy': draw col=1/2" in out
+
+
 def test_draw_description_columns_empty_descriptions_shows_fallback(tmp_path: Path):
     from reportlab.pdfgen import canvas
 
