@@ -141,6 +141,15 @@ def test_resolve_channel_numbers_uses_confs_and_cli_override():
     assert merged["New Channel"] == "77"
 
 
+def test_load_channel_content_dirs_from_confs():
+    confs = Path(__file__).resolve().parent / "fixtures" / "confs"
+    mapping = core.load_channel_content_dirs_from_confs(confs, base_dir=Path("/tmp/fs42"))
+    assert "NBC" in mapping
+    assert "PBS" in mapping
+    assert str(mapping["NBC"]).endswith("/tmp/fs42/catalog/nbc")
+    assert str(mapping["PBS"]).endswith("/tmp/fs42/catalog/pbs")
+
+
 def test_catalog_dump_and_load_round_trip(tmp_path: Path):
     channels = ["NBC"]
     schedules = {

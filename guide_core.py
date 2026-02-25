@@ -443,6 +443,32 @@ def load_channel_numbers_from_confs(confs_dir: Optional[Path]) -> Dict[str, str]
     return out
 
 
+def load_channel_content_dirs_from_confs(confs_dir: Optional[Path], base_dir: Optional[Path] = None) -> Dict[str, Path]:
+    """
+    Load channel -> content directory mapping from FieldStation42 conf JSON files.
+
+    Expected per-file structure:
+      {"station_conf": {"network_name": "...", "content_dir": "catalog/xyz", ...}}
+    """
+    out: Dict[str, Path] = {}
+    if not confs_dir or not confs_dir.exists() or not confs_dir.is_dir():
+        return out
+    for p in confs_dir.glob("*.json"):
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            sc = data.get("station_conf", {}) if isinstance(data, dict) else {}
+            name = clean_text(str(sc.get("network_name", "")))
+            cdir = clean_text(str(sc.get("content_dir", "")))
+            if not name or not cdir:
+                continue
+            raw = Path(cdir)
+            resolved = (base_dir / raw).resolve() if base_dir and not raw.is_absolute() else raw
+            out[name] = resolved
+        except Exception:
+            continue
+    return out
+
+
 def list_image_files(folder: Optional[Path]) -> List[Path]:
     if not folder:
         return []

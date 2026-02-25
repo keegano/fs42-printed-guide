@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import re
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -18,6 +19,7 @@ from guide_core import (
     display_title,
     is_movie_event,
     _extract_year_hint,
+    load_channel_content_dirs_from_confs,
 )
 from print_guide import load_catalog_file
 from guide_config import load_env_values
@@ -30,12 +32,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--tvdb-api-key", default="")
     p.add_argument("--tvdb-pin", default="")
     p.add_argument("--omdb-api-key", default="")
+    p.add_argument("--confs-dir", type=Path, default=None, help="Path to FieldStation42 confs directory (defaults to <fs42-dir>/confs).")
     p.add_argument("--dry-run", action="store_true", help="Do not write files")
     p.add_argument("--limit", type=int, default=0, help="Max files to write (0=all)")
     return p.parse_args()
 
 
 def _find_media_path(root: Path, channel: str, filename: str) -> Path | None:
+    # Deprecated exact matcher; kept for initial fast path.
     stem = Path(clean_text(filename)).stem
     if not stem:
         return None
@@ -49,6 +53,103 @@ def _find_media_path(root: Path, channel: str, filename: str) -> Path | None:
             print(f"[status] media matched: {p}")
             return p
     print(f"[status] media lookup had no non-nfo file for {channel}/{stem}")
+    return None
+
+
+def _norm_stem(text: str) -> str:
+    t = clean_text(text).lower()
+    t = t.replace("&", " and ")
+    t = re.sub(r"[^a-z0-9]+", "", t)
+    return t
+
+
+def _build_channel_media_index(root: Path, channel: str, conf_content_dirs: dict[str, Path]) -> dict[str, list[Path]]:
+    catalog_dir = root / "catalog"
+    channel_dir = conf_content_dirs.get(clean_text(channel), catalog_dir / clean_text(channel))
+    if conf_content_dirs.get(clean_text(channel)):
+        print(f"[status] using conf content_dir for channel={channel}: {channel_dir}")
+    if not channel_dir.exists() and catalog_dir.exists():
+        want = _norm_stem(channel)
+        candidates = [p for p in catalog_dir.iterdir() if p.is_dir()]
+        matched = next((p for p in candidates if _norm_stem(p.name) == want), None)
+        if matched:
+            print(
+                f"[status] channel directory normalized match: schedule_channel='{channel}' "
+                f"-> folder='{matched.name}'"
+            )
+            channel_dir = matched
+        else:
+            for p in candidates:
+                if want and want in _norm_stem(p.name):
+                    print(
+                        f"[status] channel directory fuzzy match: schedule_channel='{channel}' "
+                        f"-> folder='{p.name}'"
+                    )
+                    channel_dir = p
+                    break
+    index: dict[str, list[Path]] = {}
+    if not channel_dir.exists():
+        print(f"[status] channel directory missing: {channel_dir}")
+        return index
+    files = [p for p in channel_dir.rglob("*") if p.is_file() and p.suffix.lower() != ".nfo"]
+    print(f"[status] indexing media files for channel={channel} count={len(files)}")
+    for p in files:
+        k = _norm_stem(p.stem)
+        if not k:
+            continue
+        index.setdefault(k, []).append(p)
+    print(f"[status] built media index keys for channel={channel} keys={len(index)}")
+    return index
+
+
+def _find_media_path_indexed(
+    root: Path,
+    channel: str,
+    filename: str,
+    shown_title: str,
+    channel_index: dict[str, list[Path]],
+) -> Path | None:
+    raw_stem = Path(clean_text(filename)).stem
+    if not raw_stem:
+        print(f"[status] media lookup skip: empty filename stem for title='{shown_title}'")
+        return None
+
+    # 1) normalized stem match
+    target = _norm_stem(raw_stem)
+    if target and target in channel_index and channel_index[target]:
+        p = channel_index[target][0]
+        print(
+            "[status] media normalized-stem match "
+            f"channel={channel} title='{shown_title}' stem='{raw_stem}' -> {p}"
+        )
+        return p
+
+    # 2) fallback by normalized display title for schedules with heavily transformed filenames
+    title_key = _norm_stem(shown_title)
+    if title_key and title_key in channel_index and channel_index[title_key]:
+        p = channel_index[title_key][0]
+        print(
+            "[status] media title-key match "
+            f"channel={channel} title='{shown_title}' key='{title_key}' -> {p}"
+        )
+        return p
+
+    # 3) token-subset fuzzy fallback
+    tokens = [tok for tok in re.split(r"[^a-z0-9]+", clean_text(raw_stem).lower()) if len(tok) >= 3]
+    if tokens:
+        for k, paths in channel_index.items():
+            if all(tok in k for tok in tokens[:4]) and paths:
+                p = paths[0]
+                print(
+                    "[status] media fuzzy-token match "
+                    f"channel={channel} title='{shown_title}' tokens={tokens[:4]} -> {p}"
+                )
+                return p
+
+    print(
+        "[status] media miss "
+        f"channel={channel} title='{shown_title}' stem='{raw_stem}' norm='{target}' title_norm='{title_key}'"
+    )
     return None
 
 
@@ -72,8 +173,10 @@ def _write_nfo(path: Path, title: str, plot: str, rating: str, rated: str, dry_r
 
 def main() -> None:
     args = parse_args()
+    if args.confs_dir is None:
+        args.confs_dir = args.fs42_dir / "confs"
     print(f"[status] starting NFO population catalog={args.catalog} fs42_dir={args.fs42_dir}")
-    print(f"[status] options dry_run={args.dry_run} limit={args.limit}")
+    print(f"[status] options dry_run={args.dry_run} limit={args.limit} confs_dir={args.confs_dir}")
     env = load_env_values()
     if not args.tvdb_api_key:
         args.tvdb_api_key = env.get("TVDB_API_KEY", "")
@@ -92,6 +195,8 @@ def main() -> None:
 
     channels, _year, schedules = load_catalog_file(args.catalog)
     print(f"[status] loaded catalog channels={len(channels)}")
+    conf_content_dirs = load_channel_content_dirs_from_confs(args.confs_dir, base_dir=args.fs42_dir)
+    print(f"[status] loaded conf content_dir mappings={len(conf_content_dirs)}")
     token = ""
     if args.tvdb_api_key:
         try:
@@ -105,8 +210,11 @@ def main() -> None:
     scanned = 0
     missing_media = 0
     missing_metadata = 0
+    media_index_cache: dict[str, dict[str, list[Path]]] = {}
     for ch in channels:
         print(f"[status] scanning channel {ch} events={len(schedules.get(ch, []))}")
+        if ch not in media_index_cache:
+            media_index_cache[ch] = _build_channel_media_index(args.fs42_dir, ch, conf_content_dirs)
         channel_written = 0
         channel_missing_media = 0
         channel_missing_meta = 0
@@ -121,7 +229,13 @@ def main() -> None:
                 f"{ch} {ev.start.strftime('%m/%d %H:%M')}-{ev.end.strftime('%H:%M')} "
                 f"title='{shown}' file='{clean_text(ev.filename)}'"
             )
-            media_path = _find_media_path(args.fs42_dir, ch, ev.filename)
+            media_path = _find_media_path_indexed(
+                args.fs42_dir,
+                ch,
+                ev.filename,
+                shown,
+                media_index_cache[ch],
+            )
             if not media_path:
                 missing_media += 1
                 channel_missing_media += 1
