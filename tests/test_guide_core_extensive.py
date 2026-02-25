@@ -529,6 +529,32 @@ def test_draw_description_columns_flows_single_entry_across_columns(monkeypatch)
     assert xs[2] > xs[1]
 
 
+def test_draw_description_columns_flow_truncates_at_final_column(tmp_path: Path):
+    from reportlab.pdfgen import canvas
+
+    tail_marker = "THIS_MARKER_SHOULD_NOT_APPEAR"
+    entries = [
+        core.OnTonightEntry(
+            title="Epic Marathon",
+            description=(
+                ("Sentence that fills space quickly. " * 80)
+                + tail_marker
+            ),
+        )
+    ]
+
+    out = tmp_path / "ontonight_flow_truncate_final_col.pdf"
+    c = canvas.Canvas(str(out))
+    core._draw_description_columns(c, entries, 0, 0, 363.6, 113.3, flow_columns=True)
+    c.showPage()
+    c.save()
+
+    txt = _extract_pdf_text(out)
+    assert "ON TONIGHT" in txt
+    assert "Epic Marathon:" in txt
+    assert tail_marker not in txt
+
+
 def test_draw_description_columns_empty_descriptions_shows_fallback(tmp_path: Path):
     from reportlab.pdfgen import canvas
 
