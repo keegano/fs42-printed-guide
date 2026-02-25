@@ -17,6 +17,7 @@ from guide_core import (
     _fetch_omdb_movie_meta,
     _fetch_tvdb_overview_by_title,
     _fetch_tvdb_token,
+    MovieMeta,
     clean_text,
     display_title,
     is_movie_event,
@@ -89,6 +90,14 @@ def _movie_nfo_path(out_root: Path, shown: str, year_hint: str) -> Path:
     return out_root / "movies" / f"{_slug(shown)}{suffix}.nfo"
 
 
+def _target_nfo_path(out_root: Path, channel: str, shown: str, filename: str, is_movie: bool, episode_nfo: bool) -> Path:
+    if is_movie:
+        return _movie_nfo_path(out_root, shown, _extract_year_hint(filename))
+    if episode_nfo:
+        return _episode_nfo_path(out_root, channel, shown, filename)
+    return _series_nfo_path(out_root, channel, shown)
+
+
 def main() -> None:
     args = parse_args()
     print(f"[status] starting local NFO population catalog={args.catalog} out={args.nfo_out_dir}")
@@ -129,8 +138,11 @@ def main() -> None:
     missing_metadata = 0
     skipped_duplicate_show = 0
     skipped_duplicate_movie = 0
+    skipped_existing_nfo = 0
     processed_show_keys: set[tuple[str, str]] = set()
     processed_movie_keys: set[str] = set()
+    tvdb_plot_cache: dict[str, str | None] = {}
+    omdb_meta_cache: dict[str, MovieMeta | None] = {}
 
     for ch in channels:
         events = schedules.get(ch, [])
@@ -149,6 +161,18 @@ def main() -> None:
             )
 
             is_movie = is_movie_event(ev.title, ev.filename)
+            nfo_path = _target_nfo_path(
+                out_root=args.nfo_out_dir,
+                channel=ch,
+                shown=shown,
+                filename=ev.filename,
+                is_movie=is_movie,
+                episode_nfo=args.episode_nfo,
+            )
+            if nfo_path.exists():
+                skipped_existing_nfo += 1
+                print(f"[status] skip existing nfo for '{shown}' -> {nfo_path}")
+                continue
             plot = ""
             rating = ""
             rated = ""
@@ -161,18 +185,30 @@ def main() -> None:
                     print(f"[status] skip duplicate movie metadata for '{shown}'")
                     continue
                 if args.omdb_api_key:
-                    print(f"[status] trying OMDb metadata for movie '{shown}'")
-                    try:
-                        meta = _fetch_omdb_movie_meta(shown, _extract_year_hint(ev.filename), args.omdb_api_key)
-                    except Exception:
-                        meta = None
-                        print(f"[status] OMDb lookup failed for '{shown}'")
+                    year_hint = _extract_year_hint(ev.filename)
+                    omdb_key = f"{_norm(shown)}|{clean_text(year_hint)}"
+                    if omdb_key in omdb_meta_cache:
+                        meta = omdb_meta_cache[omdb_key]
+                        print(
+                            f"[status] OMDb cache {'hit' if meta else 'negative-hit'} for movie "
+                            f"'{shown}' key={omdb_key}"
+                        )
+                    else:
+                        print(f"[status] trying OMDb metadata for movie '{shown}'")
+                        try:
+                            meta = _fetch_omdb_movie_meta(shown, year_hint, args.omdb_api_key)
+                        except Exception:
+                            meta = None
+                            print(f"[status] OMDb lookup failed for '{shown}'")
+                        omdb_meta_cache[omdb_key] = meta
                     if meta:
                         title = meta.title or shown
                         plot = meta.plot
                         rating = meta.imdb_rating
                         rated = meta.rated
                         print(f"[status] OMDb metadata found for '{shown}'")
+                    else:
+                        print(f"[status] OMDb metadata not found for '{shown}' (cached)")
                 else:
                     print(f"[status] skip OMDb lookup for movie '{shown}' (no key)")
             else:
@@ -182,12 +218,22 @@ def main() -> None:
                     print(f"[status] skip duplicate show metadata for '{shown}' on channel={ch}")
                     continue
                 if token:
-                    print(f"[status] trying TVDB overview for '{shown}'")
-                    try:
-                        plot = _fetch_tvdb_overview_by_title(shown, token)
-                    except Exception:
-                        plot = ""
-                        print(f"[status] TVDB lookup failed for '{shown}'")
+                    tvdb_key = _norm(shown)
+                    if tvdb_key in tvdb_plot_cache:
+                        cached_plot = tvdb_plot_cache[tvdb_key]
+                        plot = cached_plot or ""
+                        print(
+                            f"[status] TVDB cache {'hit' if cached_plot else 'negative-hit'} for show "
+                            f"'{shown}' key={tvdb_key}"
+                        )
+                    else:
+                        print(f"[status] trying TVDB overview for '{shown}'")
+                        try:
+                            plot = _fetch_tvdb_overview_by_title(shown, token)
+                        except Exception:
+                            plot = ""
+                            print(f"[status] TVDB lookup failed for '{shown}'")
+                        tvdb_plot_cache[tvdb_key] = plot or None
                 else:
                     print(f"[status] skip TVDB lookup for show '{shown}' (no key/token)")
 
@@ -197,15 +243,12 @@ def main() -> None:
                 continue
 
             if is_movie:
-                nfo_path = _movie_nfo_path(args.nfo_out_dir, shown, _extract_year_hint(ev.filename))
                 print(f"[status] writing movie nfo for '{shown}' -> {nfo_path}")
                 wrote_ok = _write_nfo(nfo_path, title, plot, rating, rated, root_tag="movie", dry_run=args.dry_run)
             elif args.episode_nfo:
-                nfo_path = _episode_nfo_path(args.nfo_out_dir, ch, shown, ev.filename)
                 print(f"[status] writing episode nfo for '{shown}' -> {nfo_path}")
                 wrote_ok = _write_nfo(nfo_path, title, plot, rating, rated, root_tag="episodedetails", dry_run=args.dry_run)
             else:
-                nfo_path = _series_nfo_path(args.nfo_out_dir, ch, shown)
                 print(f"[status] writing top-level show nfo for '{shown}' -> {nfo_path}")
                 wrote_ok = _write_nfo(nfo_path, title, plot, rating, rated, root_tag="tvshow", dry_run=args.dry_run)
 
@@ -224,7 +267,8 @@ def main() -> None:
     print(
         f"done; wrote {written} nfo file(s) "
         f"(scanned={scanned}, missing_metadata={missing_metadata}, "
-        f"skipped_duplicate_show={skipped_duplicate_show}, skipped_duplicate_movie={skipped_duplicate_movie})"
+        f"skipped_duplicate_show={skipped_duplicate_show}, skipped_duplicate_movie={skipped_duplicate_movie}, "
+        f"skipped_existing_nfo={skipped_existing_nfo})"
     )
 
 
