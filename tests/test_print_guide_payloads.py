@@ -102,6 +102,11 @@ def test_display_title_movie_style_uses_filename():
     assert shown == "The Matrix"
 
 
+def test_display_title_non_movie_preserves_event_title_capitalization():
+    shown = pg.display_title("ER", "er_episode_cut.mkv")
+    assert shown == "ER"
+
+
 def test_normalize_title_removes_bracketed_tokens():
     assert pg.normalize_title_text("[Foo] Movie") == "Movie"
     assert pg.normalize_title_text("Movie [1080p]") == "Movie"

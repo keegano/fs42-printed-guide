@@ -128,15 +128,20 @@ def display_title(event_title: str, filename: str) -> str:
     if EP_RE.search(filename):
         return event_title
 
-    # If it looks like a movie rip (has a year anywhere), prefer filename-derived
-    pretty = pretty_from_filename(filename)
-    cleaned = strip_year_and_after(pretty)
-    cleaned = normalize_title_text(cleaned)
+    # Only prefer filename-derived text for movie-like items (year hints).
+    movie_like = bool(YEAR_RE.search(filename) or YEAR_RE.search(event_title))
+    if movie_like:
+        pretty = pretty_from_filename(filename)
+        cleaned = strip_year_and_after(pretty)
+        cleaned = normalize_title_text(cleaned)
 
-    # Fallback: if filename didn't yield anything useful
-    if cleaned:
-        return cleaned
-    return normalize_title_text(strip_year_and_after(event_title) or event_title)
+        # Fallback: if filename didn't yield anything useful
+        if cleaned:
+            return cleaned
+        return normalize_title_text(strip_year_and_after(event_title) or event_title)
+
+    # Non-movie: preserve event-title capitalization and wording.
+    return event_title
 
 
 def is_movie_event(event_title: str, filename: str) -> bool:
@@ -388,27 +393,33 @@ def fit_title_with_badge(
     font_size: float,
     max_width_pts: float,
 ) -> str:
+    title_fit, badge_fit = fit_title_with_badge_parts(title, badge, font_name, font_size, max_width_pts)
+    if title_fit and badge_fit:
+        return f"{title_fit} {badge_fit}"
+    return title_fit or badge_fit
+
+
+def fit_title_with_badge_parts(
+    title: str,
+    badge: str,
+    font_name: str,
+    font_size: float,
+    max_width_pts: float,
+) -> Tuple[str, str]:
     t = clean_text(title)
     b = re.sub(r"\s+", " ", str(badge or "")).strip()
-    if not b:
-        return fit_show_title(t, font_name, font_size, max_width_pts)
+    title_fit = fit_show_title(t, font_name, font_size, max_width_pts)
+    if not b or not title_fit:
+        return title_fit, ""
 
-    badge_txt = f"[{b}]"
-    badge_w = pdfmetrics.stringWidth(badge_txt, font_name, font_size)
+    # Ratings are lower priority than title: if they don't fit next to the
+    # already-compacted title, drop ratings instead of truncating title further.
+    badge_w = pdfmetrics.stringWidth(b, "Helvetica", font_size)
     space_w = pdfmetrics.stringWidth(" ", font_name, font_size)
-
-    if badge_w > max_width_pts:
-        # Badge alone does not fit; fallback to title behavior.
-        return fit_show_title(t, font_name, font_size, max_width_pts)
-
-    title_max = max_width_pts - badge_w - space_w
-    if title_max <= 4:
-        return badge_txt
-
-    title_fit = fit_show_title(t, font_name, font_size, title_max)
-    if title_fit:
-        return f"{title_fit} {badge_txt}"
-    return badge_txt
+    title_w = pdfmetrics.stringWidth(title_fit, font_name, font_size)
+    if title_w + space_w + badge_w <= max_width_pts:
+        return title_fit, b
+    return title_fit, ""
 
 
 def clip_events(events: List[Event], start_dt: datetime, end_dt: datetime) -> List[Event]:
@@ -1246,6 +1257,18 @@ def _build_block_descriptions(
                         f"title='{clean_text(title)}' file='{clean_text(ev.filename)}'"
                     )
                 continue
+            if is_movie_event(ev.title, ev.filename):
+                badge = _movie_meta_badge(
+                    MovieMeta(
+                        title=clean_text(meta.title or title),
+                        year="",
+                        plot="",
+                        imdb_rating=clean_text(meta.imdb_rating),
+                        rated=clean_text(meta.rated),
+                    )
+                )
+                if badge:
+                    desc = f"{badge} {desc}".strip()
             pool.append(OnTonightEntry(title=title, description=desc))
         return pool, skipped_missing, skipped_empty_plot
 
@@ -1476,15 +1499,24 @@ class GuideTimelineFlowable(Flowable):
                     )
                     badge = _movie_meta_badge(meta)
                     if badge:
-                        shown = fit_title_with_badge(shown, badge, self.cell_font, 6.5, text_w)
+                        title_fit, badge_fit = fit_title_with_badge_parts(shown, badge, self.cell_font, 6.5, text_w)
                     else:
-                        shown = fit_show_title(shown, self.cell_font, 6.5, text_w)
+                        title_fit, badge_fit = fit_show_title(shown, self.cell_font, 6.5, text_w), ""
                 else:
-                    shown = fit_show_title(shown, self.cell_font, 6.5, text_w)
-                if not shown:
+                    title_fit, badge_fit = fit_show_title(shown, self.cell_font, 6.5, text_w), ""
+                if not title_fit and not badge_fit:
                     continue
-                c.setFont(self.cell_font, 6.5)
-                c.drawString(x0 + 2, row_bottom + ((self.row_h - 6.5) / 2.0) + 1, shown)
+                text_x = x0 + 2
+                text_y = row_bottom + ((self.row_h - 6.5) / 2.0) + 1
+                if title_fit:
+                    c.setFont(self.cell_font, 6.5)
+                    c.drawString(text_x, text_y, title_fit)
+                if badge_fit:
+                    shift = pdfmetrics.stringWidth(title_fit, self.cell_font, 6.5)
+                    if title_fit:
+                        shift += pdfmetrics.stringWidth(" ", self.cell_font, 6.5)
+                    c.setFont("Helvetica", 6.5)
+                    c.drawString(text_x + shift, text_y, badge_fit)
 
 
 class FoldedGuideTimelineFlowable(Flowable):

@@ -466,6 +466,54 @@ def test_movie_meta_badge_rendered_inline(monkeypatch, tmp_path: Path):
     assert "R" in txt
     assert "★" in txt
     assert "½" in txt
+    assert "[" not in txt
+
+
+def test_fit_title_with_badge_parts_drops_badge_when_space_tight():
+    title, badge = core.fit_title_with_badge_parts(
+        title="The Matrix Reloaded",
+        badge="R ★★★ ½",
+        font_name="Helvetica-Bold",
+        font_size=6.5,
+        max_width_pts=55.0,
+    )
+    assert title
+    assert badge == ""
+
+
+def test_block_descriptions_movie_prepends_rating_badge():
+    schedules = {
+        "Movies": [
+            core.Event(
+                start=datetime(2026, 3, 5, 20, 0),
+                end=datetime(2026, 3, 5, 22, 0),
+                title="Movie Night",
+                filename="The.Matrix.1999.1080p.mkv",
+            )
+        ]
+    }
+    nfo = core.cs.NfoIndex(
+        by_filename_stem={},
+        by_title={
+            "the matrix": core.cs.NfoMeta(
+                title="The Matrix",
+                plot="A hacker learns the truth.",
+                rated="R",
+                imdb_rating="7.4",
+            )
+        },
+    )
+    entries = core._build_block_descriptions(
+        schedules=schedules,
+        start_dt=datetime(2026, 3, 5, 19, 0),
+        end_dt=datetime(2026, 3, 5, 23, 0),
+        ignored_channels=None,
+        ignored_titles=None,
+        nfo_index=nfo,
+        max_items=3,
+    )
+    assert entries
+    assert entries[0].description.startswith("R ★★★ ½")
 
 
 def _sample_schedules() -> tuple[list[str], dict[str, str], dict[str, list[core.Event]]]:
