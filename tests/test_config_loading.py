@@ -94,9 +94,19 @@ def test_load_config_file_rejects_unsupported_extension(tmp_path: Path):
         cfg.load_config_file(p)
 
 
-def test_parse_effective_args_requires_fs42_dir_and_date():
+def test_parse_effective_args_requires_date():
     with pytest.raises(SystemExit):
-        cfg.parse_effective_args([])
+        cfg.parse_effective_args(["--fs42-dir", "/tmp/fs42"])
+
+
+def test_parse_effective_args_uses_default_station42_dir():
+    args = cfg.parse_effective_args(["--date", "2026-03-01"])
+    assert args.fs42_dir == cfg.DEFAULT_FS42_DIR
+
+
+def test_station42_dir_alias_is_supported():
+    args = cfg.parse_effective_args(["--station42-dir", "/tmp/s42", "--date", "2026-03-01"])
+    assert args.fs42_dir == Path("/tmp/s42")
 
 
 def test_env_file_supplies_tvdb_credentials(tmp_path: Path, monkeypatch):

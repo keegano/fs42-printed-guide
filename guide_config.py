@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional
 
 from guide_core import parse_date, parse_hhmm
 
+DEFAULT_FS42_DIR = Path(__file__).resolve().parent.parent / "FieldStation42"
 
 DEFAULTS: Dict[str, Any] = {
     "start": parse_hhmm("18:00"),
@@ -19,6 +20,7 @@ DEFAULTS: Dict[str, Any] = {
     "numbers": "",
     "confs_dir": Path("confs"),
     "year": 0,
+    "fs42_dir": DEFAULT_FS42_DIR,
     "out": Path("tv_guide.pdf"),
     "title": "",
     "double_sided_fold": False,
@@ -35,7 +37,7 @@ DEFAULTS: Dict[str, Any] = {
     "tvdb_pin": "",
 }
 
-REQUIRED_KEYS = ("fs42_dir", "date")
+REQUIRED_KEYS = ("date",)
 
 
 def _parse_env_file(path: Path) -> Dict[str, str]:
@@ -72,7 +74,10 @@ def load_env_values() -> Dict[str, str]:
 def _normalize_config_keys(cfg: Dict[str, Any]) -> Dict[str, Any]:
     out: Dict[str, Any] = {}
     for k, v in cfg.items():
-        out[k.replace("-", "_")] = v
+        key = k.replace("-", "_")
+        if key == "station42_dir":
+            key = "fs42_dir"
+        out[key] = v
     return out
 
 
@@ -128,6 +133,7 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
 def _build_cli_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(argument_default=argparse.SUPPRESS)
     p.add_argument("--config", type=Path, help="Path to JSON/TOML config file.")
+    p.add_argument("--station42-dir", dest="fs42_dir", type=Path, help="Path to FieldStation42 repo (where station_42.py lives).")
     p.add_argument("--fs42-dir", type=Path, help="Path to FieldStation42 repo (where station_42.py lives).")
     p.add_argument("--date", type=parse_date, help="Guide date: YYYY-MM-DD")
     p.add_argument("--start", type=parse_hhmm, help="Start time HH:MM")

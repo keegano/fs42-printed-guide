@@ -339,6 +339,51 @@ def test_make_compilation_pdf_with_cover_ads_and_bottom_ads(tmp_path: Path, monk
         assert marker in txt
 
 
+def test_impose_booklet_pages_order():
+    logical = [core.BookletPageSpec(kind="blank", header_right=str(i)) for i in range(1, 9)]
+    imposed = core.impose_booklet_pages(logical)
+
+    order = [(left.header_right, right.header_right) for left, right in imposed]
+    assert order == [
+        ("8", "1"),
+        ("2", "7"),
+        ("6", "3"),
+        ("4", "5"),
+    ]
+
+
+def test_make_compilation_pdf_folded_booklet_imposition(tmp_path: Path, monkeypatch):
+    channels, numbers, schedules = _sample_schedules()
+    monkeypatch.setattr(core, "choose_random", lambda items: items[0] if items else None)
+
+    out = tmp_path / "folded_booklet.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 3, 1, 0, 0),
+        range_end=datetime(2026, 3, 2, 0, 0),
+        page_block_hours=6,
+        step_minutes=30,
+        double_sided_fold=True,
+        cover_enabled=True,
+        cover_title="Time Travel Cable Guide",
+        cover_subtitle="March 2026",
+    )
+
+    reader = PdfReader(str(out))
+    # logical pages: 1 cover + 8 guide halves + 1 back cover blank = 10, padded to 12 => 6 physical sides
+    assert len(reader.pages) == 6
+
+    first_page_text = reader.pages[0].extract_text() or ""
+    second_page_text = reader.pages[1].extract_text() or ""
+    assert "Time Travel Cable Guide" in first_page_text
+    assert "CABLE GUIDE" not in first_page_text
+    assert "CABLE GUIDE" in second_page_text
+
+
 def test_flowable_wraps():
     channels, numbers, schedules = _sample_schedules()
     guide = core.GuideTimelineFlowable(channels, numbers, schedules, datetime(2026, 3, 5, 9, 0), datetime(2026, 3, 5, 10, 0), 30)

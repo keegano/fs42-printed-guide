@@ -788,6 +788,162 @@ class CompilationGuidePageFlowable(Flowable):
         self.guide.drawOn(c, 0, guide_y)
 
 
+@dataclass(frozen=True)
+class BookletPageSpec:
+    kind: str  # guide|cover|blank
+    start_dt: Optional[datetime] = None
+    end_dt: Optional[datetime] = None
+    header_left: str = ""
+    header_right: str = ""
+    bottom_ad: Optional[Path] = None
+    cover_title: str = ""
+    cover_subtitle: str = ""
+    cover_period_label: str = ""
+    cover_art_path: Optional[Path] = None
+
+
+def _compute_fold_split(start_dt: datetime, end_dt: datetime, step_minutes: int) -> datetime:
+    total = end_dt - start_dt
+    half = start_dt + timedelta(seconds=total.total_seconds() / 2.0)
+    step_s = max(60, step_minutes * 60)
+    offset_s = int((half - start_dt).total_seconds())
+    snapped_s = int(round(offset_s / step_s) * step_s)
+    split_dt = start_dt + timedelta(seconds=snapped_s)
+    if split_dt <= start_dt:
+        split_dt = start_dt + timedelta(seconds=step_s)
+    if split_dt >= end_dt:
+        split_dt = end_dt - timedelta(seconds=step_s)
+    return split_dt
+
+
+def impose_booklet_pages(logical_pages: List[BookletPageSpec]) -> List[Tuple[BookletPageSpec, BookletPageSpec]]:
+    """
+    Convert booklet page order into printer order for duplex fold printing.
+    Input pages are reading order (1..N). Output is a list of physical sides
+    where each entry is (left_half, right_half).
+    """
+    pages = list(logical_pages)
+    while len(pages) % 4 != 0:
+        pages.append(BookletPageSpec(kind="blank"))
+
+    total = len(pages)
+    out: List[Tuple[BookletPageSpec, BookletPageSpec]] = []
+    for sheet in range(total // 4):
+        front_left = pages[total - (2 * sheet) - 1]
+        front_right = pages[(2 * sheet)]
+        back_left = pages[(2 * sheet) + 1]
+        back_right = pages[total - (2 * sheet) - 2]
+        out.append((front_left, front_right))
+        out.append((back_left, back_right))
+    return out
+
+
+class BookletHalfPageFlowable(Flowable):
+    def __init__(
+        self,
+        frame_height: float,
+        spec: BookletPageSpec,
+        channels: List[str],
+        channel_numbers: Dict[str, str],
+        schedules: Dict[str, List[Event]],
+        step_minutes: int,
+    ) -> None:
+        super().__init__()
+        self.frame_height = frame_height
+        self.spec = spec
+        self.channels = channels
+        self.channel_numbers = channel_numbers
+        self.schedules = schedules
+        self.step_minutes = step_minutes
+        self.header_h = 0.14 * inch
+        self.gap = 0.06 * inch
+
+    def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
+        self.width = availWidth
+        self.height = self.frame_height
+        return self.width, self.height
+
+    def _draw_cover(self, c) -> None:
+        if self.spec.cover_art_path:
+            draw_image_fit(c, self.spec.cover_art_path, 0, 0, self.width, self.height)
+            c.setFillColorRGB(1, 1, 1)
+            c.rect(0, self.height * 0.55, self.width, self.height * 0.45, stroke=0, fill=1)
+            c.setFillColorRGB(0, 0, 0)
+        else:
+            c.setFillColorRGB(1, 1, 1)
+            c.rect(0, 0, self.width, self.height, stroke=0, fill=1)
+            c.setFillColorRGB(0, 0, 0)
+
+        c.setFont("Helvetica-Bold", 16)
+        c.drawCentredString(self.width / 2.0, self.height * 0.86, clean_text(self.spec.cover_title))
+        if self.spec.cover_subtitle:
+            c.setFont("Helvetica", 9)
+            c.drawCentredString(self.width / 2.0, self.height * 0.79, clean_text(self.spec.cover_subtitle))
+        if self.spec.cover_period_label:
+            c.setFont("Helvetica-Bold", 12)
+            c.drawCentredString(self.width / 2.0, self.height * 0.70, clean_text(self.spec.cover_period_label))
+
+    def _draw_guide(self, c) -> None:
+        c.setFont("Helvetica-Bold", 7)
+        y_hdr = self.frame_height - self.header_h + 2
+        c.drawString(0, y_hdr, self.spec.header_left)
+        c.drawRightString(self.width, y_hdr, self.spec.header_right)
+        c.line(0, self.frame_height - self.header_h, self.width, self.frame_height - self.header_h)
+
+        content_h = self.frame_height - self.header_h - self.gap
+        guide = GuideTimelineFlowable(
+            channels=self.channels,
+            channel_numbers=self.channel_numbers,
+            schedules=self.schedules,
+            start_dt=self.spec.start_dt,  # type: ignore[arg-type]
+            end_dt=self.spec.end_dt,  # type: ignore[arg-type]
+            step_minutes=self.step_minutes,
+        )
+        content: Flowable = guide
+        if self.spec.bottom_ad:
+            content = GuideWithBottomAdFlowable(guide=guide, ad_path=self.spec.bottom_ad, frame_height=content_h)
+
+        self.guide = content
+        _, guide_h = self.guide.wrap(self.width, content_h)
+        guide_y = max(0.0, content_h - guide_h)
+        self.guide.drawOn(c, 0, guide_y)
+
+    def draw(self) -> None:
+        c = self.canv
+        c.setFillColorRGB(1, 1, 1)
+        c.rect(0, 0, self.width, self.height, stroke=0, fill=1)
+        c.setFillColorRGB(0, 0, 0)
+
+        if self.spec.kind == "cover":
+            self._draw_cover(c)
+            return
+        if self.spec.kind == "guide":
+            self._draw_guide(c)
+            return
+
+
+class BookletSpreadFlowable(Flowable):
+    def __init__(self, frame_height: float, left: Flowable, right: Flowable) -> None:
+        super().__init__()
+        self.frame_height = frame_height
+        self.left = left
+        self.right = right
+
+    def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
+        self.width = availWidth
+        self.height = self.frame_height
+        return self.width, self.height
+
+    def draw(self) -> None:
+        c = self.canv
+        panel_w = self.width / 2.0
+
+        self.left.wrap(panel_w, self.height)
+        self.left.drawOn(c, 0, 0)
+        self.right.wrap(panel_w, self.height)
+        self.right.drawOn(c, panel_w, 0)
+
+
 def make_pdf(
     out_path: Path,
     grid_title: str,
@@ -822,17 +978,7 @@ def make_pdf(
     story = []
 
     if double_sided_fold:
-        total = end_dt - start_dt
-        half = start_dt + timedelta(seconds=total.total_seconds() / 2.0)
-        # Keep the split on a step boundary for cleaner time labels.
-        step_s = max(60, step_minutes * 60)
-        offset_s = int((half - start_dt).total_seconds())
-        snapped_s = int(round(offset_s / step_s) * step_s)
-        split_dt = start_dt + timedelta(seconds=snapped_s)
-        if split_dt <= start_dt:
-            split_dt = start_dt + timedelta(seconds=step_s)
-        if split_dt >= end_dt:
-            split_dt = end_dt - timedelta(seconds=step_s)
+        split_dt = _compute_fold_split(start_dt, end_dt, step_minutes)
 
         story.append(
             FoldHeaderFlowable(
@@ -911,8 +1057,8 @@ def make_compilation_pdf(
     bottom_ads = list_image_files(bottom_ads_dir)
     cover_folder_art = list_image_files(cover_art_dir)
 
+    cover_art: Optional[Path] = None
     if cover_enabled:
-        cover_art: Optional[Path] = None
         source = cover_art_source.lower().strip()
         if source in ("folder", "auto"):
             cover_art = choose_random(cover_folder_art)
@@ -923,33 +1069,101 @@ def make_compilation_pdf(
                 cover_art = fetched
                 tmp_files.append(fetched)
 
-        period = clean_text(cover_period_label) or pick_cover_period_label(range_mode, range_start)
-        story.append(
-            CoverPageFlowable(
-                frame_height=frame_h,
-                title=cover_title,
-                subtitle=cover_subtitle,
-                period_label=period,
-                art_path=cover_art,
+        if not double_sided_fold:
+            period = clean_text(cover_period_label) or pick_cover_period_label(range_mode, range_start)
+            story.append(
+                CoverPageFlowable(
+                    frame_height=frame_h,
+                    title=cover_title,
+                    subtitle=cover_subtitle,
+                    period_label=period,
+                    art_path=cover_art,
+                )
             )
-        )
 
     blocks = split_into_blocks(range_start, range_end, page_block_hours)
+    if double_sided_fold:
+        logical_pages: List[BookletPageSpec] = []
+        if cover_enabled:
+            period = clean_text(cover_period_label) or pick_cover_period_label(range_mode, range_start)
+            logical_pages.append(
+                BookletPageSpec(
+                    kind="cover",
+                    cover_title=cover_title,
+                    cover_subtitle=cover_subtitle,
+                    cover_period_label=period,
+                    cover_art_path=cover_art,
+                )
+            )
+
+        for b0, b1 in blocks:
+            split_dt = _compute_fold_split(b0, b1, step_minutes)
+            bottom_ad_left = choose_random(bottom_ads) if bottom_ads else None
+            bottom_ad_right = choose_random(bottom_ads) if bottom_ads else None
+            logical_pages.append(
+                BookletPageSpec(
+                    kind="guide",
+                    start_dt=b0,
+                    end_dt=split_dt,
+                    header_left="CABLE GUIDE",
+                    header_right=f"{b0.strftime('%a %b %d, %Y %H:%M')} - {split_dt.strftime('%H:%M')}",
+                    bottom_ad=bottom_ad_left,
+                )
+            )
+            logical_pages.append(
+                BookletPageSpec(
+                    kind="guide",
+                    start_dt=split_dt,
+                    end_dt=b1,
+                    header_left="CABLE GUIDE",
+                    header_right=f"{split_dt.strftime('%a %b %d, %Y %H:%M')} - {b1.strftime('%H:%M')}",
+                    bottom_ad=bottom_ad_right,
+                )
+            )
+
+        if cover_enabled:
+            logical_pages.append(BookletPageSpec(kind="blank"))
+
+        imposed = impose_booklet_pages(logical_pages)
+        for i, (left_spec, right_spec) in enumerate(imposed):
+            if i > 0:
+                story.append(PageBreak())
+            story.append(
+                BookletSpreadFlowable(
+                    frame_height=frame_h,
+                    left=BookletHalfPageFlowable(
+                        frame_height=frame_h,
+                        spec=left_spec,
+                        channels=channels,
+                        channel_numbers=channel_numbers,
+                        schedules=schedules,
+                        step_minutes=step_minutes,
+                    ),
+                    right=BookletHalfPageFlowable(
+                        frame_height=frame_h,
+                        spec=right_spec,
+                        channels=channels,
+                        channel_numbers=channel_numbers,
+                        schedules=schedules,
+                        step_minutes=step_minutes,
+                    ),
+                )
+            )
+
+        doc.build(story)
+        for p in tmp_files:
+            try:
+                p.unlink(missing_ok=True)
+            except Exception:
+                pass
+        return
+
     for i, (b0, b1) in enumerate(blocks):
         if story:
             story.append(PageBreak())
 
         if double_sided_fold:
-            total = b1 - b0
-            half = b0 + timedelta(seconds=total.total_seconds() / 2.0)
-            step_s = max(60, step_minutes * 60)
-            offset_s = int((half - b0).total_seconds())
-            snapped_s = int(round(offset_s / step_s) * step_s)
-            split_dt = b0 + timedelta(seconds=snapped_s)
-            if split_dt <= b0:
-                split_dt = b0 + timedelta(seconds=step_s)
-            if split_dt >= b1:
-                split_dt = b1 - timedelta(seconds=step_s)
+            split_dt = _compute_fold_split(b0, b1, step_minutes)
 
             guide_flow: Flowable = FoldedGuideTimelineFlowable(
                 channels=channels,

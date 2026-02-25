@@ -5,6 +5,7 @@ Generate printable TV guide PDFs from FieldStation42 schedule output.
 ## Overview
 
 `print_guide.py` reads channel extents (`station_42.py -e`) and per-channel schedules (`station_42.py -u <channel>`), parses events, normalizes titles, and renders a print-focused PDF.
+By default it looks for FieldStation42 at `../FieldStation42` (adjacent to this repo), and you can override that with config/CLI.
 
 Current rendering supports:
 - Proportional timeline layout (event blocks positioned by true start/end time)
@@ -47,6 +48,12 @@ Builds a larger PDF by concatenating many guide pages:
 - `month`: full calendar month of selected date
 
 Per-page time window is controlled by `--page-block-hours`.
+
+With `--double-sided-fold`, compilation mode now performs booklet imposition:
+- each guide block is split into left/right time halves as separate booklet pages
+- booklet pages are reordered into printer sheet order for duplex fold printing
+- cover art is placed on the right half of the outer front sheet
+- the back-cover half is currently blank
 
 ## Ads and Cover Features
 
@@ -95,7 +102,8 @@ cover_art_dir = "./assets/cover"
 
 Core options:
 - `--config FILE.json|FILE.toml`
-- `--fs42-dir PATH`
+- `--station42-dir PATH` (preferred alias)
+- `--fs42-dir PATH` (backward compatible alias)
 - `--date YYYY-MM-DD`
 - `--start HH:MM`
 - `--hours FLOAT`
