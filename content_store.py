@@ -148,20 +148,28 @@ def pick_promo_spec(
     if not candidates:
         return None
 
-    scored: List[tuple[int, PromoSpec]] = []
+    # Prefer content-matched promos first; only fall back to generic promos
+    # if nothing matched the current block.
+    matched_scored: List[tuple[int, PromoSpec]] = []
+    generic: List[PromoSpec] = []
     for spec in candidates:
-        score = 0
-        if spec.match_titles and title_set.intersection(spec.match_titles):
-            score += 4
-        if spec.match_channels and ch_set.intersection(spec.match_channels):
-            score += 2
-        if not spec.match_titles and not spec.match_channels:
-            score += 1
-        scored.append((score, spec))
-    scored.sort(key=lambda x: x[0], reverse=True)
-    best_score = scored[0][0]
-    top = [spec for score, spec in scored if score == best_score]
-    return random.choice(top)
+        title_hit = bool(spec.match_titles and title_set.intersection(spec.match_titles))
+        channel_hit = bool(spec.match_channels and ch_set.intersection(spec.match_channels))
+        if spec.match_titles or spec.match_channels:
+            if title_hit or channel_hit:
+                score = (4 if title_hit else 0) + (2 if channel_hit else 0)
+                matched_scored.append((score, spec))
+        else:
+            generic.append(spec)
+
+    if matched_scored:
+        matched_scored.sort(key=lambda x: x[0], reverse=True)
+        best_score = matched_scored[0][0]
+        top = [spec for score, spec in matched_scored if score == best_score]
+        return random.choice(top)
+    if generic:
+        return random.choice(generic)
+    return None
 
 
 def load_nfo_index(root: Path) -> NfoIndex:

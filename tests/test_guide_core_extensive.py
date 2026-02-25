@@ -743,6 +743,63 @@ def test_make_compilation_pdf_interstitial_promo_template_fills_placeholders(tmp
     assert "Catch Test Show on Thursday at 9:00!" in text
 
 
+def test_make_compilation_pdf_prefers_matched_promo_over_generic(tmp_path: Path):
+    channels, numbers, schedules = _sample_schedules()
+    content_dir = tmp_path / "content"
+    (content_dir / "covers").mkdir(parents=True)
+    promos = content_dir / "promos"
+    promos.mkdir(parents=True)
+    (promos / "promo_generic.json").write_text(
+        json.dumps(
+            {
+                "id": "promo-generic",
+                "enabled": True,
+                "range_modes": [],
+                "title": "Tony's Pizza",
+                "message_template": "Open late every night.",
+                "image": "",
+                "match_titles": [],
+                "match_channels": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (promos / "promo_matched.json").write_text(
+        json.dumps(
+            {
+                "id": "promo-matched",
+                "enabled": True,
+                "range_modes": [],
+                "title": "",
+                "message_template": "Catch {show} on {weekday} at {time}!",
+                "image": "",
+                "match_titles": ["test show"],
+                "match_channels": ["nbc"],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    out = tmp_path / "prefer_matched.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 3, 5, 0, 0),
+        range_end=datetime(2026, 3, 6, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        double_sided_fold=True,
+        cover_enabled=False,
+        content_dir=content_dir,
+    )
+    text = _extract_pdf_text(out)
+    assert "Catch Test Show on Thursday at 9:00!" in text
+    assert "Tony's Pizza" not in text
+
+
 def test_flowable_wraps():
     channels, numbers, schedules = _sample_schedules()
     guide = core.GuideTimelineFlowable(channels, numbers, schedules, datetime(2026, 3, 5, 9, 0), datetime(2026, 3, 5, 10, 0), 30)
