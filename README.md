@@ -12,6 +12,8 @@ Current rendering supports:
 - Optional folded layout (two side-by-side timeline halves on one page)
 - Single-window guide output and multi-page compilation output
 - Optional ad insertion and optional cover page with image art
+- Progress status messages during station scanning and PDF assembly
+- Catalog dump/load to reuse scanned schedules without re-running FieldStation42
 
 ## Data Flow
 
@@ -81,7 +83,16 @@ Precedence:
 2. Config file values
 3. Explicit CLI flags
 
-Required fields (`fs42_dir`, `date`) can come from either CLI or config.
+Required field: `date` (and `fs42_dir` only when not using `--load-catalog`).
+
+## Catalog Cache Workflow
+
+To avoid repeatedly scanning slow `station_42.py` calls:
+
+1. Run once with `--dump-catalog ./cache/march_scan.json`.
+2. Iterate on rendering options with `--load-catalog ./cache/march_scan.json`.
+
+Catalog files include discovered channels, inferred year, and parsed schedule events.
 
 Example `guide.toml`:
 
@@ -115,6 +126,7 @@ Core options:
 - `--year INT`
 - `--out FILE.pdf`
 - `--double-sided-fold`
+- `--fold-safe-gap FLOAT` (inches of extra center gutter for folded pages)
 
 Compilation extras:
 - `--ads-dir PATH`
@@ -128,6 +140,11 @@ Compilation extras:
 - `--cover-art-dir PATH`
 - `--tvdb-api-key KEY`
 - `--tvdb-pin PIN`
+- `--dump-catalog PATH`
+- `--load-catalog PATH`
+- `--status-messages` / `--no-status-messages`
+
+`--fold-safe-gap` applies to folded single pages and folded booklet compilation spreads.
 
 ## Example
 

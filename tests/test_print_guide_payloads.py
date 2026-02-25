@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -126,3 +128,77 @@ def test_resolve_channel_numbers_uses_confs_and_cli_override():
     assert merged["NBC"] == "99"
     assert merged["PBS"] == "4"
     assert merged["New Channel"] == "77"
+
+
+def test_catalog_dump_and_load_round_trip(tmp_path: Path):
+    channels = ["NBC"]
+    schedules = {
+        "NBC": [
+            core.Event(
+                start=datetime(2026, 3, 1, 9, 0),
+                end=datetime(2026, 3, 1, 9, 30),
+                title="Morning Show",
+                filename="Morning.Show.S01E01.mkv",
+            )
+        ]
+    }
+    out = tmp_path / "catalog.json"
+    pg.dump_catalog_file(out, Path("/tmp/fs42"), channels, 2026, schedules)
+    raw = json.loads(out.read_text(encoding="utf-8"))
+    assert raw["year"] == 2026
+    assert raw["channels"] == ["NBC"]
+
+    loaded_channels, loaded_year, loaded_schedules = pg.load_catalog_file(out)
+    assert loaded_channels == ["NBC"]
+    assert loaded_year == 2026
+    assert loaded_schedules["NBC"][0].title == "Morning Show"
+
+
+def test_main_uses_loaded_catalog_without_scanning(monkeypatch, tmp_path: Path):
+    catalog = tmp_path / "catalog.json"
+    pg.dump_catalog_file(
+        catalog,
+        Path("/tmp/fs42"),
+        ["NBC"],
+        2026,
+        {
+            "NBC": [
+                core.Event(
+                    start=datetime(2026, 3, 1, 9, 0),
+                    end=datetime(2026, 3, 1, 10, 0),
+                    title="Cached Show",
+                    filename="",
+                )
+            ]
+        },
+    )
+
+    called = {"discover": 0, "make_pdf": 0}
+
+    def fail_discover(_dir):
+        called["discover"] += 1
+        raise AssertionError("discover should not be called when --load-catalog is used")
+
+    def fake_make_pdf(**kwargs):
+        called["make_pdf"] += 1
+        assert kwargs["channels"] == ["NBC"]
+        assert kwargs["schedules"]["NBC"][0].title == "Cached Show"
+
+    monkeypatch.setattr(pg, "discover_channels_from_extents", fail_discover)
+    monkeypatch.setattr(pg, "make_pdf", fake_make_pdf)
+
+    pg.main(
+        [
+            "--load-catalog",
+            str(catalog),
+            "--date",
+            "2026-03-01",
+            "--range-mode",
+            "single",
+            "--out",
+            str(tmp_path / "out.pdf"),
+        ]
+    )
+
+    assert called["discover"] == 0
+    assert called["make_pdf"] == 1

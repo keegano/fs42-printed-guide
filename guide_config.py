@@ -16,6 +16,7 @@ DEFAULTS: Dict[str, Any] = {
     "hours": 8.0,
     "range_mode": "single",
     "page_block_hours": 6.0,
+    "fold_safe_gap": 0.1,
     "step": 30,
     "numbers": "",
     "confs_dir": Path("confs"),
@@ -35,6 +36,9 @@ DEFAULTS: Dict[str, Any] = {
     "cover_art_dir": None,
     "tvdb_api_key": "",
     "tvdb_pin": "",
+    "load_catalog": None,
+    "dump_catalog": None,
+    "status_messages": True,
 }
 
 REQUIRED_KEYS = ("date",)
@@ -99,7 +103,7 @@ def load_config_file(path: Optional[Path]) -> Dict[str, Any]:
 def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
     out = dict(cfg)
 
-    path_keys = ("fs42_dir", "out", "ads_dir", "bottom_ads_dir", "cover_art_dir", "confs_dir")
+    path_keys = ("fs42_dir", "out", "ads_dir", "bottom_ads_dir", "cover_art_dir", "confs_dir", "load_catalog", "dump_catalog")
     for k in path_keys:
         if k in out and out[k] is not None and not isinstance(out[k], Path):
             out[k] = Path(str(out[k]))
@@ -114,12 +118,12 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
         if k in out and out[k] is not None and not isinstance(out[k], int):
             out[k] = int(out[k])
 
-    float_keys = ("hours", "page_block_hours")
+    float_keys = ("hours", "page_block_hours", "fold_safe_gap")
     for k in float_keys:
         if k in out and out[k] is not None and not isinstance(out[k], float):
             out[k] = float(out[k])
 
-    bool_keys = ("double_sided_fold", "cover_page")
+    bool_keys = ("double_sided_fold", "cover_page", "status_messages")
     for k in bool_keys:
         if k in out and not isinstance(out[k], bool):
             if isinstance(out[k], str):
@@ -147,6 +151,7 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", type=Path, help="Output PDF path")
     p.add_argument("--title", type=str, help="Optional title override.")
     p.add_argument("--double-sided-fold", action="store_true", help="Render guide as two side-by-side time-range halves on one page for fold printing.")
+    p.add_argument("--fold-safe-gap", type=float, help="Extra center gutter in inches for folded output to tolerate off-center folds.")
     p.add_argument("--ads-dir", type=Path, help="Folder of full-page ad images to intersperse between guide pages.")
     p.add_argument("--ad-insert-every", type=int, help="Insert a full-page ad after every N guide pages (0 disables).")
     p.add_argument("--bottom-ads-dir", type=Path, help="Folder of ad images to place below the guide when there is remaining page space.")
@@ -158,6 +163,10 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--cover-art-dir", type=Path, help="Folder for cover art images (used by cover-art-source folder/auto).")
     p.add_argument("--tvdb-api-key", type=str, help="TVDB API key for cover-art-source tvdb/auto.")
     p.add_argument("--tvdb-pin", type=str, help="TVDB PIN (if required by your TVDB account/app).")
+    p.add_argument("--load-catalog", type=Path, help="Load pre-scanned channel schedules/catalog JSON instead of querying station_42.py.")
+    p.add_argument("--dump-catalog", type=Path, help="Write scanned channel schedules/catalog JSON for later reuse.")
+    p.add_argument("--status-messages", action="store_true", help="Print progress/status messages while scanning and rendering (default on).")
+    p.add_argument("--no-status-messages", dest="status_messages", action="store_false", help="Disable progress/status messages.")
     return p
 
 

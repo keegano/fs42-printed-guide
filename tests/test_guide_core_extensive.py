@@ -390,9 +390,19 @@ def test_flowable_wraps():
     w, h = guide.wrap(500, 700)
     assert w == 500 and h > 0
 
-    folded = core.FoldedGuideTimelineFlowable(channels, numbers, schedules, datetime(2026, 3, 5, 9, 0), datetime(2026, 3, 5, 10, 0), datetime(2026, 3, 5, 11, 0), 30)
+    folded = core.FoldedGuideTimelineFlowable(
+        channels,
+        numbers,
+        schedules,
+        datetime(2026, 3, 5, 9, 0),
+        datetime(2026, 3, 5, 10, 0),
+        datetime(2026, 3, 5, 11, 0),
+        30,
+        safe_gap=0.2,
+    )
     w2, h2 = folded.wrap(500, 700)
     assert w2 == 500 and h2 > 0
+    assert folded.gap > 0.12 * core.inch
 
     hdr = core.FoldHeaderFlowable("L", "R")
     w3, h3 = hdr.wrap(500, 700)

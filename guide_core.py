@@ -579,6 +579,7 @@ class FoldedGuideTimelineFlowable(Flowable):
         split_dt: datetime,
         end_dt: datetime,
         step_minutes: int,
+        safe_gap: float = 0.0,
     ) -> None:
         super().__init__()
         self.left = GuideTimelineFlowable(
@@ -597,7 +598,7 @@ class FoldedGuideTimelineFlowable(Flowable):
             end_dt=end_dt,
             step_minutes=step_minutes,
         )
-        self.gap = 0.12 * inch
+        self.gap = (0.12 + max(0.0, safe_gap)) * inch
 
     def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
         self.width = availWidth
@@ -923,11 +924,12 @@ class BookletHalfPageFlowable(Flowable):
 
 
 class BookletSpreadFlowable(Flowable):
-    def __init__(self, frame_height: float, left: Flowable, right: Flowable) -> None:
+    def __init__(self, frame_height: float, left: Flowable, right: Flowable, safe_gap: float = 0.0) -> None:
         super().__init__()
         self.frame_height = frame_height
         self.left = left
         self.right = right
+        self.gap = max(0.0, safe_gap) * inch
 
     def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
         self.width = availWidth
@@ -936,12 +938,12 @@ class BookletSpreadFlowable(Flowable):
 
     def draw(self) -> None:
         c = self.canv
-        panel_w = self.width / 2.0
+        panel_w = max(1.0, (self.width - self.gap) / 2.0)
 
         self.left.wrap(panel_w, self.height)
         self.left.drawOn(c, 0, 0)
         self.right.wrap(panel_w, self.height)
-        self.right.drawOn(c, panel_w, 0)
+        self.right.drawOn(c, panel_w + self.gap, 0)
 
 
 def make_pdf(
@@ -954,6 +956,7 @@ def make_pdf(
     end_dt: datetime,
     step_minutes: int,
     double_sided_fold: bool = False,
+    fold_safe_gap: float = 0.0,
 ) -> None:
     page_size = landscape(letter)
     doc = SimpleDocTemplate(
@@ -997,6 +1000,7 @@ def make_pdf(
                 split_dt=split_dt,
                 end_dt=end_dt,
                 step_minutes=step_minutes,
+                safe_gap=fold_safe_gap,
             )
         )
     else:
@@ -1037,7 +1041,13 @@ def make_compilation_pdf(
     cover_art_dir: Optional[Path] = None,
     tvdb_api_key: str = "",
     tvdb_pin: str = "",
+    status_messages: bool = False,
+    fold_safe_gap: float = 0.0,
 ) -> None:
+    def _status(message: str) -> None:
+        if status_messages:
+            print(f"[status] {clean_text(message)}")
+
     page_size = landscape(letter)
     doc = SimpleDocTemplate(
         str(out_path),
@@ -1059,15 +1069,23 @@ def make_compilation_pdf(
 
     cover_art: Optional[Path] = None
     if cover_enabled:
+        _status(f"Selecting cover art (source={cover_art_source})")
         source = cover_art_source.lower().strip()
         if source in ("folder", "auto"):
             cover_art = choose_random(cover_folder_art)
+            if cover_art:
+                _status(f"Selected cover from folder: {cover_art.name}")
         if not cover_art and source in ("tvdb", "auto"):
             candidates = sorted({normalize_title_text(e.title) for evs in schedules.values() for e in evs if e.title})
+            _status(f"Trying TVDB cover lookup from {len(candidates)} title candidates")
             fetched = fetch_tvdb_cover_art(candidates, api_key=tvdb_api_key, pin=tvdb_pin)
             if fetched:
                 cover_art = fetched
                 tmp_files.append(fetched)
+                _status(f"Selected cover from TVDB download: {fetched.name}")
+
+        if not cover_art:
+            _status("No cover art selected; using text-only cover")
 
         if not double_sided_fold:
             period = clean_text(cover_period_label) or pick_cover_period_label(range_mode, range_start)
@@ -1082,6 +1100,7 @@ def make_compilation_pdf(
             )
 
     blocks = split_into_blocks(range_start, range_end, page_block_hours)
+    _status(f"Computed {len(blocks)} schedule block(s) for compilation")
     if double_sided_fold:
         logical_pages: List[BookletPageSpec] = []
         if cover_enabled:
@@ -1123,8 +1142,10 @@ def make_compilation_pdf(
 
         if cover_enabled:
             logical_pages.append(BookletPageSpec(kind="blank"))
+            _status("Added blank back-cover half-page")
 
         imposed = impose_booklet_pages(logical_pages)
+        _status(f"Booklet imposition produced {len(imposed)} physical side(s)")
         for i, (left_spec, right_spec) in enumerate(imposed):
             if i > 0:
                 story.append(PageBreak())
@@ -1147,10 +1168,12 @@ def make_compilation_pdf(
                         schedules=schedules,
                         step_minutes=step_minutes,
                     ),
+                    safe_gap=fold_safe_gap,
                 )
             )
 
         doc.build(story)
+        _status("PDF build complete (booklet mode)")
         for p in tmp_files:
             try:
                 p.unlink(missing_ok=True)
@@ -1173,6 +1196,7 @@ def make_compilation_pdf(
                 split_dt=split_dt,
                 end_dt=b1,
                 step_minutes=step_minutes,
+                safe_gap=fold_safe_gap,
             )
         else:
             guide_flow = GuideTimelineFlowable(
@@ -1202,6 +1226,7 @@ def make_compilation_pdf(
             story.append(FullPageImageFlowable(choose_random(full_ads), frame_h))
 
     doc.build(story)
+    _status("PDF build complete")
 
     for p in tmp_files:
         try:

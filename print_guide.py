@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List
 
 from guide_config import parse_effective_args
@@ -44,38 +46,139 @@ def resolve_channel_numbers(confs_dir, numbers: object) -> Dict[str, str]:
     return out
 
 
-def main(argv: List[str] | None = None) -> None:
-    args = parse_effective_args(argv)
+def _status(enabled: bool, message: str) -> None:
+    if enabled:
+        print(f"[status] {clean_text(message)}")
 
-    channels = discover_channels_from_extents(args.fs42_dir)
+
+def dump_catalog_file(path: Path, fs42_dir: Path, channels: List[str], year: int, schedules: Dict[str, List[Event]]) -> None:
+    payload = {
+        "version": 1,
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+        "fs42_dir": str(fs42_dir),
+        "year": int(year),
+        "channels": [clean_text(ch) for ch in channels],
+        "schedules": {
+            clean_text(ch): [
+                {
+                    "start": e.start.isoformat(timespec="minutes"),
+                    "end": e.end.isoformat(timespec="minutes"),
+                    "title": clean_text(e.title),
+                    "filename": clean_text(e.filename),
+                }
+                for e in schedules.get(ch, [])
+            ]
+            for ch in channels
+        },
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def load_catalog_file(path: Path) -> tuple[List[str], int, Dict[str, List[Event]]]:
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("Catalog must be a JSON object")
+
+    channels_raw = raw.get("channels", [])
+    if not isinstance(channels_raw, list):
+        raise ValueError("Catalog 'channels' must be a list")
+    channels = [clean_text(str(ch)) for ch in channels_raw if clean_text(str(ch))]
     if not channels:
-        raise RuntimeError("No channels with valid schedules found")
+        raise ValueError("Catalog has no channels")
 
-    number_map = resolve_channel_numbers(args.confs_dir, args.numbers)
+    year = int(raw.get("year", 0))
+    if year <= 0:
+        raise ValueError("Catalog 'year' must be a positive integer")
 
-    year = args.year
-    if not year:
-        inferred = None
-        for ch in channels:
-            inferred = infer_year_from_extents(args.fs42_dir, ch)
-            if inferred:
-                break
-        year = inferred or args.date.year
-
-    start_dt, end_dt = compute_range_bounds(args.range_mode, args.date, args.start, args.hours)
+    schedules_raw = raw.get("schedules", {})
+    if not isinstance(schedules_raw, dict):
+        raise ValueError("Catalog 'schedules' must be an object")
 
     schedules: Dict[str, List[Event]] = {}
     for ch in channels:
-        try:
-            schedules[ch] = parse_channel_schedule(args.fs42_dir, ch, year)
-        except Exception:
-            schedules[ch] = []
+        rows = schedules_raw.get(ch, [])
+        if not isinstance(rows, list):
+            rows = []
+        events: List[Event] = []
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            try:
+                start = datetime.fromisoformat(str(row.get("start", "")))
+                end = datetime.fromisoformat(str(row.get("end", "")))
+            except Exception:
+                continue
+            if end <= start:
+                continue
+            events.append(
+                Event(
+                    start=start,
+                    end=end,
+                    title=clean_text(str(row.get("title", ""))),
+                    filename=clean_text(str(row.get("filename", ""))),
+                )
+            )
+        events.sort(key=lambda e: e.start)
+        schedules[ch] = events
+
+    return channels, year, schedules
+
+
+def main(argv: List[str] | None = None) -> None:
+    args = parse_effective_args(argv)
+
+    number_map = resolve_channel_numbers(args.confs_dir, args.numbers)
+    if args.load_catalog:
+        _status(args.status_messages, f"Loading schedule catalog from {args.load_catalog}")
+        channels, catalog_year, schedules = load_catalog_file(args.load_catalog)
+        year = args.year or catalog_year
+        _status(args.status_messages, f"Loaded catalog: {len(channels)} channels, year {catalog_year}")
+    else:
+        _status(args.status_messages, f"Scanning channel extents in {args.fs42_dir}")
+        channels = discover_channels_from_extents(args.fs42_dir)
+        if not channels:
+            raise RuntimeError("No channels with valid schedules found")
+        _status(args.status_messages, f"Discovered {len(channels)} channels")
+
+        year = args.year
+        if not year:
+            _status(args.status_messages, "Inferring schedule year from extents")
+            inferred = None
+            for ch in channels:
+                inferred = infer_year_from_extents(args.fs42_dir, ch)
+                if inferred:
+                    break
+            year = inferred or args.date.year
+        _status(args.status_messages, f"Using schedule year {year}")
+
+        schedules = {}
+        for idx, ch in enumerate(channels, start=1):
+            _status(args.status_messages, f"Scanning schedule {idx}/{len(channels)}: {ch}")
+            try:
+                schedules[ch] = parse_channel_schedule(args.fs42_dir, ch, year)
+                _status(args.status_messages, f"Loaded {len(schedules[ch])} events for {ch}")
+            except Exception:
+                schedules[ch] = []
+                _status(args.status_messages, f"Failed to load schedule for {ch}; using empty schedule")
+
+        if args.dump_catalog:
+            _status(args.status_messages, f"Writing catalog to {args.dump_catalog}")
+            dump_catalog_file(args.dump_catalog, args.fs42_dir, channels, year, schedules)
+            _status(args.status_messages, "Catalog write complete")
+
+    start_dt, end_dt = compute_range_bounds(args.range_mode, args.date, args.start, args.hours)
+    _status(
+        args.status_messages,
+        f"Preparing {args.range_mode} render window {start_dt.strftime('%Y-%m-%d %H:%M')} to {end_dt.strftime('%Y-%m-%d %H:%M')}",
+    )
 
     title = clean_text(args.title.strip()) or clean_text(
         f"TIME TRAVEL CABLE GUIDE - {args.date.strftime('%a %b %d, %Y')} ({start_dt.strftime('%H:%M')}-{end_dt.strftime('%H:%M')})"
     )
 
     if args.range_mode == "single":
+        _status(args.status_messages, "Rendering single-range PDF")
         make_pdf(
             out_path=args.out,
             grid_title=title,
@@ -86,8 +189,11 @@ def main(argv: List[str] | None = None) -> None:
             end_dt=end_dt,
             step_minutes=args.step,
             double_sided_fold=args.double_sided_fold,
+            fold_safe_gap=args.fold_safe_gap,
         )
     else:
+        blocks = split_into_blocks(start_dt, end_dt, args.page_block_hours)
+        _status(args.status_messages, f"Rendering compilation PDF with {len(blocks)} block(s)")
         make_compilation_pdf(
             out_path=args.out,
             channels=channels,
@@ -110,8 +216,11 @@ def main(argv: List[str] | None = None) -> None:
             cover_art_dir=args.cover_art_dir,
             tvdb_api_key=args.tvdb_api_key,
             tvdb_pin=args.tvdb_pin,
+            status_messages=args.status_messages,
+            fold_safe_gap=args.fold_safe_gap,
         )
 
+    _status(args.status_messages, f"Finished writing {args.out}")
     print(f"Wrote {args.out}")
 
 

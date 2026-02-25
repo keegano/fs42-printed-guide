@@ -109,6 +109,26 @@ def test_station42_dir_alias_is_supported():
     assert args.fs42_dir == Path("/tmp/s42")
 
 
+def test_catalog_options_and_status_toggle():
+    args = cfg.parse_effective_args(
+        [
+            "--date",
+            "2026-03-01",
+            "--load-catalog",
+            "scan.json",
+            "--dump-catalog",
+            "dump.json",
+            "--fold-safe-gap",
+            "0.2",
+            "--no-status-messages",
+        ]
+    )
+    assert args.load_catalog == Path("scan.json")
+    assert args.dump_catalog == Path("dump.json")
+    assert args.fold_safe_gap == 0.2
+    assert args.status_messages is False
+
+
 def test_env_file_supplies_tvdb_credentials(tmp_path: Path, monkeypatch):
     env_file = tmp_path / ".env"
     env_file.write_text(
