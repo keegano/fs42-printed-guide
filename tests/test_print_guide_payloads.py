@@ -302,3 +302,30 @@ def test_tvdb_cover_adds_airing_label_from_catalog(tmp_path: Path, monkeypatch):
 
     text = "\n".join((p.extract_text() or "") for p in pytest.importorskip("pypdf").PdfReader(str(out)).pages)
     assert "playing" in text
+
+
+def test_bottom_descriptions_used_when_no_bottom_ads(tmp_path: Path, monkeypatch):
+    channels, _, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
+    monkeypatch.setattr(core, "_fetch_tvdb_token", lambda *_a, **_k: "tok")
+    monkeypatch.setattr(core, "_fetch_tvdb_overview_by_title", lambda title, token: f"{title} overview from TVDB")
+    monkeypatch.setattr(core.random, "shuffle", lambda items: None)
+
+    out = tmp_path / "desc_fallback.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers={},
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 2, 24, 0, 0),
+        range_end=datetime(2026, 2, 25, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        cover_enabled=False,
+        bottom_ads_dir=None,
+        tvdb_api_key="fake-key",
+    )
+
+    text = "\n".join((p.extract_text() or "") for p in pytest.importorskip("pypdf").PdfReader(str(out)).pages)
+    assert "ON TONIGHT" in text
+    assert "overview from TVDB" in text

@@ -70,6 +70,7 @@ Compilation mode supports:
   filled by `--cover-bg-color` (useful for trim/fold safety)
 - TVDB covers can include an airing label (for example: `"Rugrats playing Tuesday at 7:00"`)
   using configurable templates per range mode (`single/day/week/month`)
+- If no bottom ad is available, guide pages can fill lower space with TVDB show-description columns for titles airing in that block
 
 Cover art sources (`--cover-art-source`):
 - `none`
@@ -155,8 +156,10 @@ Compilation extras:
 - `--cover-subtitle-size FLOAT`
 - `--cover-date-font NAME`
 - `--cover-date-size FLOAT`
+- `--cover-date-y FLOAT`
 - `--cover-airing-font NAME`
 - `--cover-airing-size FLOAT`
+- `--cover-airing-y FLOAT`
 - `--cover-airing-label-enabled` / `--no-cover-airing-label`
 - `--cover-airing-label-single-format TEXT`
 - `--cover-airing-label-day-format TEXT`
@@ -176,6 +179,8 @@ inside print-safe bounds and clear of the `CH` column and fold gutter.
 
 Cover text defaults to white with black outline (`--cover-text-color` and
 `--cover-text-outline-color`) so title/date remain printable over arbitrary art.
+Date and airing-label lines are positioned near the bottom by default (`cover_date_y=0.18`,
+`cover_airing_y=0.11`) and are configurable.
 
 ## Example
 

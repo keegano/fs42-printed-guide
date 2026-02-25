@@ -43,13 +43,15 @@ DEFAULTS: Dict[str, Any] = {
     "cover_subtitle_size": 13.0,
     "cover_date_font": "Helvetica-Bold",
     "cover_date_size": 18.0,
+    "cover_date_y": 0.18,
     "cover_airing_font": "Helvetica-Bold",
     "cover_airing_size": 14.0,
+    "cover_airing_y": 0.11,
     "cover_airing_label_enabled": True,
     "cover_airing_label_single_format": "{time}",
-    "cover_airing_label_day_format": "{time}",
-    "cover_airing_label_week_format": "{title} playing {weekday} at {time}",
-    "cover_airing_label_month_format": "{md} at {time}",
+    "cover_airing_label_day_format": "Catch {show} at {time}!",
+    "cover_airing_label_week_format": "Catch {show} on {weekday} at {time}!",
+    "cover_airing_label_month_format": "Catch {show} on {md} at {time}!",
     "cover_art_source": "none",
     "cover_art_dir": None,
     "tvdb_api_key": "",
@@ -146,6 +148,8 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
         "cover_date_size",
         "cover_text_outline_width",
         "cover_airing_size",
+        "cover_date_y",
+        "cover_airing_y",
     )
     for k in float_keys:
         if k in out and out[k] is not None and not isinstance(out[k], float):
@@ -198,8 +202,10 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--cover-subtitle-size", type=float, help="Cover subtitle font size (pt).")
     p.add_argument("--cover-date-font", type=str, help="Cover period/date font name.")
     p.add_argument("--cover-date-size", type=float, help="Cover period/date font size (pt).")
+    p.add_argument("--cover-date-y", type=float, help="Cover period/date vertical position as fraction of cover height (0-1).")
     p.add_argument("--cover-airing-font", type=str, help="Cover airing-label font name.")
     p.add_argument("--cover-airing-size", type=float, help="Cover airing-label font size (pt).")
+    p.add_argument("--cover-airing-y", type=float, help="Cover airing-label vertical position as fraction of cover height (0-1).")
     p.add_argument("--cover-airing-label-enabled", action="store_true", help="Enable airing label text on TVDB cover selection.")
     p.add_argument("--no-cover-airing-label", dest="cover_airing_label_enabled", action="store_false", help="Disable airing label text on TVDB cover selection.")
     p.add_argument("--cover-airing-label-single-format", type=str, help="Template for single range airing label.")
