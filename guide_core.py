@@ -551,7 +551,7 @@ def build_catch_promo_label(
         ignored_titles=ignored_titles,
     )
     if not ev:
-        return "Catch Tonight", "Something good is always on."
+        return "", "Something good is always on."
     shown = display_title(ev.title, ev.filename)
     label = _build_airing_label(
         range_mode=range_mode,
@@ -562,7 +562,7 @@ def build_catch_promo_label(
         week_fmt=week_fmt,
         month_fmt=month_fmt,
     )
-    return "Catch Tonight", label
+    return "", label
 
 
 def compute_range_bounds(range_mode: str, anchor_date: date, start_time: time, hours: float) -> Tuple[datetime, datetime]:
@@ -941,7 +941,7 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
         sentences = _split_sentences(entry.description)
         if not sentences:
             # No valid sentences -> remove this show and stop column.
-            return
+            break
 
         usable_lines: List[str] = []
         for sent in sentences:
@@ -961,10 +961,10 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
         if cursor_y - needed_h < body_y:
             col += 1
             if col >= cols:
-                return
+                break
             cursor_y = text_top
             if cursor_y - needed_h < body_y:
-                return
+                break
 
         cx = body_x + col * (col_w + col_gap)
         paragraph.drawOn(c, cx, cursor_y - needed_h)
@@ -973,7 +973,16 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
 
     if not drew_any:
         c.setFont("Helvetica", 7)
-        c.drawString(body_x, max(body_y + 6, text_top - 8), "No current descriptions available.")
+        c.drawString(body_x, max(body_y + 6, text_top - 8), "No descriptions generated; check source filters.")
+
+
+def _schedule_blurb(ev: Event, title: str) -> str:
+    """Show-specific fallback text when external metadata is unavailable."""
+    s = f"Airing {ev.start.strftime('%-I:%M %p')} to {ev.end.strftime('%-I:%M %p')}."
+    base = clean_text(title)
+    if base:
+        return f"{base} {s}"
+    return s
 
 
 def _build_block_descriptions(
@@ -998,12 +1007,12 @@ def _build_block_descriptions(
         end_dt,
         ignored_channels=ignored_channels,
         ignored_titles=ignored_titles,
-        max_items=max_items * 3,
+        max_items=max_items * 20,
     )
     if status_cb:
         status_cb(f"On Tonight candidates considered: {len(candidates)}")
     if not candidates:
-        return [OnTonightEntry(title="Programming Note", description="No current descriptions available.")]
+        return []
     out: List[OnTonightEntry] = []
     token = token_holder.get("token", "")
     if tvdb_api_key and not token:
@@ -1034,22 +1043,14 @@ def _build_block_descriptions(
                 except Exception:
                     desc = ""
                 desc_cache[title] = desc
-        if desc:
-            out.append(OnTonightEntry(title=title, description=desc))
+        if not desc:
+            desc = _schedule_blurb(ev, title)
+        out.append(OnTonightEntry(title=title, description=desc))
         if len(out) >= max_items:
             break
     if status_cb:
         status_cb(f"On Tonight entries after filtering/descriptions: {len(out)}")
-    if not out:
-        return [OnTonightEntry(title="Programming Note", description="No current descriptions available.")]
     return out
-
-
-def _ensure_bottom_descriptions(entries: Optional[List[OnTonightEntry]]) -> List[OnTonightEntry]:
-    """Ensure bottom description sections are never empty."""
-    if entries:
-        return entries
-    return [OnTonightEntry(title="Programming Note", description="No current descriptions available.")]
 
 
 def time_label(dt: datetime) -> str:
@@ -2198,7 +2199,7 @@ def make_compilation_pdf(
                     month_fmt=cover_airing_label_month_format,
                 )
                 _status(f"Catch promo image selected on attempt {idx}: {shown}")
-                return "Catch Tonight", label, art
+                return "", label, art
 
         _status("Catch promo image lookup failed for all candidates; using text-only promo page")
         return base_title, base_label, None
@@ -2258,7 +2259,6 @@ def make_compilation_pdf(
                     api_cache=runtime_api_cache,
                     status_cb=_status,
                 )
-                bottom_desc_left = _ensure_bottom_descriptions(bottom_desc_left)
                 _status(f"On Tonight entries (left): {len(bottom_desc_left)}")
             if not bottom_ad_right:
                 _status(
@@ -2279,7 +2279,6 @@ def make_compilation_pdf(
                     api_cache=runtime_api_cache,
                     status_cb=_status,
                 )
-                bottom_desc_right = _ensure_bottom_descriptions(bottom_desc_right)
                 _status(f"On Tonight entries (right): {len(bottom_desc_right)}")
             logical_pages.append(
                 BookletPageSpec(
@@ -2304,38 +2303,37 @@ def make_compilation_pdf(
                 )
             )
 
-        if cover_enabled:
-            if back_cover_catch_enabled:
-                bc_title, bc_label, bc_art = _build_catch_promo_asset(range_start, range_end)
-                logical_pages.append(
-                    BookletPageSpec(
-                        kind="cover",
-                        cover_title=bc_title,
-                        cover_subtitle="",
-                        cover_period_label="",
-                        cover_airing_label=bc_label,
-                        cover_art_path=bc_art,
-                        cover_bg_color=cover_bg_color,
-                        cover_border_size=cover_border_size,
-                        cover_text_color=cover_text_color,
-                        cover_text_outline_color=cover_text_outline_color,
-                        cover_text_outline_width=cover_text_outline_width,
-                        cover_title_font=cover_title_font,
-                        cover_title_size=cover_title_size,
-                        cover_subtitle_font=cover_subtitle_font,
-                        cover_subtitle_size=cover_subtitle_size,
-                        cover_date_font=cover_date_font,
-                        cover_date_size=cover_date_size,
-                        cover_date_y=cover_date_y,
-                        cover_airing_font=cover_airing_font,
-                        cover_airing_size=cover_airing_size,
-                        cover_airing_y=cover_airing_y,
-                    )
+        if back_cover_catch_enabled:
+            bc_title, bc_label, bc_art = _build_catch_promo_asset(range_start, range_end)
+            logical_pages.append(
+                BookletPageSpec(
+                    kind="cover",
+                    cover_title=bc_title,
+                    cover_subtitle="",
+                    cover_period_label="",
+                    cover_airing_label=bc_label,
+                    cover_art_path=bc_art,
+                    cover_bg_color=cover_bg_color,
+                    cover_border_size=cover_border_size,
+                    cover_text_color=cover_text_color,
+                    cover_text_outline_color=cover_text_outline_color,
+                    cover_text_outline_width=cover_text_outline_width,
+                    cover_title_font=cover_title_font,
+                    cover_title_size=cover_title_size,
+                    cover_subtitle_font=cover_subtitle_font,
+                    cover_subtitle_size=cover_subtitle_size,
+                    cover_date_font=cover_date_font,
+                    cover_date_size=cover_date_size,
+                    cover_date_y=cover_date_y,
+                    cover_airing_font=cover_airing_font,
+                    cover_airing_size=cover_airing_size,
+                    cover_airing_y=cover_airing_y,
                 )
-                _status("Added generated Catch promo on back cover")
-            else:
-                logical_pages.append(BookletPageSpec(kind="blank"))
-                _status("Added blank back-cover half-page")
+            )
+            _status("Added generated Catch promo on back cover")
+        elif cover_enabled:
+            logical_pages.append(BookletPageSpec(kind="blank"))
+            _status("Added blank back-cover half-page")
 
         imposed = impose_booklet_pages(logical_pages)
         _status(f"Booklet imposition produced {len(imposed)} physical side(s)")
@@ -2438,7 +2436,6 @@ def make_compilation_pdf(
                 api_cache=runtime_api_cache,
                 status_cb=_status,
             )
-            bottom_desc = _ensure_bottom_descriptions(bottom_desc)
             _status(f"On Tonight entries: {len(bottom_desc)}")
         header_left = "CABLE GUIDE"
         header_right = f"{b0.strftime('%a %b %d, %Y %H:%M')} - {b1.strftime('%H:%M')}"
@@ -2463,11 +2460,11 @@ def make_compilation_pdf(
             _status(f"Inserting interstitial page after block {i + 1} using source={interstitial_source}")
             story.append(PageBreak())
             if interstitial_source == "catch":
-                cap_title, cap_label, cap_art = _build_catch_promo_asset(b0, b1)
+                _, cap_label, cap_art = _build_catch_promo_asset(b0, b1)
                 story.append(
                     CoverPageFlowable(
                         frame_height=frame_h,
-                        title=cap_title,
+                        title="",
                         subtitle="",
                         period_label="",
                         airing_label=cap_label,

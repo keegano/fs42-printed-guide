@@ -420,7 +420,7 @@ def test_draw_description_columns_empty_descriptions_shows_fallback(tmp_path: Pa
 
     txt = _extract_pdf_text(out)
     assert "ON TONIGHT" in txt
-    assert "No current descriptions available." in txt
+    assert "No descriptions generated; check source filters." in txt
 
 
 def test_movie_meta_badge_rendered_inline(monkeypatch, tmp_path: Path):
@@ -632,7 +632,8 @@ def test_make_compilation_pdf_interstitial_catch_page(tmp_path: Path, monkeypatc
         cover_enabled=False,
     )
     text = _extract_pdf_text(out)
-    assert "Catch Tonight" in text
+    assert "Catch Tonight" not in text
+    assert "Catch " in text
 
 
 def test_make_compilation_pdf_booklet_back_cover_catch(tmp_path: Path, monkeypatch):
@@ -655,7 +656,31 @@ def test_make_compilation_pdf_booklet_back_cover_catch(tmp_path: Path, monkeypat
         back_cover_catch_enabled=True,
     )
     text = _extract_pdf_text(out)
-    assert "Catch Tonight" in text
+    assert "Catch Tonight" not in text
+    assert "Catch " in text
+
+
+def test_make_compilation_pdf_booklet_back_cover_catch_without_front_cover(tmp_path: Path, monkeypatch):
+    channels, numbers, schedules = _sample_schedules()
+    monkeypatch.setattr(core, "pick_cover_airing_event", lambda *a, **k: schedules["NBC"][0])
+
+    out = tmp_path / "booklet_back_only_catch.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 3, 1, 0, 0),
+        range_end=datetime(2026, 3, 2, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        double_sided_fold=True,
+        cover_enabled=False,
+        back_cover_catch_enabled=True,
+    )
+    text = _extract_pdf_text(out)
+    assert "Catch " in text
 
 
 def test_flowable_wraps():

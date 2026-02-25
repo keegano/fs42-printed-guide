@@ -442,4 +442,4 @@ def test_real_catalog_fuzz_no_blank_ontonight_boxes_with_cached_api(tmp_path: Pa
             txt = page.extract_text() or ""
             if "CABLE GUIDE" in txt and "CH" in txt:
                 assert "ON TONIGHT" in txt
-                assert ("No current descriptions available." in txt) or re.search(r"[A-Za-z][A-Za-z0-9 '&-]{1,40}:", txt)
+                assert ("No descriptions generated; check source filters." in txt) or re.search(r"[A-Za-z][A-Za-z0-9 '&-]{1,40}:", txt)
