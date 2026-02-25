@@ -797,7 +797,12 @@ def test_make_compilation_pdf_prefers_matched_promo_over_generic(tmp_path: Path)
     )
     text = _extract_pdf_text(out)
     assert "Catch Test Show on Thursday at 9:00!" in text
-    assert "Tony's Pizza" not in text
+
+    # Generic promos may be consumed for booklet padding, but the matched promo
+    # must be used for the back cover first (outer sheet first side).
+    reader = PdfReader(str(out))
+    first_page = reader.pages[0].extract_text() or ""
+    assert "Catch Test Show on Thursday at 9:00!" in first_page
 
 
 def test_make_compilation_pdf_booklet_never_reuses_same_promo(tmp_path: Path):
@@ -890,6 +895,80 @@ def test_booklet_back_cover_promo_stays_on_outer_sheet(tmp_path: Path):
     second = reader.pages[1].extract_text() or ""
     assert "BACK COVER PROMO" in first
     assert "BACK COVER PROMO" not in second
+
+
+def test_booklet_padding_uses_promos_before_blanks(tmp_path: Path, capsys):
+    channels, numbers, schedules = _sample_schedules()
+    content_dir = tmp_path / "content"
+    (content_dir / "covers").mkdir(parents=True)
+    promos = content_dir / "promos"
+    promos.mkdir(parents=True)
+    for idx in range(1, 5):
+        (promos / f"promo_{idx}.json").write_text(
+            json.dumps(
+                {
+                    "id": f"promo-{idx}",
+                    "enabled": True,
+                    "range_modes": [],
+                    "title": f"PROMO {idx}",
+                    "message_template": f"Message {idx}",
+                    "image": "",
+                    "match_titles": [],
+                    "match_channels": [],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    out = tmp_path / "pad_promos.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 3, 5, 0, 0),
+        range_end=datetime(2026, 3, 6, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        double_sided_fold=True,
+        cover_enabled=False,
+        content_dir=content_dir,
+        status_messages=True,
+    )
+    captured = capsys.readouterr().out
+    assert "Inserted booklet pad promo before back cover" in captured
+    assert "Inserted booklet pad blank before back cover (no unused promos left)" not in captured
+
+
+def test_ontonight_generation_retries_until_renderable(tmp_path: Path, monkeypatch, capsys):
+    channels, numbers, schedules = _sample_schedules()
+    attempts = {"n": 0}
+
+    def _mock_renderable(_entries, _box_width=250.0):
+        attempts["n"] += 1
+        return attempts["n"] >= 3
+
+    monkeypatch.setattr(core, "_has_renderable_ontonight_content", _mock_renderable)
+
+    out = tmp_path / "retry_ontonight.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="single",
+        range_start=datetime(2026, 3, 5, 9, 0),
+        range_end=datetime(2026, 3, 5, 12, 0),
+        page_block_hours=3,
+        step_minutes=30,
+        cover_enabled=False,
+        status_messages=True,
+    )
+    captured = capsys.readouterr().out
+    assert "WARNING: On Tonight generation attempt 1/10 had no renderable entries" in captured
+    assert "WARNING: On Tonight generation attempt 2/10 had no renderable entries" in captured
+    assert "On Tonight generation recovered" in captured
 
 
 def test_flowable_wraps():

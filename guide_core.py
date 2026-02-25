@@ -973,6 +973,7 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
         spaceAfter=2,
     )
     drew_any = False
+    drew_in_col = False
     for entry in descriptions:
         title = clean_text(entry.title)
         if not title:
@@ -980,8 +981,15 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
 
         sentences = _split_sentences(entry.description)
         if not sentences:
-            # No valid sentences -> remove this show and stop column.
-            break
+            # No valid sentences -> remove this show.
+            # If we already wrote in this column, end it and move on.
+            if drew_in_col:
+                col += 1
+                if col >= cols:
+                    break
+                cursor_y = text_top
+                drew_in_col = False
+            continue
 
         usable_lines: List[str] = []
         for sent in sentences:
@@ -992,8 +1000,15 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
             usable_lines.extend(sent_lines)
 
         if not usable_lines:
-            # Remove whole show and end this column.
-            break
+            # Remove whole show and end this column if it already has content.
+            # Otherwise keep trying additional shows to avoid empty boxes.
+            if drew_in_col:
+                col += 1
+                if col >= cols:
+                    break
+                cursor_y = text_top
+                drew_in_col = False
+            continue
 
         paragraph = Paragraph(f"<b>{escape(title)}:</b> {escape(' '.join(usable_lines))}", para_style)
         _, needed_h = paragraph.wrap(col_w, h)
@@ -1003,16 +1018,39 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
             if col >= cols:
                 break
             cursor_y = text_top
+            drew_in_col = False
             if cursor_y - needed_h < body_y:
-                break
+                # Entry cannot fit in an empty column; skip it and try another.
+                continue
 
         cx = body_x + col * (col_w + col_gap)
         paragraph.drawOn(c, cx, cursor_y - needed_h)
         cursor_y -= needed_h + para_style.spaceAfter
         drew_any = True
+        drew_in_col = True
 
     if not drew_any:
         return
+
+
+def _has_renderable_ontonight_content(descriptions: List[OnTonightEntry], box_width: float = 250.0) -> bool:
+    """Preflight check used by retry logic to avoid blank ON TONIGHT boxes."""
+    if not descriptions:
+        return False
+    padding = 6.0
+    body_w = max(10.0, box_width - (2.0 * padding))
+    cols = 2 if body_w >= 320 else 1
+    col_gap = 10.0
+    col_w = max(20.0, (body_w - ((cols - 1) * col_gap)) / cols)
+    for entry in descriptions:
+        title = clean_text(entry.title)
+        if not title:
+            continue
+        for sent in _split_sentences(entry.description):
+            sent_lines = _wrap_text_lines(sent, "Helvetica", 7, col_w)
+            if sent_lines and not any(pdfmetrics.stringWidth(ln, "Helvetica", 7) > col_w for ln in sent_lines):
+                return True
+    return False
 
 
 def _schedule_blurb(ev: Event, title: str) -> str:
@@ -2278,6 +2316,35 @@ def make_compilation_pdf(
         _status(f"No promo manifest matched for {purpose}; no auto-generated fallback will be used")
         return "", "", None
 
+    def _build_ontonight_with_retries(
+        block_start: datetime,
+        block_end: datetime,
+        label: str,
+    ) -> List[OnTonightEntry]:
+        max_attempts = 10
+        for attempt in range(1, max_attempts + 1):
+            entries = _build_block_descriptions(
+                schedules=schedules,
+                start_dt=block_start,
+                end_dt=block_end,
+                ignored_channels=ignore_ch,
+                ignored_titles=ignore_t,
+                nfo_index=nfo_index,
+                status_cb=_status,
+            )
+            if _has_renderable_ontonight_content(entries):
+                if attempt > 1:
+                    _status(
+                        f"On Tonight generation recovered for {label} on attempt {attempt}/{max_attempts}"
+                    )
+                return entries
+            _status(
+                f"WARNING: On Tonight generation attempt {attempt}/{max_attempts} "
+                f"had no renderable entries for {label}; retrying"
+            )
+        _status(f"WARNING: On Tonight generation failed after {max_attempts} attempts for {label}")
+        return []
+
     if double_sided_fold:
         logical_pages: List[BookletPageSpec] = []
         if cover_enabled:
@@ -2318,14 +2385,10 @@ def make_compilation_pdf(
                 _status(
                     f"Generating On Tonight fallback for {b0.strftime('%m/%d %H:%M')} - {split_dt.strftime('%H:%M')} (left half)"
                 )
-                bottom_desc_left = _build_block_descriptions(
-                    schedules=schedules,
-                    start_dt=b0,
-                    end_dt=split_dt,
-                    ignored_channels=ignore_ch,
-                    ignored_titles=ignore_t,
-                    nfo_index=nfo_index,
-                    status_cb=_status,
+                bottom_desc_left = _build_ontonight_with_retries(
+                    block_start=b0,
+                    block_end=split_dt,
+                    label=f"{b0.strftime('%m/%d %H:%M')}-{split_dt.strftime('%H:%M')} left",
                 )
                 _status(f"On Tonight entries (left): {len(bottom_desc_left)}")
                 if not bottom_desc_left:
@@ -2334,14 +2397,10 @@ def make_compilation_pdf(
                 _status(
                     f"Generating On Tonight fallback for {split_dt.strftime('%m/%d %H:%M')} - {b1.strftime('%H:%M')} (right half)"
                 )
-                bottom_desc_right = _build_block_descriptions(
-                    schedules=schedules,
-                    start_dt=split_dt,
-                    end_dt=b1,
-                    ignored_channels=ignore_ch,
-                    ignored_titles=ignore_t,
-                    nfo_index=nfo_index,
-                    status_cb=_status,
+                bottom_desc_right = _build_ontonight_with_retries(
+                    block_start=split_dt,
+                    block_end=b1,
+                    label=f"{split_dt.strftime('%m/%d %H:%M')}-{b1.strftime('%H:%M')} right",
                 )
                 _status(f"On Tonight entries (right): {len(bottom_desc_right)}")
                 if not bottom_desc_right:
@@ -2401,13 +2460,43 @@ def make_compilation_pdf(
             )
         logical_pages.append(back_cover_spec)
         _status("Added promo back cover")
-        _status("Back-cover promo selected first; no explicit filler promo pages will be added")
+        _status("Back-cover promo selected first; filling booklet padding with remaining promos before blanks")
 
         # Preserve back cover as the final logical page (outer back side) when
         # padding to a multiple of 4 for booklet imposition.
         while len(logical_pages) % 4 != 0:
-            logical_pages.insert(len(logical_pages) - 1, BookletPageSpec(kind="blank"))
-            _status("Inserted booklet pad blank before back cover to preserve outer back position")
+            pad_title, pad_label, pad_art = _pick_promo_asset(range_start, range_end, "booklet-filler")
+            if pad_title or pad_label or pad_art:
+                logical_pages.insert(
+                    len(logical_pages) - 1,
+                    BookletPageSpec(
+                        kind="cover",
+                        cover_title=pad_title,
+                        cover_subtitle="",
+                        cover_period_label="",
+                        cover_airing_label=pad_label,
+                        cover_art_path=pad_art,
+                        cover_bg_color=cover_bg_color,
+                        cover_border_size=cover_border_size,
+                        cover_text_color=cover_text_color,
+                        cover_text_outline_color=cover_text_outline_color,
+                        cover_text_outline_width=cover_text_outline_width,
+                        cover_title_font=cover_title_font,
+                        cover_title_size=cover_title_size,
+                        cover_subtitle_font=cover_subtitle_font,
+                        cover_subtitle_size=cover_subtitle_size,
+                        cover_date_font=cover_date_font,
+                        cover_date_size=cover_date_size,
+                        cover_date_y=cover_date_y,
+                        cover_airing_font=cover_airing_font,
+                        cover_airing_size=cover_airing_size,
+                        cover_airing_y=cover_airing_y,
+                    ),
+                )
+                _status("Inserted booklet pad promo before back cover")
+            else:
+                logical_pages.insert(len(logical_pages) - 1, BookletPageSpec(kind="blank"))
+                _status("Inserted booklet pad blank before back cover (no unused promos left)")
 
         imposed = impose_booklet_pages(logical_pages)
         _status(f"Booklet imposition produced {len(imposed)} physical side(s)")
@@ -2499,14 +2588,10 @@ def make_compilation_pdf(
         bottom_desc: List[OnTonightEntry] = []
         if not bottom_ad:
             _status(f"Generating On Tonight fallback for {b0.strftime('%m/%d %H:%M')} - {b1.strftime('%H:%M')}")
-            bottom_desc = _build_block_descriptions(
-                schedules=schedules,
-                start_dt=b0,
-                end_dt=b1,
-                ignored_channels=ignore_ch,
-                ignored_titles=ignore_t,
-                nfo_index=nfo_index,
-                status_cb=_status,
+            bottom_desc = _build_ontonight_with_retries(
+                block_start=b0,
+                block_end=b1,
+                label=f"{b0.strftime('%m/%d %H:%M')}-{b1.strftime('%H:%M')}",
             )
             _status(f"On Tonight entries: {len(bottom_desc)}")
             if not bottom_desc:
