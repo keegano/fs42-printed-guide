@@ -34,12 +34,22 @@ DEFAULTS: Dict[str, Any] = {
     "cover_period_label": "",
     "cover_bg_color": "FFFFFF",
     "cover_border_size": 0.0,
+    "cover_text_color": "FFFFFF",
+    "cover_text_outline_color": "000000",
+    "cover_text_outline_width": 1.2,
     "cover_title_font": "Helvetica-Bold",
     "cover_title_size": 28.0,
     "cover_subtitle_font": "Helvetica",
     "cover_subtitle_size": 13.0,
     "cover_date_font": "Helvetica-Bold",
     "cover_date_size": 18.0,
+    "cover_airing_font": "Helvetica-Bold",
+    "cover_airing_size": 14.0,
+    "cover_airing_label_enabled": True,
+    "cover_airing_label_single_format": "{time}",
+    "cover_airing_label_day_format": "{time}",
+    "cover_airing_label_week_format": "{title} playing {weekday} at {time}",
+    "cover_airing_label_month_format": "{md} at {time}",
     "cover_art_source": "none",
     "cover_art_dir": None,
     "tvdb_api_key": "",
@@ -134,12 +144,14 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
         "cover_title_size",
         "cover_subtitle_size",
         "cover_date_size",
+        "cover_text_outline_width",
+        "cover_airing_size",
     )
     for k in float_keys:
         if k in out and out[k] is not None and not isinstance(out[k], float):
             out[k] = float(out[k])
 
-    bool_keys = ("double_sided_fold", "cover_page", "status_messages")
+    bool_keys = ("double_sided_fold", "cover_page", "status_messages", "cover_airing_label_enabled")
     for k in bool_keys:
         if k in out and not isinstance(out[k], bool):
             if isinstance(out[k], str):
@@ -177,12 +189,23 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--cover-period-label", type=str, help="Optional explicit period label on cover. If omitted, inferred from range mode/date.")
     p.add_argument("--cover-bg-color", type=str, help="Cover background/border color hex, e.g. FFFFFF or 101820.")
     p.add_argument("--cover-border-size", type=float, help="Border inset in inches around cover art.")
+    p.add_argument("--cover-text-color", type=str, help="Cover text color hex.")
+    p.add_argument("--cover-text-outline-color", type=str, help="Cover text outline color hex.")
+    p.add_argument("--cover-text-outline-width", type=float, help="Cover text outline width in points.")
     p.add_argument("--cover-title-font", type=str, help="Cover title font name.")
     p.add_argument("--cover-title-size", type=float, help="Cover title font size (pt).")
     p.add_argument("--cover-subtitle-font", type=str, help="Cover subtitle font name.")
     p.add_argument("--cover-subtitle-size", type=float, help="Cover subtitle font size (pt).")
     p.add_argument("--cover-date-font", type=str, help="Cover period/date font name.")
     p.add_argument("--cover-date-size", type=float, help="Cover period/date font size (pt).")
+    p.add_argument("--cover-airing-font", type=str, help="Cover airing-label font name.")
+    p.add_argument("--cover-airing-size", type=float, help="Cover airing-label font size (pt).")
+    p.add_argument("--cover-airing-label-enabled", action="store_true", help="Enable airing label text on TVDB cover selection.")
+    p.add_argument("--no-cover-airing-label", dest="cover_airing_label_enabled", action="store_false", help="Disable airing label text on TVDB cover selection.")
+    p.add_argument("--cover-airing-label-single-format", type=str, help="Template for single range airing label.")
+    p.add_argument("--cover-airing-label-day-format", type=str, help="Template for day range airing label.")
+    p.add_argument("--cover-airing-label-week-format", type=str, help="Template for week range airing label.")
+    p.add_argument("--cover-airing-label-month-format", type=str, help="Template for month range airing label.")
     p.add_argument("--cover-art-source", choices=["none", "folder", "tvdb", "auto"], help="Cover art source.")
     p.add_argument("--cover-art-dir", type=Path, help="Folder for cover art images (used by cover-art-source folder/auto).")
     p.add_argument("--tvdb-api-key", type=str, help="TVDB API key for cover-art-source tvdb/auto.")

@@ -97,6 +97,41 @@ def test_cover_period_label_modes():
     assert core.pick_cover_period_label("day", s).endswith("2026")
 
 
+def test_build_airing_label_formats():
+    dt = datetime(2026, 2, 28, 20, 30)
+    week = core._build_airing_label(
+        "week",
+        "Rugrats",
+        dt,
+        single_fmt="{time}",
+        day_fmt="{time}",
+        week_fmt="{title} playing {weekday} at {time}",
+        month_fmt="{md} at {time}",
+    )
+    month = core._build_airing_label(
+        "month",
+        "Rugrats",
+        dt,
+        single_fmt="{time}",
+        day_fmt="{time}",
+        week_fmt="{title} playing {weekday} at {time}",
+        month_fmt="{md} at {time}",
+    )
+    day = core._build_airing_label(
+        "day",
+        "Rugrats",
+        datetime(2026, 2, 28, 5, 0),
+        single_fmt="{time}",
+        day_fmt="{time}",
+        week_fmt="{title} playing {weekday} at {time}",
+        month_fmt="{md} at {time}",
+    )
+    assert "Rugrats playing" in week
+    assert "Saturday" in week
+    assert month == "2/28 at 8:30"
+    assert day == "5:00"
+
+
 def test_list_image_files_and_choose_random(tmp_path: Path, monkeypatch):
     (tmp_path / "a.jpg").write_text("x")
     (tmp_path / "b.png").write_text("x")

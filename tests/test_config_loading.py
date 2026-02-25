@@ -132,6 +132,18 @@ def test_catalog_options_and_status_toggle():
             "Helvetica",
             "--cover-date-size",
             "16",
+            "--cover-text-color",
+            "FFFFFF",
+            "--cover-text-outline-color",
+            "000000",
+            "--cover-text-outline-width",
+            "1.4",
+            "--cover-airing-font",
+            "Helvetica-Bold",
+            "--cover-airing-size",
+            "12",
+            "--cover-airing-label-week-format",
+            "{title} playing {weekday} at {time}",
             "--no-status-messages",
         ]
     )
@@ -144,6 +156,12 @@ def test_catalog_options_and_status_toggle():
     assert args.cover_title_size == 30.0
     assert args.cover_date_font == "Helvetica"
     assert args.cover_date_size == 16.0
+    assert args.cover_text_color == "FFFFFF"
+    assert args.cover_text_outline_color == "000000"
+    assert args.cover_text_outline_width == 1.4
+    assert args.cover_airing_font == "Helvetica-Bold"
+    assert args.cover_airing_size == 12.0
+    assert "{title}" in args.cover_airing_label_week_format
     assert args.status_messages is False
 
 

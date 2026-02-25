@@ -271,3 +271,34 @@ def test_real_catalog_compilation_with_ads(tmp_path: Path, monkeypatch):
     assert len(reader.pages) == 4
     assert "Time Travel Cable Guide" in text
     assert "CABLE GUIDE" in text
+
+
+def test_tvdb_cover_adds_airing_label_from_catalog(tmp_path: Path, monkeypatch):
+    channels, _, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
+    cover = tmp_path / "cover.png"
+    _write_tiny_png(cover)
+
+    monkeypatch.setattr(core, "fetch_tvdb_cover_art", lambda *_a, **_k: cover)
+    monkeypatch.setattr(core.random, "choice", lambda items: items[0])
+
+    out = tmp_path / "tvdb_cover_label.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers={},
+        schedules=schedules,
+        range_mode="week",
+        range_start=datetime(2026, 2, 24, 0, 0),
+        range_end=datetime(2026, 3, 3, 0, 0),
+        page_block_hours=24,
+        step_minutes=30,
+        cover_enabled=True,
+        cover_title="Time Travel Cable Guide",
+        cover_subtitle="Week",
+        cover_art_source="tvdb",
+        cover_airing_label_enabled=True,
+        cover_airing_label_week_format="{title} playing {weekday} at {time}",
+    )
+
+    text = "\n".join((p.extract_text() or "") for p in pytest.importorskip("pypdf").PdfReader(str(out)).pages)
+    assert "playing" in text

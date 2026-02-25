@@ -33,6 +33,8 @@ def test_example_month_booklet_toml_parses():
     assert args.cover_bg_color == "102030"
     assert args.cover_border_size == 0.14
     assert args.cover_title_size == 30.0
+    assert args.cover_text_outline_width == 1.2
+    assert "{weekday}" in args.cover_airing_label_week_format
 
 
 def test_example_cached_iterate_toml_parses():
@@ -45,6 +47,8 @@ def test_example_cached_iterate_toml_parses():
     assert args.cover_art_source == "auto"
     assert args.cover_bg_color == "1D2A44"
     assert args.cover_border_size == 0.12
+    assert args.cover_text_outline_color == "000000"
+    assert args.cover_airing_label_enabled is True
 
 
 def test_example_real_catalog_ads_toml_parses():
@@ -55,3 +59,5 @@ def test_example_real_catalog_ads_toml_parses():
     assert args.range_mode == "day"
     assert args.ad_insert_every == 1
     assert args.cover_bg_color == "101820"
+    assert args.cover_text_color == "FFFFFF"
+    assert args.cover_airing_label_day_format == "{time}"

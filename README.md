@@ -16,6 +16,7 @@ Current rendering supports:
 - Catalog dump/load to reuse scanned schedules without re-running FieldStation42
 - Configurable folded safe-gap at center fold for print tolerance
 - Cover styling controls (background color, border inset, and title/date fonts)
+- Default outlined cover text for readability on arbitrary backgrounds
 
 ## Data Flow
 
@@ -67,6 +68,8 @@ Compilation mode supports:
 - Optional cover page (`--cover-page`) with configurable text and optional art
 - Cover art can be rendered as a full-bleed image inside a configurable border
   filled by `--cover-bg-color` (useful for trim/fold safety)
+- TVDB covers can include an airing label (for example: `"Rugrats playing Tuesday at 7:00"`)
+  using configurable templates per range mode (`single/day/week/month`)
 
 Cover art sources (`--cover-art-source`):
 - `none`
@@ -143,12 +146,22 @@ Compilation extras:
 - `--cover-period-label TEXT`
 - `--cover-bg-color HEX`
 - `--cover-border-size FLOAT`
+- `--cover-text-color HEX`
+- `--cover-text-outline-color HEX`
+- `--cover-text-outline-width FLOAT`
 - `--cover-title-font NAME`
 - `--cover-title-size FLOAT`
 - `--cover-subtitle-font NAME`
 - `--cover-subtitle-size FLOAT`
 - `--cover-date-font NAME`
 - `--cover-date-size FLOAT`
+- `--cover-airing-font NAME`
+- `--cover-airing-size FLOAT`
+- `--cover-airing-label-enabled` / `--no-cover-airing-label`
+- `--cover-airing-label-single-format TEXT`
+- `--cover-airing-label-day-format TEXT`
+- `--cover-airing-label-week-format TEXT`
+- `--cover-airing-label-month-format TEXT`
 - `--cover-art-source none|folder|tvdb|auto`
 - `--cover-art-dir PATH`
 - `--tvdb-api-key KEY`
@@ -160,6 +173,9 @@ Compilation extras:
 `--fold-safe-gap` applies to folded single pages and folded booklet compilation spreads.
 Time tick labels on guide headers are inset at the edges so start/end labels stay
 inside print-safe bounds and clear of the `CH` column and fold gutter.
+
+Cover text defaults to white with black outline (`--cover-text-color` and
+`--cover-text-outline-color`) so title/date remain printable over arbitrary art.
 
 ## Example
 

@@ -348,6 +348,54 @@ def pick_cover_period_label(range_mode: str, start_dt: datetime) -> str:
     return start_dt.strftime("%B %Y")
 
 
+def _clock_no_ampm(dt: datetime) -> str:
+    return f"{dt.hour % 12 or 12}:{dt.minute:02d}"
+
+
+def _build_airing_label(
+    range_mode: str,
+    title: str,
+    when_dt: datetime,
+    single_fmt: str,
+    day_fmt: str,
+    week_fmt: str,
+    month_fmt: str,
+) -> str:
+    template = {
+        "single": single_fmt,
+        "day": day_fmt,
+        "week": week_fmt,
+        "month": month_fmt,
+    }.get(range_mode, day_fmt)
+    values = {
+        "title": clean_text(title),
+        "weekday": when_dt.strftime("%A"),
+        "dow": when_dt.strftime("%a"),
+        "time": _clock_no_ampm(when_dt),
+        "md": f"{when_dt.month}/{when_dt.day}",
+        "date": when_dt.strftime("%m/%d"),
+    }
+    try:
+        return clean_text(template.format(**values))
+    except Exception:
+        return clean_text(template)
+
+
+def pick_cover_airing_event(
+    schedules: Dict[str, List[Event]],
+    range_start: datetime,
+    range_end: datetime,
+) -> Optional[Event]:
+    events = [e for evs in schedules.values() for e in evs if clean_text(e.title)]
+    if not events:
+        return None
+    in_range = [e for e in events if range_start <= e.start < range_end]
+    if in_range:
+        return random.choice(in_range)
+    events.sort(key=lambda e: e.start)
+    return events[0]
+
+
 def compute_range_bounds(range_mode: str, anchor_date: date, start_time: time, hours: float) -> Tuple[datetime, datetime]:
     if range_mode == "single":
         s = datetime.combine(anchor_date, start_time)
@@ -725,14 +773,22 @@ def draw_cover_panel(
     art_path: Optional[Path] = None,
     bg_color_hex: str = "FFFFFF",
     border_size_in: float = 0.0,
+    text_color_hex: str = "FFFFFF",
+    text_outline_color_hex: str = "000000",
+    text_outline_width: float = 1.2,
     title_font: str = "Helvetica-Bold",
     title_size: float = 28.0,
     subtitle_font: str = "Helvetica",
     subtitle_size: float = 13.0,
     date_font: str = "Helvetica-Bold",
     date_size: float = 18.0,
+    airing_label: str = "",
+    airing_font: str = "Helvetica-Bold",
+    airing_size: float = 14.0,
 ) -> None:
     bg = _parse_hex_color(bg_color_hex, fallback=(1.0, 1.0, 1.0))
+    text_rgb = _parse_hex_color(text_color_hex, fallback=(1.0, 1.0, 1.0))
+    outline_rgb = _parse_hex_color(text_outline_color_hex, fallback=(0.0, 0.0, 0.0))
     c.setFillColorRGB(*bg)
     c.rect(x, y, width, height, stroke=0, fill=1)
 
@@ -742,16 +798,68 @@ def draw_cover_panel(
     if art_path and inner_w > 0 and inner_h > 0:
         draw_image_cover(c, art_path, x + border, y + border, inner_w, inner_h)
 
-    c.setFillColorRGB(1.0, 1.0, 1.0)
     cx = x + (width / 2.0)
-    c.setFont(title_font, title_size)
-    c.drawCentredString(cx, y + height * 0.86, clean_text(title))
+    _draw_outlined_centered_text(c, clean_text(title), cx, y + height * 0.86, title_font, title_size, text_rgb, outline_rgb, text_outline_width)
     if subtitle:
-        c.setFont(subtitle_font, subtitle_size)
-        c.drawCentredString(cx, y + height * 0.80, clean_text(subtitle))
+        _draw_outlined_centered_text(
+            c,
+            clean_text(subtitle),
+            cx,
+            y + height * 0.80,
+            subtitle_font,
+            subtitle_size,
+            text_rgb,
+            outline_rgb,
+            text_outline_width,
+        )
     if period_label:
-        c.setFont(date_font, date_size)
-        c.drawCentredString(cx, y + height * 0.72, clean_text(period_label))
+        _draw_outlined_centered_text(
+            c,
+            clean_text(period_label),
+            cx,
+            y + height * 0.72,
+            date_font,
+            date_size,
+            text_rgb,
+            outline_rgb,
+            text_outline_width,
+        )
+    if airing_label:
+        _draw_outlined_centered_text(
+            c,
+            clean_text(airing_label),
+            cx,
+            y + height * 0.64,
+            airing_font,
+            airing_size,
+            text_rgb,
+            outline_rgb,
+            text_outline_width,
+        )
+
+
+def _draw_outlined_centered_text(
+    c,
+    text: str,
+    center_x: float,
+    y: float,
+    font_name: str,
+    font_size: float,
+    fill_rgb: Tuple[float, float, float],
+    outline_rgb: Tuple[float, float, float],
+    outline_width: float,
+) -> None:
+    t = clean_text(text)
+    if not t:
+        return
+    c.setFont(font_name, font_size)
+    ow = max(0.0, outline_width)
+    if ow > 0:
+        c.setFillColorRGB(*outline_rgb)
+        for dx, dy in [(-ow, 0), (ow, 0), (0, -ow), (0, ow), (-ow, -ow), (-ow, ow), (ow, -ow), (ow, ow)]:
+            c.drawCentredString(center_x + dx, y + dy, t)
+    c.setFillColorRGB(*fill_rgb)
+    c.drawCentredString(center_x, y, t)
 
 
 class FullPageImageFlowable(Flowable):
@@ -776,30 +884,42 @@ class CoverPageFlowable(Flowable):
         title: str,
         subtitle: str,
         period_label: str,
+        airing_label: str = "",
         art_path: Optional[Path] = None,
         bg_color: str = "FFFFFF",
         border_size: float = 0.0,
+        text_color: str = "FFFFFF",
+        text_outline_color: str = "000000",
+        text_outline_width: float = 1.2,
         title_font: str = "Helvetica-Bold",
         title_size: float = 28.0,
         subtitle_font: str = "Helvetica",
         subtitle_size: float = 13.0,
         date_font: str = "Helvetica-Bold",
         date_size: float = 18.0,
+        airing_font: str = "Helvetica-Bold",
+        airing_size: float = 14.0,
     ) -> None:
         super().__init__()
         self.frame_height = frame_height
         self.title = clean_text(title)
         self.subtitle = clean_text(subtitle)
         self.period_label = clean_text(period_label)
+        self.airing_label = clean_text(airing_label)
         self.art_path = art_path
         self.bg_color = clean_text(bg_color) or "FFFFFF"
         self.border_size = max(0.0, border_size)
+        self.text_color = clean_text(text_color) or "FFFFFF"
+        self.text_outline_color = clean_text(text_outline_color) or "000000"
+        self.text_outline_width = max(0.0, text_outline_width)
         self.title_font = clean_text(title_font) or "Helvetica-Bold"
         self.title_size = max(1.0, title_size)
         self.subtitle_font = clean_text(subtitle_font) or "Helvetica"
         self.subtitle_size = max(1.0, subtitle_size)
         self.date_font = clean_text(date_font) or "Helvetica-Bold"
         self.date_size = max(1.0, date_size)
+        self.airing_font = clean_text(airing_font) or "Helvetica-Bold"
+        self.airing_size = max(1.0, airing_size)
 
     def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
         self.width = availWidth
@@ -816,15 +936,21 @@ class CoverPageFlowable(Flowable):
             title=self.title,
             subtitle=self.subtitle,
             period_label=self.period_label,
+            airing_label=self.airing_label,
             art_path=self.art_path,
             bg_color_hex=self.bg_color,
             border_size_in=self.border_size,
+            text_color_hex=self.text_color,
+            text_outline_color_hex=self.text_outline_color,
+            text_outline_width=self.text_outline_width,
             title_font=self.title_font,
             title_size=self.title_size,
             subtitle_font=self.subtitle_font,
             subtitle_size=self.subtitle_size,
             date_font=self.date_font,
             date_size=self.date_size,
+            airing_font=self.airing_font,
+            airing_size=self.airing_size,
         )
 
 
@@ -910,15 +1036,21 @@ class BookletPageSpec:
     cover_title: str = ""
     cover_subtitle: str = ""
     cover_period_label: str = ""
+    cover_airing_label: str = ""
     cover_art_path: Optional[Path] = None
     cover_bg_color: str = "FFFFFF"
     cover_border_size: float = 0.0
+    cover_text_color: str = "FFFFFF"
+    cover_text_outline_color: str = "000000"
+    cover_text_outline_width: float = 1.2
     cover_title_font: str = "Helvetica-Bold"
     cover_title_size: float = 28.0
     cover_subtitle_font: str = "Helvetica"
     cover_subtitle_size: float = 13.0
     cover_date_font: str = "Helvetica-Bold"
     cover_date_size: float = 18.0
+    cover_airing_font: str = "Helvetica-Bold"
+    cover_airing_size: float = 14.0
 
 
 def _compute_fold_split(start_dt: datetime, end_dt: datetime, step_minutes: int) -> datetime:
@@ -992,15 +1124,21 @@ class BookletHalfPageFlowable(Flowable):
             title=self.spec.cover_title,
             subtitle=self.spec.cover_subtitle,
             period_label=self.spec.cover_period_label,
+            airing_label=self.spec.cover_airing_label,
             art_path=self.spec.cover_art_path,
             bg_color_hex=self.spec.cover_bg_color,
             border_size_in=self.spec.cover_border_size,
+            text_color_hex=self.spec.cover_text_color,
+            text_outline_color_hex=self.spec.cover_text_outline_color,
+            text_outline_width=self.spec.cover_text_outline_width,
             title_font=self.spec.cover_title_font,
             title_size=self.spec.cover_title_size,
             subtitle_font=self.spec.cover_subtitle_font,
             subtitle_size=self.spec.cover_subtitle_size,
             date_font=self.spec.cover_date_font,
             date_size=self.spec.cover_date_size,
+            airing_font=self.spec.cover_airing_font,
+            airing_size=self.spec.cover_airing_size,
         )
 
     def _draw_guide(self, c) -> None:
@@ -1158,12 +1296,22 @@ def make_compilation_pdf(
     cover_period_label: str = "",
     cover_bg_color: str = "FFFFFF",
     cover_border_size: float = 0.0,
+    cover_text_color: str = "FFFFFF",
+    cover_text_outline_color: str = "000000",
+    cover_text_outline_width: float = 1.2,
     cover_title_font: str = "Helvetica-Bold",
     cover_title_size: float = 28.0,
     cover_subtitle_font: str = "Helvetica",
     cover_subtitle_size: float = 13.0,
     cover_date_font: str = "Helvetica-Bold",
     cover_date_size: float = 18.0,
+    cover_airing_font: str = "Helvetica-Bold",
+    cover_airing_size: float = 14.0,
+    cover_airing_label_enabled: bool = True,
+    cover_airing_label_single_format: str = "{time}",
+    cover_airing_label_day_format: str = "{time}",
+    cover_airing_label_week_format: str = "{title} playing {weekday} at {time}",
+    cover_airing_label_month_format: str = "{md} at {time}",
     cover_art_source: str = "none",
     cover_art_dir: Optional[Path] = None,
     tvdb_api_key: str = "",
@@ -1195,6 +1343,8 @@ def make_compilation_pdf(
     cover_folder_art = list_image_files(cover_art_dir)
 
     cover_art: Optional[Path] = None
+    cover_airing_label = ""
+    cover_event: Optional[Event] = None
     if cover_enabled:
         _status(f"Selecting cover art (source={cover_art_source})")
         source = cover_art_source.lower().strip()
@@ -1203,13 +1353,29 @@ def make_compilation_pdf(
             if cover_art:
                 _status(f"Selected cover from folder: {cover_art.name}")
         if not cover_art and source in ("tvdb", "auto"):
-            candidates = sorted({normalize_title_text(e.title) for evs in schedules.values() for e in evs if e.title})
-            _status(f"Trying TVDB cover lookup from {len(candidates)} title candidates")
+            cover_event = pick_cover_airing_event(schedules, range_start, range_end)
+            picked_title = normalize_title_text(cover_event.title) if cover_event else ""
+            candidates = [picked_title] if picked_title else sorted(
+                {normalize_title_text(e.title) for evs in schedules.values() for e in evs if e.title}
+            )
+            _status(f"Trying TVDB cover lookup from {len(candidates)} title candidate(s)")
             fetched = fetch_tvdb_cover_art(candidates, api_key=tvdb_api_key, pin=tvdb_pin)
             if fetched:
                 cover_art = fetched
                 tmp_files.append(fetched)
                 _status(f"Selected cover from TVDB download: {fetched.name}")
+            if cover_airing_label_enabled and cover_event:
+                cover_airing_label = _build_airing_label(
+                    range_mode=range_mode,
+                    title=cover_event.title,
+                    when_dt=cover_event.start,
+                    single_fmt=cover_airing_label_single_format,
+                    day_fmt=cover_airing_label_day_format,
+                    week_fmt=cover_airing_label_week_format,
+                    month_fmt=cover_airing_label_month_format,
+                )
+                if cover_airing_label:
+                    _status(f"TVDB airing label: {cover_airing_label}")
 
         if not cover_art:
             _status("No cover art selected; using text-only cover")
@@ -1222,15 +1388,21 @@ def make_compilation_pdf(
                     title=cover_title,
                     subtitle=cover_subtitle,
                     period_label=period,
+                    airing_label=cover_airing_label,
                     art_path=cover_art,
                     bg_color=cover_bg_color,
                     border_size=cover_border_size,
+                    text_color=cover_text_color,
+                    text_outline_color=cover_text_outline_color,
+                    text_outline_width=cover_text_outline_width,
                     title_font=cover_title_font,
                     title_size=cover_title_size,
                     subtitle_font=cover_subtitle_font,
                     subtitle_size=cover_subtitle_size,
                     date_font=cover_date_font,
                     date_size=cover_date_size,
+                    airing_font=cover_airing_font,
+                    airing_size=cover_airing_size,
                 )
             )
 
@@ -1246,15 +1418,21 @@ def make_compilation_pdf(
                     cover_title=cover_title,
                     cover_subtitle=cover_subtitle,
                     cover_period_label=period,
+                    cover_airing_label=cover_airing_label,
                     cover_art_path=cover_art,
                     cover_bg_color=cover_bg_color,
                     cover_border_size=cover_border_size,
+                    cover_text_color=cover_text_color,
+                    cover_text_outline_color=cover_text_outline_color,
+                    cover_text_outline_width=cover_text_outline_width,
                     cover_title_font=cover_title_font,
                     cover_title_size=cover_title_size,
                     cover_subtitle_font=cover_subtitle_font,
                     cover_subtitle_size=cover_subtitle_size,
                     cover_date_font=cover_date_font,
                     cover_date_size=cover_date_size,
+                    cover_airing_font=cover_airing_font,
+                    cover_airing_size=cover_airing_size,
                 )
             )
 
