@@ -394,7 +394,7 @@ def test_movie_meta_badge_rendered_inline(monkeypatch, tmp_path: Path):
             title="The Matrix",
             year="1999",
             plot="A computer hacker learns reality is simulated.",
-            imdb_rating="7.6",
+            imdb_rating="7.4",
             rated="R",
         ),
     )
@@ -414,7 +414,8 @@ def test_movie_meta_badge_rendered_inline(monkeypatch, tmp_path: Path):
     )
     txt = _extract_pdf_text(out)
     assert "R" in txt
-    assert "★" in txt or "☆" in txt
+    assert "★" in txt
+    assert "½" in txt
 
 
 def _sample_schedules() -> tuple[list[str], dict[str, str], dict[str, list[core.Event]]]:

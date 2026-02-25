@@ -36,6 +36,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Flowable, P
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.utils import ImageReader
 
 
@@ -51,8 +52,28 @@ EXTENT_RE = re.compile(
 YEAR_RE = re.compile(r"\b(19\d{2}|20\d{2})\b")
 EP_RE = re.compile(r"\bS\d{2}E\d{2}\b", re.IGNORECASE)
 FULL_STAR = "★"
-HALF_STAR = "⯪"
-EMPTY_STAR = "☆"
+HALF_TEXT = "½"
+
+
+def _pick_unicode_bold_font() -> str:
+    """
+    Prefer a Unicode-capable bold font for inline metadata glyphs.
+    Falls back to Helvetica-Bold if no TTF is available.
+    """
+    font_name = "DejaVuSans-Bold"
+    font_path = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+    if font_name in pdfmetrics.getRegisteredFontNames():
+        return font_name
+    if font_path.exists():
+        try:
+            pdfmetrics.registerFont(TTFont(font_name, str(font_path)))
+            return font_name
+        except Exception:
+            pass
+    return "Helvetica-Bold"
+
+
+UNICODE_BOLD_FONT = _pick_unicode_bold_font()
 
 
 def pretty_from_filename(filename: str) -> str:
@@ -713,8 +734,11 @@ def _movie_meta_badge(meta: Optional[MovieMeta]) -> str:
         half_steps = int(round(stars * 2.0))
         full = half_steps // 2
         has_half = (half_steps % 2) == 1
-        empty = max(0, 5 - full - (1 if has_half else 0))
-        bits.append((FULL_STAR * full) + (HALF_STAR if has_half else "") + (EMPTY_STAR * empty))
+        stars_text = FULL_STAR * full
+        if has_half:
+            stars_text = f"{stars_text} {HALF_TEXT}".strip()
+        if stars_text:
+            bits.append(stars_text)
     except Exception:
         pass
     return " ".join(bits).strip()
@@ -959,6 +983,7 @@ class GuideTimelineFlowable(Flowable):
         self.movie_cache = movie_cache if movie_cache is not None else {}
         self.movie_inline_meta = movie_inline_meta
         self.api_cache = api_cache
+        self.cell_font = UNICODE_BOLD_FONT
         self.first_col = (1.15 * 0.75) * inch
         self.header_h = 0.26 * inch
         self.row_h = 0.24 * inch
@@ -1073,14 +1098,14 @@ class GuideTimelineFlowable(Flowable):
                     meta = _get_movie_meta_for_event(e, self.omdb_api_key, self.movie_cache, api_cache=self.api_cache)
                     badge = _movie_meta_badge(meta)
                     if badge:
-                        shown = fit_title_with_badge(shown, badge, "Helvetica-Bold", 6.5, text_w)
+                        shown = fit_title_with_badge(shown, badge, self.cell_font, 6.5, text_w)
                     else:
-                        shown = fit_show_title(shown, "Helvetica-Bold", 6.5, text_w)
+                        shown = fit_show_title(shown, self.cell_font, 6.5, text_w)
                 else:
-                    shown = fit_show_title(shown, "Helvetica-Bold", 6.5, text_w)
+                    shown = fit_show_title(shown, self.cell_font, 6.5, text_w)
                 if not shown:
                     continue
-                c.setFont("Helvetica-Bold", 6.5)
+                c.setFont(self.cell_font, 6.5)
                 c.drawString(x0 + 2, row_bottom + ((self.row_h - 6.5) / 2.0) + 1, shown)
 
 
