@@ -116,3 +116,13 @@ def test_split_into_blocks_count():
     blocks = pg.split_into_blocks(start, end, 6.0)
     assert len(blocks) == 4
     assert blocks[0] == (start, pg.datetime(2026, 2, 24, 6, 0))
+
+
+def test_resolve_channel_numbers_uses_confs_and_cli_override():
+    confs = Path(__file__).resolve().parent / "fixtures" / "confs"
+    merged = pg.resolve_channel_numbers(confs, "NBC=99,New Channel=77")
+
+    # Loaded from fixture confs (with CLI override for NBC).
+    assert merged["NBC"] == "99"
+    assert merged["PBS"] == "4"
+    assert merged["New Channel"] == "77"

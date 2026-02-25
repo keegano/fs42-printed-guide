@@ -17,6 +17,7 @@ DEFAULTS: Dict[str, Any] = {
     "page_block_hours": 6.0,
     "step": 30,
     "numbers": "",
+    "confs_dir": Path("confs"),
     "year": 0,
     "out": Path("tv_guide.pdf"),
     "title": "",
@@ -93,7 +94,7 @@ def load_config_file(path: Optional[Path]) -> Dict[str, Any]:
 def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
     out = dict(cfg)
 
-    path_keys = ("fs42_dir", "out", "ads_dir", "bottom_ads_dir", "cover_art_dir")
+    path_keys = ("fs42_dir", "out", "ads_dir", "bottom_ads_dir", "cover_art_dir", "confs_dir")
     for k in path_keys:
         if k in out and out[k] is not None and not isinstance(out[k], Path):
             out[k] = Path(str(out[k]))
@@ -135,6 +136,7 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--page-block-hours", type=float, help="Hours shown per guide page in day/week/month compilation.")
     p.add_argument("--step", type=int, help="Minutes per header tick")
     p.add_argument("--numbers", type=str, help='Comma-separated mapping like "NBC=3,PBS=4"')
+    p.add_argument("--confs-dir", type=Path, help="Directory containing channel conf JSON files with station_conf.network_name/channel_number.")
     p.add_argument("--year", type=int, help="Override schedule year (0 = infer from -e using first channel).")
     p.add_argument("--out", type=Path, help="Output PDF path")
     p.add_argument("--title", type=str, help="Optional title override.")

@@ -297,6 +297,29 @@ def clip_events(events: List[Event], start_dt: datetime, end_dt: datetime) -> Li
     return clipped
 
 
+def load_channel_numbers_from_confs(confs_dir: Optional[Path]) -> Dict[str, str]:
+    """
+    Load channel numbers from conf JSON files.
+    Expected shape per file:
+      {"station_conf": {"network_name": "...", "channel_number": 3, ...}}
+    """
+    out: Dict[str, str] = {}
+    if not confs_dir or not confs_dir.exists() or not confs_dir.is_dir():
+        return out
+
+    for p in sorted(confs_dir.glob("*.json")):
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            sc = data.get("station_conf", {}) if isinstance(data, dict) else {}
+            name = clean_text(str(sc.get("network_name", "")))
+            number = sc.get("channel_number", None)
+            if name and number is not None:
+                out[name] = clean_text(str(number))
+        except Exception:
+            continue
+    return out
+
+
 def list_image_files(folder: Optional[Path]) -> List[Path]:
     if not folder:
         return []
@@ -453,6 +476,35 @@ class GuideTimelineFlowable(Flowable):
         secs = max(0.0, min(total_seconds, secs))
         return self.first_col + (timeline_w * (secs / total_seconds))
 
+    def _draw_channel_label(self, c, row_bottom: float, channel_name: str, channel_num: str) -> None:
+        y = row_bottom + ((self.row_h - 7) / 2.0) + 1
+        c.setFont("Helvetica-Bold", 7)
+
+        name = hard_truncate_to_width(channel_name, "Helvetica-Bold", 7, self.first_col - 4)
+        if not channel_num:
+            c.drawCentredString(self.first_col / 2.0, y, name)
+            return
+
+        bubble_r = 4.3
+        bubble_d = bubble_r * 2.0
+        gap = 2.0
+        num = hard_truncate_to_width(channel_num, "Helvetica-Bold", 5.5, bubble_d - 2)
+        name_max_w = max(1.0, self.first_col - bubble_d - gap - 4)
+        name_fit = hard_truncate_to_width(name, "Helvetica-Bold", 7, name_max_w)
+        name_w = pdfmetrics.stringWidth(name_fit, "Helvetica-Bold", 7)
+
+        group_w = bubble_d + gap + name_w
+        start_x = max(1.0, (self.first_col - group_w) / 2.0)
+
+        cx = start_x + bubble_r
+        cy = row_bottom + (self.row_h / 2.0)
+        c.circle(cx, cy, bubble_r, stroke=1, fill=0)
+        c.setFont("Helvetica-Bold", 5.5)
+        c.drawCentredString(cx, cy - 2.0, num)
+
+        c.setFont("Helvetica-Bold", 7)
+        c.drawString(start_x + bubble_d + gap, y, name_fit)
+
     def draw(self) -> None:
         c = self.canv
         width = self.width
@@ -485,10 +537,7 @@ class GuideTimelineFlowable(Flowable):
             c.line(0, row_bottom, width, row_bottom)
 
             num = clean_text(self.channel_numbers.get(raw_ch, ""))
-            left = f"{num} {ch}".strip()
-            left = hard_truncate_to_width(left, "Helvetica-Bold", 7, self.first_col - 4)
-            c.setFont("Helvetica-Bold", 7)
-            c.drawCentredString(self.first_col / 2.0, row_bottom + ((self.row_h - 7) / 2.0) + 1, left)
+            self._draw_channel_label(c, row_bottom, ch, num)
 
             evs = clip_events(self.schedules.get(raw_ch, []), self.start_dt, self.end_dt)
             for e in evs:

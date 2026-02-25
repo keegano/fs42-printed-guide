@@ -109,6 +109,18 @@ def test_list_image_files_and_choose_random(tmp_path: Path, monkeypatch):
     assert core.choose_random([]) is None
 
 
+def test_load_channel_numbers_from_confs_fixture(tmp_path: Path):
+    conf_dir = Path(__file__).parent / "fixtures" / "confs"
+    loaded = core.load_channel_numbers_from_confs(conf_dir)
+    assert loaded.get("NBC") == "3"
+    assert loaded.get("PBS") == "4"
+
+    # Invalid JSON files should be ignored.
+    (tmp_path / "broken.json").write_text("{not valid", encoding="utf-8")
+    merged = core.load_channel_numbers_from_confs(tmp_path)
+    assert merged == {}
+
+
 def test_run_fs42_executes_local_station_script(tmp_path: Path):
     script = tmp_path / "station_42.py"
     script.write_text(

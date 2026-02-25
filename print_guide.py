@@ -13,6 +13,7 @@ from guide_core import (
     display_title,
     fit_show_title,
     infer_year_from_extents,
+    load_channel_numbers_from_confs,
     make_compilation_pdf,
     make_pdf,
     normalize_title_text,
@@ -37,6 +38,12 @@ def _parse_number_map(numbers: object) -> Dict[str, str]:
     return out
 
 
+def resolve_channel_numbers(confs_dir, numbers: object) -> Dict[str, str]:
+    out = load_channel_numbers_from_confs(confs_dir)
+    out.update(_parse_number_map(numbers))
+    return out
+
+
 def main(argv: List[str] | None = None) -> None:
     args = parse_effective_args(argv)
 
@@ -44,7 +51,7 @@ def main(argv: List[str] | None = None) -> None:
     if not channels:
         raise RuntimeError("No channels with valid schedules found")
 
-    number_map = _parse_number_map(args.numbers)
+    number_map = resolve_channel_numbers(args.confs_dir, args.numbers)
 
     year = args.year
     if not year:

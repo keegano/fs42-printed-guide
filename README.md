@@ -24,6 +24,12 @@ Current rendering supports:
 - Width fitting with case-insensitive reduction rules for `the` / `and`
 5. Render to PDF.
 
+Channel numbers are sourced from `confs/*.json` files by default using:
+- `station_conf.network_name`
+- `station_conf.channel_number`
+
+Those numbers are rendered as circled badges next to channel names in the guide.
+
 ## Rendering Modes
 
 ### Single Range (`--range-mode single`)
@@ -97,6 +103,7 @@ Core options:
 - `--page-block-hours FLOAT`
 - `--step INT`
 - `--numbers "CHAN=NUM,..."`
+- `--confs-dir PATH`
 - `--year INT`
 - `--out FILE.pdf`
 - `--double-sided-fold`
