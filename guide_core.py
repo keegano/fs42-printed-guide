@@ -2403,6 +2403,12 @@ def make_compilation_pdf(
         _status("Added promo back cover")
         _status("Back-cover promo selected first; no explicit filler promo pages will be added")
 
+        # Preserve back cover as the final logical page (outer back side) when
+        # padding to a multiple of 4 for booklet imposition.
+        while len(logical_pages) % 4 != 0:
+            logical_pages.insert(len(logical_pages) - 1, BookletPageSpec(kind="blank"))
+            _status("Inserted booklet pad blank before back cover to preserve outer back position")
+
         imposed = impose_booklet_pages(logical_pages)
         _status(f"Booklet imposition produced {len(imposed)} physical side(s)")
         for i, (left_spec, right_spec) in enumerate(imposed):

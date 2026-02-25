@@ -846,6 +846,52 @@ def test_make_compilation_pdf_booklet_never_reuses_same_promo(tmp_path: Path):
     assert pages_with_promo <= 1
 
 
+def test_booklet_back_cover_promo_stays_on_outer_sheet(tmp_path: Path):
+    channels, numbers, schedules = _sample_schedules()
+    content_dir = tmp_path / "content"
+    (content_dir / "covers").mkdir(parents=True)
+    promos = content_dir / "promos"
+    promos.mkdir(parents=True)
+    (promos / "promo_back.json").write_text(
+        json.dumps(
+            {
+                "id": "promo-back",
+                "enabled": True,
+                "range_modes": [],
+                "title": "BACK COVER PROMO",
+                "message_template": "Outer sheet promo",
+                "image": "",
+                "match_titles": [],
+                "match_channels": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    out = tmp_path / "back_cover_position.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 3, 5, 0, 0),
+        range_end=datetime(2026, 3, 6, 0, 0),
+        page_block_hours=6,
+        step_minutes=30,
+        double_sided_fold=True,
+        cover_enabled=True,
+        cover_title="Time Travel Cable Guide",
+        content_dir=content_dir,
+    )
+
+    reader = PdfReader(str(out))
+    first = reader.pages[0].extract_text() or ""
+    second = reader.pages[1].extract_text() or ""
+    assert "BACK COVER PROMO" in first
+    assert "BACK COVER PROMO" not in second
+
+
 def test_flowable_wraps():
     channels, numbers, schedules = _sample_schedules()
     guide = core.GuideTimelineFlowable(channels, numbers, schedules, datetime(2026, 3, 5, 9, 0), datetime(2026, 3, 5, 10, 0), 30)
