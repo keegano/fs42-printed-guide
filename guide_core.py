@@ -40,6 +40,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.utils import ImageReader
 from xml.sax.saxutils import escape
+import content_store as cs
 
 
 LINE_RE = re.compile(
@@ -827,6 +828,7 @@ def _get_movie_meta_for_event(
     event: Event,
     omdb_api_key: str,
     movie_cache: Dict[str, MovieMeta],
+    nfo_index: Optional[cs.NfoIndex] = None,
     api_cache: Optional[Dict[str, object]] = None,
 ) -> Optional[MovieMeta]:
     if not is_movie_event(event.title, event.filename):
@@ -837,12 +839,24 @@ def _get_movie_meta_for_event(
     meta = movie_cache.get(key)
     if meta:
         return meta
-    if not omdb_api_key:
-        return None
-    try:
-        meta = _fetch_omdb_movie_meta(key, _extract_year_hint(event.filename), omdb_api_key, api_cache=api_cache)
-    except Exception:
-        meta = None
+
+    meta = None
+    if nfo_index:
+        nfo = nfo_index.lookup(title=key, filename=event.filename)
+        if nfo:
+            meta = MovieMeta(
+                title=nfo.title or key,
+                year=_extract_year_hint(event.filename),
+                plot=nfo.plot,
+                imdb_rating=nfo.imdb_rating,
+                rated=nfo.rated,
+            )
+
+    if meta is None and omdb_api_key:
+        try:
+            meta = _fetch_omdb_movie_meta(key, _extract_year_hint(event.filename), omdb_api_key, api_cache=api_cache)
+        except Exception:
+            meta = None
     if meta:
         movie_cache[key] = meta
     return meta
@@ -972,8 +986,7 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
         drew_any = True
 
     if not drew_any:
-        c.setFont("Helvetica", 7)
-        c.drawString(body_x, max(body_y + 6, text_top - 8), "No descriptions generated; check source filters.")
+        return
 
 
 def _schedule_blurb(ev: Event, title: str) -> str:
@@ -991,13 +1004,7 @@ def _build_block_descriptions(
     end_dt: datetime,
     ignored_channels: Optional[set[str]],
     ignored_titles: Optional[set[str]],
-    tvdb_api_key: str,
-    tvdb_pin: str,
-    omdb_api_key: str,
-    desc_cache: Dict[str, str],
-    movie_cache: Dict[str, MovieMeta],
-    token_holder: Dict[str, str],
-    api_cache: Optional[Dict[str, object]] = None,
+    nfo_index: Optional[cs.NfoIndex] = None,
     status_cb: Optional[Callable[[str], None]] = None,
     max_items: int = 8,
 ) -> List[OnTonightEntry]:
@@ -1011,38 +1018,14 @@ def _build_block_descriptions(
     )
     if status_cb:
         status_cb(f"On Tonight candidates considered: {len(candidates)}")
-    if not candidates:
-        return []
     out: List[OnTonightEntry] = []
-    token = token_holder.get("token", "")
-    if tvdb_api_key and not token:
-        try:
-            token = _fetch_tvdb_token(tvdb_api_key, tvdb_pin, api_cache=api_cache)
-        except Exception:
-            token = ""
-        token_holder["token"] = token
 
     for title, ev in candidates:
         desc = ""
-        if is_movie_event(ev.title, ev.filename):
-            key = clean_text(title)
-            meta = movie_cache.get(key)
-            if not meta and omdb_api_key:
-                try:
-                    meta = _fetch_omdb_movie_meta(title, _extract_year_hint(ev.filename), omdb_api_key, api_cache=api_cache)
-                except Exception:
-                    meta = None
-                if meta:
-                    movie_cache[key] = meta
-            desc = clean_text(meta.plot if meta else "")
-        else:
-            desc = desc_cache.get(title, "")
-            if not desc and token:
-                try:
-                    desc = _fetch_tvdb_overview_by_title(title, token, api_cache=api_cache)
-                except Exception:
-                    desc = ""
-                desc_cache[title] = desc
+        if nfo_index:
+            meta = nfo_index.lookup(title=title, filename=ev.filename)
+            if meta:
+                desc = clean_text(meta.plot)
         if not desc:
             desc = _schedule_blurb(ev, title)
         out.append(OnTonightEntry(title=title, description=desc))
@@ -1069,6 +1052,7 @@ class GuideTimelineFlowable(Flowable):
         omdb_api_key: str = "",
         movie_cache: Optional[Dict[str, MovieMeta]] = None,
         movie_inline_meta: bool = True,
+        nfo_index: Optional[cs.NfoIndex] = None,
         api_cache: Optional[Dict[str, object]] = None,
     ) -> None:
         super().__init__()
@@ -1081,6 +1065,7 @@ class GuideTimelineFlowable(Flowable):
         self.omdb_api_key = clean_text(omdb_api_key)
         self.movie_cache = movie_cache if movie_cache is not None else {}
         self.movie_inline_meta = movie_inline_meta
+        self.nfo_index = nfo_index
         self.api_cache = api_cache
         self.cell_font = UNICODE_BOLD_FONT
         self.first_col = (1.15 * 0.75) * inch
@@ -1194,7 +1179,13 @@ class GuideTimelineFlowable(Flowable):
 
                 shown = display_title(e.title, e.filename)
                 if self.movie_inline_meta:
-                    meta = _get_movie_meta_for_event(e, self.omdb_api_key, self.movie_cache, api_cache=self.api_cache)
+                    meta = _get_movie_meta_for_event(
+                        e,
+                        self.omdb_api_key,
+                        self.movie_cache,
+                        nfo_index=self.nfo_index,
+                        api_cache=self.api_cache,
+                    )
                     badge = _movie_meta_badge(meta)
                     if badge:
                         shown = fit_title_with_badge(shown, badge, self.cell_font, 6.5, text_w)
@@ -1226,6 +1217,7 @@ class FoldedGuideTimelineFlowable(Flowable):
         omdb_api_key: str = "",
         movie_cache: Optional[Dict[str, MovieMeta]] = None,
         movie_inline_meta: bool = True,
+        nfo_index: Optional[cs.NfoIndex] = None,
         api_cache: Optional[Dict[str, object]] = None,
     ) -> None:
         super().__init__()
@@ -1240,6 +1232,7 @@ class FoldedGuideTimelineFlowable(Flowable):
             omdb_api_key=omdb_api_key,
             movie_cache=cache,
             movie_inline_meta=movie_inline_meta,
+            nfo_index=nfo_index,
             api_cache=api_cache,
         )
         self.right = GuideTimelineFlowable(
@@ -1252,6 +1245,7 @@ class FoldedGuideTimelineFlowable(Flowable):
             omdb_api_key=omdb_api_key,
             movie_cache=cache,
             movie_inline_meta=movie_inline_meta,
+            nfo_index=nfo_index,
             api_cache=api_cache,
         )
         self.gap = (0.12 + max(0.0, safe_gap)) * inch
@@ -1773,6 +1767,7 @@ class BookletHalfPageFlowable(Flowable):
         omdb_api_key: str = "",
         movie_cache: Optional[Dict[str, MovieMeta]] = None,
         movie_inline_meta: bool = True,
+        nfo_index: Optional[cs.NfoIndex] = None,
         api_cache: Optional[Dict[str, object]] = None,
     ) -> None:
         super().__init__()
@@ -1785,6 +1780,7 @@ class BookletHalfPageFlowable(Flowable):
         self.omdb_api_key = clean_text(omdb_api_key)
         self.movie_cache = movie_cache if movie_cache is not None else {}
         self.movie_inline_meta = movie_inline_meta
+        self.nfo_index = nfo_index
         self.api_cache = api_cache
         self.header_h = 0.14 * inch
         self.gap = 0.06 * inch
@@ -1841,6 +1837,7 @@ class BookletHalfPageFlowable(Flowable):
             omdb_api_key=self.omdb_api_key,
             movie_cache=self.movie_cache,
             movie_inline_meta=self.movie_inline_meta,
+            nfo_index=self.nfo_index,
             api_cache=self.api_cache,
         )
         content: Flowable = guide
@@ -1907,6 +1904,7 @@ def make_pdf(
     fold_safe_gap: float = 0.0,
     omdb_api_key: str = "",
     movie_inline_meta: bool = True,
+    nfo_index: Optional[cs.NfoIndex] = None,
     api_cache: Optional[Dict[str, object]] = None,
 ) -> None:
     page_size = landscape(letter)
@@ -1957,6 +1955,7 @@ def make_pdf(
                 omdb_api_key=omdb_api_key,
                 movie_cache=movie_cache,
                 movie_inline_meta=movie_inline_meta,
+                nfo_index=nfo_index,
                 api_cache=runtime_api_cache,
             )
         )
@@ -1974,6 +1973,7 @@ def make_pdf(
                 omdb_api_key=omdb_api_key,
                 movie_cache=movie_cache,
                 movie_inline_meta=movie_inline_meta,
+                nfo_index=nfo_index,
                 api_cache=runtime_api_cache,
             )
         )
@@ -2030,12 +2030,20 @@ def make_compilation_pdf(
     movie_inline_meta: bool = True,
     api_cache_enabled: bool = True,
     api_cache_file: Optional[Path] = Path(".cache/printed_guide_api_cache.json"),
+    content_dir: Optional[Path] = Path("content"),
+    fs42_dir: Optional[Path] = None,
     status_messages: bool = False,
     fold_safe_gap: float = 0.0,
 ) -> None:
     def _status(message: str) -> None:
         if status_messages:
             print(f"[status] {clean_text(message)}")
+
+    if tvdb_api_key or tvdb_pin or omdb_api_key:
+        _status("API credentials were provided but guide rendering uses local file content only; ignoring API keys.")
+    tvdb_api_key = ""
+    tvdb_pin = ""
+    omdb_api_key = ""
 
     ignore_ch = ignored_channels or set()
     ignore_t = ignored_titles or set()
@@ -2055,70 +2063,46 @@ def make_compilation_pdf(
     story: List[Flowable] = []
     tmp_files: List[Path] = []
     runtime_api_cache = _load_api_cache(api_cache_file) if api_cache_enabled else _ensure_api_cache_struct({})
+    content_root = content_dir or Path("content")
+    cover_specs = cs.load_cover_specs(content_root)
+    promo_specs = cs.load_promo_specs(content_root)
+    nfo_index = cs.load_nfo_index(fs42_dir) if fs42_dir else cs.NfoIndex(by_filename_stem={}, by_title={})
+    _status(f"Loaded content manifests: covers={len(cover_specs)} promos={len(promo_specs)} from {content_root}")
+    _status(
+        f"Loaded NFO index entries: by_filename={len(nfo_index.by_filename_stem)} by_title={len(nfo_index.by_title)}"
+        if fs42_dir else "No fs42_dir provided; NFO metadata disabled"
+    )
 
     full_ads = list_image_files(ads_dir)
     bottom_ads = list_image_files(bottom_ads_dir)
-    cover_folder_art = list_image_files(cover_art_dir)
-
     cover_art: Optional[Path] = None
     cover_airing_label = ""
-    cover_event: Optional[Event] = None
     if cover_enabled:
-        _status(f"Selecting cover art (source={cover_art_source})")
-        source = cover_art_source.lower().strip()
-        if source in ("folder", "auto"):
-            cover_art = choose_random(cover_folder_art)
+        selected_cover = cs.pick_cover_spec(cover_specs, range_mode=range_mode)
+        if selected_cover:
+            _status(f"Selected cover manifest: {selected_cover.id}")
+            if selected_cover.title and not clean_text(cover_title):
+                cover_title = selected_cover.title
+            if selected_cover.subtitle and not clean_text(cover_subtitle):
+                cover_subtitle = selected_cover.subtitle
+            if selected_cover.period_label and not clean_text(cover_period_label):
+                cover_period_label = selected_cover.period_label
+            if selected_cover.airing_label and not clean_text(cover_airing_label):
+                cover_airing_label = selected_cover.airing_label
+            cover_art = selected_cover.image
             if cover_art:
-                _status(f"Selected cover from folder: {cover_art.name}")
-        if not cover_art and source in ("tvdb", "auto"):
-            cover_event = pick_cover_airing_event(
-                schedules,
-                range_start,
-                range_end,
-                ignored_channels=ignore_ch,
-                ignored_titles=ignore_t,
-            )
-            if cover_event:
-                _status(f"Cover event candidate: {display_title(cover_event.title, cover_event.filename)} @ {cover_event.start.strftime('%m/%d %H:%M')}")
+                _status(f"Cover image path: {cover_art}")
             else:
-                _status("No cover event candidate after ignore filters")
-            # For movie blocks, prefer OMDb poster over TVDB series art.
-            if cover_event and is_movie_event(cover_event.title, cover_event.filename):
-                movie_title = display_title(cover_event.title, cover_event.filename)
-                movie_year = _extract_year_hint(cover_event.filename)
-                _status(f"Trying OMDb cover lookup for movie: {movie_title}")
-                fetched_movie = fetch_omdb_cover_art(movie_title, movie_year, omdb_api_key, api_cache=runtime_api_cache)
-                if fetched_movie:
-                    cover_art = fetched_movie
-                    tmp_files.append(fetched_movie)
-                    _status(f"Selected cover from OMDb download: {fetched_movie.name}")
-
-            if not cover_art:
-                picked_title = normalize_title_text(cover_event.title) if cover_event else ""
-                candidates = [picked_title] if picked_title else sorted(
-                    {normalize_title_text(e.title) for evs in schedules.values() for e in evs if e.title}
-                )
-                _status(f"Trying TVDB cover lookup from {len(candidates)} title candidate(s)")
-                fetched = fetch_tvdb_cover_art(candidates, api_key=tvdb_api_key, pin=tvdb_pin, api_cache=runtime_api_cache)
-                if fetched:
-                    cover_art = fetched
-                    tmp_files.append(fetched)
-                    _status(f"Selected cover from TVDB download: {fetched.name}")
-            if cover_airing_label_enabled and cover_event:
-                cover_airing_label = _build_airing_label(
-                    range_mode=range_mode,
-                    title=cover_event.title,
-                    when_dt=cover_event.start,
-                    single_fmt=cover_airing_label_single_format,
-                    day_fmt=cover_airing_label_day_format,
-                    week_fmt=cover_airing_label_week_format,
-                    month_fmt=cover_airing_label_month_format,
-                )
-                if cover_airing_label:
-                    _status(f"TVDB airing label: {cover_airing_label}")
-
-        if not cover_art:
-            _status("No cover art selected; using text-only cover")
+                _status(f"Cover manifest {selected_cover.id} has no image; using text-only cover")
+        else:
+            _status("No cover manifest found; using configured cover text/image options only")
+            if cover_art_source.lower().strip() == "folder" and cover_art_dir:
+                folder_art = list_image_files(cover_art_dir)
+                cover_art = choose_random(folder_art)
+                if cover_art:
+                    _status(f"Selected cover from fallback folder: {cover_art.name}")
+                else:
+                    _status("No cover art found in fallback folder")
 
         if not double_sided_fold:
             period = clean_text(cover_period_label) or pick_cover_period_label(range_mode, range_start)
@@ -2149,60 +2133,48 @@ def make_compilation_pdf(
             )
 
     blocks = split_into_blocks(range_start, range_end, page_block_hours)
-    desc_cache: Dict[str, str] = {}
     movie_cache: Dict[str, MovieMeta] = {}
-    token_holder: Dict[str, str] = {}
     _status(f"Computed {len(blocks)} schedule block(s) for compilation")
 
-    def _build_catch_promo_asset(block_start: datetime, block_end: datetime) -> tuple[str, str, Optional[Path]]:
-        base_title, base_label = build_catch_promo_label(
-            schedules=schedules,
-            range_mode=range_mode,
-            start_dt=block_start,
-            end_dt=block_end,
-            ignored_channels=ignore_ch,
-            ignored_titles=ignore_t,
-            single_fmt=cover_airing_label_single_format,
-            day_fmt=cover_airing_label_day_format,
-            week_fmt=cover_airing_label_week_format,
-            month_fmt=cover_airing_label_month_format,
-        )
+    def _pick_promo_asset(block_start: datetime, block_end: datetime, purpose: str) -> tuple[str, str, Optional[Path]]:
         candidates = _block_show_events(
             schedules=schedules,
             start_dt=block_start,
             end_dt=block_end,
             ignored_channels=ignore_ch,
             ignored_titles=ignore_t,
-            max_items=12,
+            max_items=20,
         )
-        if not candidates:
-            _status("Catch promo image search: no candidate events after filters")
+        title_hints = [shown for shown, _ in candidates]
+        promo = cs.pick_promo_spec(
+            promo_specs,
+            range_mode=range_mode,
+            title_hints=title_hints,
+            channel_hints=channels,
+        )
+        if promo and (clean_text(promo.title) or clean_text(promo.message) or promo.image):
+            _status(f"Selected {purpose} promo manifest: {promo.id}")
+            return promo.title, promo.message, promo.image
+
+        # Must never be blank on back cover; generate minimal promo text from schedule.
+        if purpose == "back-cover":
+            base_title, base_label = build_catch_promo_label(
+                schedules=schedules,
+                range_mode=range_mode,
+                start_dt=block_start,
+                end_dt=block_end,
+                ignored_channels=ignore_ch,
+                ignored_titles=ignore_t,
+                single_fmt=cover_airing_label_single_format,
+                day_fmt=cover_airing_label_day_format,
+                week_fmt=cover_airing_label_week_format,
+                month_fmt=cover_airing_label_month_format,
+            )
+            _status("No promo manifest matched for back cover; using generated schedule promo text")
             return base_title, base_label, None
 
-        for idx, (shown, ev) in enumerate(candidates, start=1):
-            art: Optional[Path] = None
-            if is_movie_event(ev.title, ev.filename) and omdb_api_key:
-                _status(f"Catch promo image attempt {idx}: OMDb poster for {shown}")
-                art = fetch_omdb_cover_art(shown, _extract_year_hint(ev.filename), omdb_api_key, api_cache=runtime_api_cache)
-            elif tvdb_api_key:
-                _status(f"Catch promo image attempt {idx}: TVDB art for {shown}")
-                art = fetch_tvdb_cover_art([shown], tvdb_api_key, tvdb_pin, api_cache=runtime_api_cache)
-            if art:
-                tmp_files.append(art)
-                label = _build_airing_label(
-                    range_mode=range_mode,
-                    title=shown,
-                    when_dt=ev.start,
-                    single_fmt=cover_airing_label_single_format,
-                    day_fmt=cover_airing_label_day_format,
-                    week_fmt=cover_airing_label_week_format,
-                    month_fmt=cover_airing_label_month_format,
-                )
-                _status(f"Catch promo image selected on attempt {idx}: {shown}")
-                return "", label, art
-
-        _status("Catch promo image lookup failed for all candidates; using text-only promo page")
-        return base_title, base_label, None
+        _status(f"No promo manifest matched for {purpose}; skipping optional promo content")
+        return "", "", None
 
     if double_sided_fold:
         logical_pages: List[BookletPageSpec] = []
@@ -2250,16 +2222,12 @@ def make_compilation_pdf(
                     end_dt=split_dt,
                     ignored_channels=ignore_ch,
                     ignored_titles=ignore_t,
-                    tvdb_api_key=tvdb_api_key,
-                    tvdb_pin=tvdb_pin,
-                    omdb_api_key=omdb_api_key,
-                    desc_cache=desc_cache,
-                    movie_cache=movie_cache,
-                    token_holder=token_holder,
-                    api_cache=runtime_api_cache,
+                    nfo_index=nfo_index,
                     status_cb=_status,
                 )
                 _status(f"On Tonight entries (left): {len(bottom_desc_left)}")
+                if not bottom_desc_left:
+                    _status("No On Tonight file-backed descriptions found for left half; leaving section unpopulated")
             if not bottom_ad_right:
                 _status(
                     f"Generating On Tonight fallback for {split_dt.strftime('%m/%d %H:%M')} - {b1.strftime('%H:%M')} (right half)"
@@ -2270,16 +2238,12 @@ def make_compilation_pdf(
                     end_dt=b1,
                     ignored_channels=ignore_ch,
                     ignored_titles=ignore_t,
-                    tvdb_api_key=tvdb_api_key,
-                    tvdb_pin=tvdb_pin,
-                    omdb_api_key=omdb_api_key,
-                    desc_cache=desc_cache,
-                    movie_cache=movie_cache,
-                    token_holder=token_holder,
-                    api_cache=runtime_api_cache,
+                    nfo_index=nfo_index,
                     status_cb=_status,
                 )
                 _status(f"On Tonight entries (right): {len(bottom_desc_right)}")
+                if not bottom_desc_right:
+                    _status("No On Tonight file-backed descriptions found for right half; leaving section unpopulated")
             logical_pages.append(
                 BookletPageSpec(
                     kind="guide",
@@ -2303,37 +2267,38 @@ def make_compilation_pdf(
                 )
             )
 
-        if back_cover_catch_enabled:
-            bc_title, bc_label, bc_art = _build_catch_promo_asset(range_start, range_end)
-            logical_pages.append(
-                BookletPageSpec(
-                    kind="cover",
-                    cover_title=bc_title,
-                    cover_subtitle="",
-                    cover_period_label="",
-                    cover_airing_label=bc_label,
-                    cover_art_path=bc_art,
-                    cover_bg_color=cover_bg_color,
-                    cover_border_size=cover_border_size,
-                    cover_text_color=cover_text_color,
-                    cover_text_outline_color=cover_text_outline_color,
-                    cover_text_outline_width=cover_text_outline_width,
-                    cover_title_font=cover_title_font,
-                    cover_title_size=cover_title_size,
-                    cover_subtitle_font=cover_subtitle_font,
-                    cover_subtitle_size=cover_subtitle_size,
-                    cover_date_font=cover_date_font,
-                    cover_date_size=cover_date_size,
-                    cover_date_y=cover_date_y,
-                    cover_airing_font=cover_airing_font,
-                    cover_airing_size=cover_airing_size,
-                    cover_airing_y=cover_airing_y,
-                )
-            )
-            _status("Added generated Catch promo on back cover")
-        elif cover_enabled:
-            logical_pages.append(BookletPageSpec(kind="blank"))
-            _status("Added blank back-cover half-page")
+        if not back_cover_catch_enabled:
+            _status("back_cover_catch_enabled=false requested, but back cover promos are always enabled in file-content mode.")
+        bc_title, bc_label, bc_art = _pick_promo_asset(range_start, range_end, "back-cover")
+        back_cover_spec = BookletPageSpec(
+            kind="cover",
+            cover_title=bc_title,
+            cover_subtitle="",
+            cover_period_label="",
+            cover_airing_label=bc_label,
+            cover_art_path=bc_art,
+            cover_bg_color=cover_bg_color,
+            cover_border_size=cover_border_size,
+            cover_text_color=cover_text_color,
+            cover_text_outline_color=cover_text_outline_color,
+            cover_text_outline_width=cover_text_outline_width,
+            cover_title_font=cover_title_font,
+            cover_title_size=cover_title_size,
+            cover_subtitle_font=cover_subtitle_font,
+            cover_subtitle_size=cover_subtitle_size,
+            cover_date_font=cover_date_font,
+            cover_date_size=cover_date_size,
+            cover_date_y=cover_date_y,
+            cover_airing_font=cover_airing_font,
+            cover_airing_size=cover_airing_size,
+            cover_airing_y=cover_airing_y,
+        )
+        logical_pages.append(back_cover_spec)
+        _status("Added promo back cover")
+
+        while len(logical_pages) % 4 != 0:
+            logical_pages.append(back_cover_spec)
+            _status("Added extra promo filler half-page to avoid blank booklet padding")
 
         imposed = impose_booklet_pages(logical_pages)
         _status(f"Booklet imposition produced {len(imposed)} physical side(s)")
@@ -2353,6 +2318,7 @@ def make_compilation_pdf(
                         omdb_api_key=omdb_api_key,
                         movie_cache=movie_cache,
                         movie_inline_meta=movie_inline_meta,
+                        nfo_index=nfo_index,
                         api_cache=runtime_api_cache,
                     ),
                     right=BookletHalfPageFlowable(
@@ -2365,6 +2331,7 @@ def make_compilation_pdf(
                         omdb_api_key=omdb_api_key,
                         movie_cache=movie_cache,
                         movie_inline_meta=movie_inline_meta,
+                        nfo_index=nfo_index,
                         api_cache=runtime_api_cache,
                     ),
                     safe_gap=fold_safe_gap,
@@ -2401,6 +2368,7 @@ def make_compilation_pdf(
                 omdb_api_key=omdb_api_key,
                 movie_cache=movie_cache,
                 movie_inline_meta=movie_inline_meta,
+                nfo_index=nfo_index,
                 api_cache=runtime_api_cache,
             )
         else:
@@ -2414,6 +2382,7 @@ def make_compilation_pdf(
                 omdb_api_key=omdb_api_key,
                 movie_cache=movie_cache,
                 movie_inline_meta=movie_inline_meta,
+                nfo_index=nfo_index,
                 api_cache=runtime_api_cache,
             )
 
@@ -2427,16 +2396,12 @@ def make_compilation_pdf(
                 end_dt=b1,
                 ignored_channels=ignore_ch,
                 ignored_titles=ignore_t,
-                tvdb_api_key=tvdb_api_key,
-                tvdb_pin=tvdb_pin,
-                omdb_api_key=omdb_api_key,
-                desc_cache=desc_cache,
-                movie_cache=movie_cache,
-                token_holder=token_holder,
-                api_cache=runtime_api_cache,
+                nfo_index=nfo_index,
                 status_cb=_status,
             )
             _status(f"On Tonight entries: {len(bottom_desc)}")
+            if not bottom_desc:
+                _status("No On Tonight file-backed descriptions found; leaving section unpopulated")
         header_left = "CABLE GUIDE"
         header_right = f"{b0.strftime('%a %b %d, %Y %H:%M')} - {b1.strftime('%H:%M')}"
         story.append(
@@ -2457,14 +2422,17 @@ def make_compilation_pdf(
             and (interstitial_source == "catch" or (interstitial_source == "ads" and bool(full_ads)))
         )
         if should_insert:
-            _status(f"Inserting interstitial page after block {i + 1} using source={interstitial_source}")
-            story.append(PageBreak())
             if interstitial_source == "catch":
-                _, cap_label, cap_art = _build_catch_promo_asset(b0, b1)
+                cap_title, cap_label, cap_art = _pick_promo_asset(b0, b1, "interstitial")
+                if not cap_title and not cap_label and not cap_art:
+                    _status(f"Skipping interstitial after block {i + 1}: no promo manifest content")
+                    continue
+                _status(f"Inserting interstitial page after block {i + 1} using source={interstitial_source}")
+                story.append(PageBreak())
                 story.append(
                     CoverPageFlowable(
                         frame_height=frame_h,
-                        title="",
+                        title=cap_title,
                         subtitle="",
                         period_label="",
                         airing_label=cap_label,
@@ -2487,6 +2455,8 @@ def make_compilation_pdf(
                     )
                 )
             elif interstitial_source == "ads" and full_ads:
+                _status(f"Inserting interstitial page after block {i + 1} using source={interstitial_source}")
+                story.append(PageBreak())
                 story.append(FullPageImageFlowable(choose_random(full_ads), frame_h))
         elif ad_insert_every > 0 and (i + 1) % ad_insert_every == 0 and (i + 1) < len(blocks):
             _status(

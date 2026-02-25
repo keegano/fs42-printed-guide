@@ -1,0 +1,22 @@
+[
+  {
+    "id": "promo-rugrats",
+    "enabled": true,
+    "range_modes": ["day", "week", "month"],
+    "title": "",
+    "message": "Catch Rugrats at 7:00 PM!",
+    "image": "rugrats_promo.jpg",
+    "match_titles": ["rugrats"],
+    "match_channels": []
+  },
+  {
+    "id": "promo-generic",
+    "enabled": true,
+    "range_modes": ["day", "week", "month", "single"],
+    "title": "",
+    "message": "",
+    "image": "",
+    "match_titles": [],
+    "match_channels": []
+  }
+]

@@ -420,7 +420,7 @@ def test_draw_description_columns_empty_descriptions_shows_fallback(tmp_path: Pa
 
     txt = _extract_pdf_text(out)
     assert "ON TONIGHT" in txt
-    assert "No descriptions generated; check source filters." in txt
+    assert "No descriptions generated; check source filters." not in txt
 
 
 def test_movie_meta_badge_rendered_inline(monkeypatch, tmp_path: Path):
@@ -535,6 +535,9 @@ def test_make_compilation_pdf_with_cover_ads_and_bottom_ads(tmp_path: Path, monk
     monkeypatch.setattr(core, "choose_random", lambda items: items[0] if items else None)
 
     out = tmp_path / "compilation.pdf"
+    content_dir = tmp_path / "content"
+    (content_dir / "covers").mkdir(parents=True)
+    (content_dir / "promos").mkdir(parents=True)
     core.make_compilation_pdf(
         out_path=out,
         channels=channels,
@@ -555,6 +558,7 @@ def test_make_compilation_pdf_with_cover_ads_and_bottom_ads(tmp_path: Path, monk
         cover_period_label="",
         cover_art_source="folder",
         cover_art_dir=cover_dir,
+        content_dir=content_dir,
         tvdb_api_key="",
         tvdb_pin="",
     )
@@ -633,7 +637,9 @@ def test_make_compilation_pdf_interstitial_catch_page(tmp_path: Path, monkeypatc
     )
     text = _extract_pdf_text(out)
     assert "Catch Tonight" not in text
-    assert "Catch " in text
+    # In file-content mode, interstitials are only inserted when a matching promo
+    # manifest exists with non-empty content.
+    assert "Catch " not in text
 
 
 def test_make_compilation_pdf_booklet_back_cover_catch(tmp_path: Path, monkeypatch):

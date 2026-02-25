@@ -22,6 +22,7 @@ DEFAULTS: Dict[str, Any] = {
     "confs_dir": Path("confs"),
     "year": 0,
     "fs42_dir": DEFAULT_FS42_DIR,
+    "content_dir": Path("content"),
     "out": Path("tv_guide.pdf"),
     "title": "",
     "double_sided_fold": False,
@@ -141,6 +142,7 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
         "dump_catalog",
         "ignore_list_file",
         "api_cache_file",
+        "content_dir",
     )
     for k in path_keys:
         if k in out and out[k] is not None and not isinstance(out[k], Path):
@@ -197,6 +199,7 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--config", type=Path, help="Path to JSON/TOML config file.")
     p.add_argument("--station42-dir", dest="fs42_dir", type=Path, help="Path to FieldStation42 repo (where station_42.py lives).")
     p.add_argument("--fs42-dir", type=Path, help="Path to FieldStation42 repo (where station_42.py lives).")
+    p.add_argument("--content-dir", type=Path, help="Directory containing content/covers and content/promos manifests.")
     p.add_argument("--date", type=parse_date, help="Guide date: YYYY-MM-DD")
     p.add_argument("--start", type=parse_hhmm, help="Start time HH:MM")
     p.add_argument("--hours", type=float, help="How many hours to include from start time (single mode).")

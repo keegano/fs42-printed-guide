@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
+from content_store import load_nfo_index
 from guide_config import parse_effective_args
 from guide_core import (
     Event,
@@ -225,6 +226,12 @@ def main(argv: List[str] | None = None) -> None:
     title = clean_text(args.title.strip()) or clean_text(
         f"TIME TRAVEL CABLE GUIDE - {args.date.strftime('%a %b %d, %Y')} ({start_dt.strftime('%H:%M')}-{end_dt.strftime('%H:%M')})"
     )
+    _status(args.status_messages, f"Loading NFO metadata from {args.fs42_dir / 'catalog'}")
+    nfo_index = load_nfo_index(args.fs42_dir)
+    _status(
+        args.status_messages,
+        f"NFO index loaded: filename keys={len(nfo_index.by_filename_stem)}, title keys={len(nfo_index.by_title)}",
+    )
 
     if args.range_mode == "single":
         _status(args.status_messages, "Rendering single-range PDF")
@@ -239,8 +246,9 @@ def main(argv: List[str] | None = None) -> None:
             step_minutes=args.step,
             double_sided_fold=args.double_sided_fold,
             fold_safe_gap=args.fold_safe_gap,
-            omdb_api_key=args.omdb_api_key,
+            omdb_api_key="",
             movie_inline_meta=args.movie_inline_meta,
+            nfo_index=nfo_index,
         )
     else:
         blocks = split_into_blocks(start_dt, end_dt, args.page_block_hours)
@@ -293,6 +301,8 @@ def main(argv: List[str] | None = None) -> None:
             movie_inline_meta=args.movie_inline_meta,
             api_cache_enabled=args.api_cache_enabled,
             api_cache_file=args.api_cache_file,
+            content_dir=args.content_dir,
+            fs42_dir=args.fs42_dir,
             ignored_channels=ignored_channels,
             ignored_titles=ignored_titles,
             status_messages=args.status_messages,

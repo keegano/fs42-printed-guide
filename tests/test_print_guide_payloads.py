@@ -275,12 +275,11 @@ def test_real_catalog_compilation_with_ads(tmp_path: Path, monkeypatch):
     assert "CABLE GUIDE" in text
 
 
-def test_tvdb_cover_adds_airing_label_from_catalog(tmp_path: Path, monkeypatch):
+def test_cover_render_offline_without_api_from_catalog(tmp_path: Path, monkeypatch):
     channels, _, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
     cover = tmp_path / "cover.png"
     _write_tiny_png(cover)
 
-    monkeypatch.setattr(core, "fetch_tvdb_cover_art", lambda *_a, **_k: cover)
     monkeypatch.setattr(core.random, "choice", lambda items: items[0])
 
     out = tmp_path / "tvdb_cover_label.pdf"
@@ -297,19 +296,16 @@ def test_tvdb_cover_adds_airing_label_from_catalog(tmp_path: Path, monkeypatch):
         cover_enabled=True,
         cover_title="Time Travel Cable Guide",
         cover_subtitle="Week",
-        cover_art_source="tvdb",
-        cover_airing_label_enabled=True,
-        cover_airing_label_week_format="{title} playing {weekday} at {time}",
+        cover_art_source="folder",
+        cover_art_dir=tmp_path,
     )
 
     text = "\n".join((p.extract_text() or "") for p in pytest.importorskip("pypdf").PdfReader(str(out)).pages)
-    assert "playing" in text
+    assert "Time Travel Cable Guide" in text
 
 
 def test_bottom_descriptions_used_when_no_bottom_ads(tmp_path: Path, monkeypatch):
     channels, _, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
-    monkeypatch.setattr(core, "_fetch_tvdb_token", lambda *_a, **_k: "tok")
-    monkeypatch.setattr(core, "_fetch_tvdb_overview_by_title", lambda title, token, api_cache=None: f"{title} overview from TVDB")
     monkeypatch.setattr(core.random, "shuffle", lambda items: None)
 
     out = tmp_path / "desc_fallback.pdf"
@@ -330,14 +326,11 @@ def test_bottom_descriptions_used_when_no_bottom_ads(tmp_path: Path, monkeypatch
 
     text = "\n".join((p.extract_text() or "") for p in pytest.importorskip("pypdf").PdfReader(str(out)).pages)
     assert "ON TONIGHT" in text
-    assert "overview from TVDB" in text
+    assert "Airing " in text
 
 
 def test_block_descriptions_skip_missing_instead_of_placeholder(monkeypatch):
     _, _, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
-    monkeypatch.setattr(core, "_fetch_tvdb_token", lambda *_a, **_k: "tok")
-    monkeypatch.setattr(core, "_fetch_tvdb_overview_by_title", lambda *_a, **_k: "")
-    monkeypatch.setattr(core, "_fetch_omdb_movie_meta", lambda *_a, **_k: None)
 
     entries = core._build_block_descriptions(
         schedules=schedules,
@@ -345,12 +338,7 @@ def test_block_descriptions_skip_missing_instead_of_placeholder(monkeypatch):
         end_dt=datetime(2026, 2, 24, 6, 0),
         ignored_channels=None,
         ignored_titles=None,
-        tvdb_api_key="k",
-        tvdb_pin="",
-        omdb_api_key="k",
-        desc_cache={},
-        movie_cache={},
-        token_holder={},
+        nfo_index=None,
         max_items=5,
     )
     assert isinstance(entries, list)

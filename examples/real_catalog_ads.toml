@@ -1,4 +1,6 @@
-# Realistic example using a pre-dumped catalog and ads.
+# Realistic example using pre-dumped catalog + local content manifests.
+station42_dir = "../FieldStation42"
+content_dir = "./content"
 load_catalog = "./tests/test_payloads/catalog_dump.json"
 date = "2026-02-24"
 range_mode = "day"
@@ -23,14 +25,7 @@ cover_date_y = 0.18
 cover_airing_font = "Helvetica-Bold"
 cover_airing_size = 12
 cover_airing_y = 0.11
-cover_airing_label_enabled = true
-cover_airing_label_day_format = "Catch {show} at {time}!"
-cover_art_source = "folder"
-cover_art_dir = "./assets/cover"
 ads_dir = "./assets/ads/full"
 ad_insert_every = 1
 bottom_ads_dir = "./assets/ads/bottom"
-omdb_api_key = "YOUR_OMDB_API_KEY"
 out = "out/real_catalog_ads.pdf"
-
-api_cache_file = "./cache/api_cache.json"

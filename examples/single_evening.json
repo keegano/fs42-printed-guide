@@ -1,5 +1,6 @@
 {
   "station42_dir": "../FieldStation42",
+  "content_dir": "./content",
   "date": "2026-03-07",
   "range_mode": "single",
   "start": "18:00",

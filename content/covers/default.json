@@ -1,0 +1,10 @@
+{
+  "id": "default-cover",
+  "enabled": true,
+  "range_modes": ["day", "week", "month", "single"],
+  "title": "Time Travel Cable Guide",
+  "subtitle": "Curated Edition",
+  "period_label": "",
+  "airing_label": "",
+  "image": "cover_default.jpg"
+}

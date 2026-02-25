@@ -1,4 +1,5 @@
 station42_dir = "../FieldStation42"
+content_dir = "./content"
 date = "2026-03-01"
 range_mode = "month"
 page_block_hours = 6
@@ -23,17 +24,7 @@ cover_date_y = 0.18
 cover_airing_font = "Helvetica-Bold"
 cover_airing_size = 14
 cover_airing_y = 0.11
-cover_airing_label_enabled = true
-cover_airing_label_single_format = "{time}"
-cover_airing_label_day_format = "Catch {show} at {time}!"
-cover_airing_label_week_format = "Catch {show} on {weekday} at {time}!"
-cover_airing_label_month_format = "Catch {show} on {md} at {time}!"
-cover_art_source = "folder"
-cover_art_dir = "./assets/cover"
 ads_dir = "./assets/ads/full"
 ad_insert_every = 4
 bottom_ads_dir = "./assets/ads/bottom"
-omdb_api_key = "YOUR_OMDB_API_KEY"
 out = "out/march_booklet.pdf"
-
-api_cache_file = "./cache/api_cache.json"

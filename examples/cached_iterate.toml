@@ -1,5 +1,6 @@
-# Use this config for fast iteration after an initial scan.
+# Fast iteration workflow from cached catalog + local content manifests.
 station42_dir = "../FieldStation42"
+content_dir = "./content"
 date = "2026-03-01"
 range_mode = "week"
 page_block_hours = 4
@@ -29,10 +30,4 @@ cover_date_y = 0.18
 cover_airing_font = "Helvetica-Bold"
 cover_airing_size = 13
 cover_airing_y = 0.11
-cover_airing_label_enabled = true
-cover_airing_label_week_format = "Catch {show} on {weekday} at {time}!"
-cover_art_source = "auto"
-omdb_api_key = "YOUR_OMDB_API_KEY"
 out = "out/week_cached.pdf"
-
-api_cache_file = "./cache/api_cache.json"
