@@ -1,0 +1,16 @@
+station42_dir = "../FieldStation42"
+date = "2026-03-01"
+range_mode = "month"
+page_block_hours = 6
+step = 30
+double_sided_fold = true
+fold_safe_gap = 0.2
+cover_page = true
+cover_title = "Time Travel Cable Guide"
+cover_subtitle = "March 2026"
+cover_art_source = "folder"
+cover_art_dir = "./assets/cover"
+ads_dir = "./assets/ads/full"
+ad_insert_every = 4
+bottom_ads_dir = "./assets/ads/bottom"
+out = "out/march_booklet.pdf"

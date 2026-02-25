@@ -1,0 +1,16 @@
+# Use this config for fast iteration after an initial scan.
+station42_dir = "../FieldStation42"
+date = "2026-03-01"
+range_mode = "week"
+page_block_hours = 4
+step = 30
+double_sided_fold = true
+fold_safe_gap = 0.18
+load_catalog = "./cache/march_week_catalog.json"
+dump_catalog = "./cache/march_week_catalog.json"
+status_messages = true
+cover_page = true
+cover_title = "Time Travel Cable Guide"
+cover_subtitle = "Week Edition"
+cover_art_source = "auto"
+out = "out/week_cached.pdf"
