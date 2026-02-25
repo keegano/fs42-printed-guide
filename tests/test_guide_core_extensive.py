@@ -555,6 +555,38 @@ def test_draw_description_columns_flow_truncates_at_final_column(tmp_path: Path)
     assert tail_marker not in txt
 
 
+def test_draw_description_columns_never_draws_third_column_after_exhaustion(monkeypatch):
+    from reportlab.pdfgen import canvas
+
+    entries = [
+        core.OnTonightEntry(
+            title="Flood",
+            description=("Long sentence that fills all available column space. " * 120).strip(),
+        ),
+        core.OnTonightEntry(
+            title="Should Not Draw Off Page",
+            description="This must not render into a third column.",
+        ),
+    ]
+
+    xs: list[float] = []
+    original_draw_on = core.Paragraph.drawOn
+
+    def _wrapped_draw_on(self, canv, x, y, _sW=0):
+        xs.append(float(x))
+        return original_draw_on(self, canv, x, y, _sW)
+
+    monkeypatch.setattr(core.Paragraph, "drawOn", _wrapped_draw_on)
+    c = canvas.Canvas("/tmp/third_col_guard_probe.pdf")
+    core._draw_description_columns(c, entries, 0, 0, 363.6, 113.3, flow_columns=True)
+    c.showPage()
+    c.save()
+
+    assert xs
+    # For w=363.6, third-column x would be > 300; ensure we never draw there.
+    assert max(xs) < 300
+
+
 def test_draw_description_columns_empty_descriptions_shows_fallback(tmp_path: Path):
     from reportlab.pdfgen import canvas
 

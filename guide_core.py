@@ -1028,7 +1028,10 @@ def _draw_description_columns(
     )
     drew_any = False
     drew_in_col = False
+    exhausted_columns = False
     for entry in descriptions:
+        if exhausted_columns or col >= cols:
+            break
         title = clean_text(entry.title)
         if not title:
             continue
@@ -1089,6 +1092,7 @@ def _draw_description_columns(
                         drew_in_col = True
                         col += 1
                         if col >= cols:
+                            exhausted_columns = True
                             break
                         cursor_y = text_top
                         drew_in_col = False
@@ -1098,6 +1102,7 @@ def _draw_description_columns(
             had_content_in_col = drew_in_col
             col += 1
             if col >= cols:
+                exhausted_columns = True
                 break
             cursor_y = text_top
             drew_in_col = False
@@ -1174,6 +1179,7 @@ def _analyze_ontonight_layout(
     )
     drew_any = False
     drew_in_col = False
+    exhausted_columns = False
     entries_drawn = 0
     chars_drawn = 0
     dropped_no_title = 0
@@ -1183,6 +1189,8 @@ def _analyze_ontonight_layout(
     dropped_no_space = 0
 
     for idx, entry in enumerate(descriptions, start=1):
+        if exhausted_columns or col >= cols:
+            break
         title = clean_text(entry.title)
         if not title:
             dropped_no_title += 1
@@ -1265,6 +1273,7 @@ def _analyze_ontonight_layout(
                         moved_col_any = True
                         col += 1
                         if col >= cols:
+                            exhausted_columns = True
                             break
                         cursor_y = text_top
                         drew_in_col = False
@@ -1275,6 +1284,7 @@ def _analyze_ontonight_layout(
             col += 1
             moved_col_any = True
             if col >= cols:
+                exhausted_columns = True
                 dropped_no_space += 1
                 if status_cb:
                     status_cb(
