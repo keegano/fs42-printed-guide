@@ -431,6 +431,36 @@ def test_ontonight_diag_does_not_burn_empty_first_column(capsys):
     assert "entry#2 'Judge Judy': draw col=1/2" in out
 
 
+def test_ontonight_diag_flow_columns_option(capsys):
+    entries = [
+        core.OnTonightEntry(title="First Show", description="Sentence one. Sentence two."),
+        core.OnTonightEntry(title="Bad Entry", description="X" * 800),
+        core.OnTonightEntry(title="Third Show", description="Short sentence. Works well."),
+    ]
+
+    core._analyze_ontonight_layout(
+        entries,
+        box_width=363.6,
+        box_height=113.3,
+        status_cb=lambda msg: print(msg),
+        label="separate",
+        flow_columns=False,
+    )
+    out_separate = capsys.readouterr().out
+    assert "entry#3 'Third Show': draw col=2/2" in out_separate
+
+    core._analyze_ontonight_layout(
+        entries,
+        box_width=363.6,
+        box_height=113.3,
+        status_cb=lambda msg: print(msg),
+        label="flow",
+        flow_columns=True,
+    )
+    out_flow = capsys.readouterr().out
+    assert "entry#3 'Third Show': draw col=1/2" in out_flow
+
+
 def test_draw_description_columns_empty_descriptions_shows_fallback(tmp_path: Path):
     from reportlab.pdfgen import canvas
 
@@ -641,6 +671,49 @@ def test_make_compilation_pdf_with_cover_ads_and_bottom_ads(tmp_path: Path, monk
         assert marker in txt
 
 
+def test_make_compilation_pdf_trims_empty_trailing_blocks_and_updates_cover_period(tmp_path: Path):
+    channels = ["NBC"]
+    numbers = {"NBC": "3"}
+    schedules = {
+        "NBC": [
+            core.Event(
+                start=datetime(2026, 3, 1, 0, 0),
+                end=datetime(2026, 3, 1, 1, 0),
+                title="Early Show",
+                filename="Early.Show.S01E01.mkv",
+            ),
+            core.Event(
+                start=datetime(2026, 3, 2, 12, 0),
+                end=datetime(2026, 3, 2, 13, 0),
+                title="Second Day Show",
+                filename="Second.Day.Show.S01E01.mkv",
+            ),
+        ]
+    }
+
+    out = tmp_path / "trimmed_week.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="week",
+        range_start=datetime(2026, 3, 1, 0, 0),
+        range_end=datetime(2026, 3, 8, 0, 0),
+        page_block_hours=24,
+        step_minutes=30,
+        double_sided_fold=False,
+        cover_enabled=True,
+        cover_title="Time Travel Cable Guide",
+    )
+
+    reader = PdfReader(str(out))
+    # 7 daily blocks requested; only first 2 days have schedule data.
+    assert len(reader.pages) == 3  # cover + 2 guide pages
+    text = _extract_pdf_text(out)
+    assert "Mar 01 - Mar 02, 2026" in text
+
+
 def test_impose_booklet_pages_order():
     logical = [core.BookletPageSpec(kind="blank", header_right=str(i)) for i in range(1, 9)]
     imposed = core.impose_booklet_pages(logical)
@@ -773,6 +846,14 @@ def test_make_compilation_pdf_booklet_back_cover_catch_without_front_cover(tmp_p
 
 def test_make_compilation_pdf_interstitial_promo_template_fills_placeholders(tmp_path: Path):
     channels, numbers, schedules = _sample_schedules()
+    schedules["NBC"].append(
+        core.Event(
+            start=datetime(2026, 3, 5, 13, 0),
+            end=datetime(2026, 3, 5, 14, 0),
+            title="Test Show",
+            filename="Test.Show.S01E02.mkv",
+        )
+    )
     content_dir = tmp_path / "content"
     (content_dir / "covers").mkdir(parents=True)
     promos = content_dir / "promos"

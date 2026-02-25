@@ -307,6 +307,7 @@ def main(argv: List[str] | None = None) -> None:
             ignored_titles=ignored_titles,
             status_messages=args.status_messages,
             fold_safe_gap=args.fold_safe_gap,
+            ontonight_flow_columns=args.ontonight_flow_columns,
         )
 
     _status(args.status_messages, f"Finished writing {args.out}")

@@ -68,6 +68,7 @@ DEFAULTS: Dict[str, Any] = {
     "dump_catalog": None,
     "ignore_list_file": None,
     "status_messages": True,
+    "ontonight_flow_columns": False,
 }
 
 REQUIRED_KEYS = ("date",)
@@ -185,6 +186,7 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
         "back_cover_catch_enabled",
         "movie_inline_meta",
         "api_cache_enabled",
+        "ontonight_flow_columns",
     )
     for k in bool_keys:
         if k in out and not isinstance(out[k], bool):
@@ -261,6 +263,8 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--ignore-list-file", type=Path, help="JSON/TXT file listing ignored channels/titles for cover and On Tonight.")
     p.add_argument("--status-messages", action="store_true", help="Print progress/status messages while scanning and rendering (default on).")
     p.add_argument("--no-status-messages", dest="status_messages", action="store_false", help="Disable progress/status messages.")
+    p.add_argument("--ontonight-flow-columns", action="store_true", help="Let On Tonight content flow continuously from left column into right column.")
+    p.add_argument("--no-ontonight-flow-columns", dest="ontonight_flow_columns", action="store_false", help="Keep On Tonight columns separated on problematic entries (default).")
     return p
 
 

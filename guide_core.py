@@ -508,6 +508,25 @@ def pick_cover_period_label(range_mode: str, start_dt: datetime) -> str:
     return start_dt.strftime("%B %Y")
 
 
+def pick_cover_period_label_for_span(range_mode: str, start_dt: datetime, end_dt: datetime) -> str:
+    """
+    Build a human-readable cover period label from the effective rendered span.
+    end_dt is treated as exclusive.
+    """
+    if end_dt <= start_dt:
+        return pick_cover_period_label(range_mode, start_dt)
+    end_disp = end_dt - timedelta(seconds=1)
+    if range_mode == "day":
+        return start_dt.strftime("%B %d, %Y")
+    if range_mode in ("week", "month"):
+        if start_dt.date() == end_disp.date():
+            return start_dt.strftime("%b %d, %Y")
+        if start_dt.year == end_disp.year:
+            return f"{start_dt.strftime('%b %d')} - {end_disp.strftime('%b %d, %Y')}"
+        return f"{start_dt.strftime('%b %d, %Y')} - {end_disp.strftime('%b %d, %Y')}"
+    return pick_cover_period_label(range_mode, start_dt)
+
+
 def _clock_no_ampm(dt: datetime) -> str:
     return f"{dt.hour % 12 or 12}:{dt.minute:02d}"
 
@@ -628,6 +647,22 @@ def split_into_blocks(start_dt: datetime, end_dt: datetime, block_hours: float) 
         blocks.append((cur, nxt))
         cur = nxt
     return blocks
+
+
+def _block_has_schedule_events(
+    schedules: Dict[str, List[Event]],
+    start_dt: datetime,
+    end_dt: datetime,
+    ignored_channels: Optional[set[str]] = None,
+) -> bool:
+    ignore_ch = ignored_channels or set()
+    for ch, evs in schedules.items():
+        if clean_text(ch).lower() in ignore_ch:
+            continue
+        for ev in evs:
+            if ev.end > start_dt and ev.start < end_dt:
+                return True
+    return False
 
 
 def _http_json(url: str, method: str = "GET", payload: Optional[dict] = None, headers: Optional[dict] = None) -> dict:
@@ -951,7 +986,15 @@ def _split_sentences(text: str) -> List[str]:
     return [t] if t else []
 
 
-def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y: float, w: float, h: float) -> None:
+def _draw_description_columns(
+    c,
+    descriptions: List[OnTonightEntry],
+    x: float,
+    y: float,
+    w: float,
+    h: float,
+    flow_columns: bool = False,
+) -> None:
     if w <= 20 or h <= 16:
         return
     c.setFillColorRGB(0, 0, 0)
@@ -994,7 +1037,7 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
         if not sentences:
             # No valid sentences -> remove this show.
             # If we already wrote in this column, end it and move on.
-            if drew_in_col:
+            if drew_in_col and not flow_columns:
                 col += 1
                 if col >= cols:
                     break
@@ -1013,7 +1056,7 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
         if not usable_lines:
             # Remove whole show and end this column if it already has content.
             # Otherwise keep trying additional shows to avoid empty boxes.
-            if drew_in_col:
+            if drew_in_col and not flow_columns:
                 col += 1
                 if col >= cols:
                     break
@@ -1076,6 +1119,7 @@ def _analyze_ontonight_layout(
     box_height: float,
     status_cb: Optional[Callable[[str], None]] = None,
     label: str = "",
+    flow_columns: bool = False,
 ) -> Dict[str, object]:
     """Simulate ON TONIGHT layout and emit detailed diagnostics."""
     padding = 6.0
@@ -1130,7 +1174,7 @@ def _analyze_ontonight_layout(
             dropped_no_sentences += 1
             if status_cb:
                 status_cb(f"On Tonight diag {label} entry#{idx} '{title}': dropped (no sentences)")
-            if drew_in_col:
+            if drew_in_col and not flow_columns:
                 col += 1
                 if col >= cols:
                     dropped_no_space += 1
@@ -1158,7 +1202,7 @@ def _analyze_ontonight_layout(
                     f"On Tonight diag {label} entry#{idx} '{title}': dropped "
                     f"(all sentences overflow/invalid, kept={kept_sent}, dropped={drop_sent})"
                 )
-            if drew_in_col:
+            if drew_in_col and not flow_columns:
                 col += 1
                 if col >= cols:
                     dropped_no_space += 1
@@ -1940,6 +1984,7 @@ class GuideWithBottomAdFlowable(Flowable):
         ad_path: Optional[Path],
         frame_height: float,
         descriptions: Optional[List[OnTonightEntry]] = None,
+        ontonight_flow_columns: bool = False,
     ) -> None:
         super().__init__()
         self.guide = guide
@@ -1947,6 +1992,7 @@ class GuideWithBottomAdFlowable(Flowable):
         self.frame_height = frame_height
         self.gap = 0.08 * inch
         self.descriptions = descriptions or []
+        self.ontonight_flow_columns = ontonight_flow_columns
 
     def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
         self.width = availWidth
@@ -1962,7 +2008,15 @@ class GuideWithBottomAdFlowable(Flowable):
         available = guide_y - self.gap
         if not self.ad_path:
             if available > 24:
-                _draw_description_columns(c, self.descriptions, 0, 0, self.width, available)
+                _draw_description_columns(
+                    c,
+                    self.descriptions,
+                    0,
+                    0,
+                    self.width,
+                    available,
+                    flow_columns=self.ontonight_flow_columns,
+                )
             return
         if available <= 12:
             return
@@ -1978,6 +2032,7 @@ class CompilationGuidePageFlowable(Flowable):
         guide: Flowable,
         bottom_ad: Optional[Path] = None,
         bottom_descriptions: Optional[List[OnTonightEntry]] = None,
+        ontonight_flow_columns: bool = False,
     ) -> None:
         super().__init__()
         self.frame_height = frame_height
@@ -1986,6 +2041,7 @@ class CompilationGuidePageFlowable(Flowable):
         self.guide = guide
         self.bottom_ad = bottom_ad
         self.bottom_descriptions = bottom_descriptions or []
+        self.ontonight_flow_columns = ontonight_flow_columns
         self.header_h = 0.14 * inch
         self.gap = 0.06 * inch
 
@@ -2012,7 +2068,15 @@ class CompilationGuidePageFlowable(Flowable):
             draw_image_fit(c, self.bottom_ad, 0, 0, self.width, ad_h)
         elif content_h - guide_h > 24:
             desc_h = content_h - guide_h - self.gap
-            _draw_description_columns(c, self.bottom_descriptions, 0, 0, self.width, desc_h)
+            _draw_description_columns(
+                c,
+                self.bottom_descriptions,
+                0,
+                0,
+                self.width,
+                desc_h,
+                flow_columns=self.ontonight_flow_columns,
+            )
             ad_h = desc_h
 
         guide_y = ad_h + (self.gap if ad_h > 0 else 0.0)
@@ -2100,6 +2164,7 @@ class BookletHalfPageFlowable(Flowable):
         movie_inline_meta: bool = True,
         nfo_index: Optional[cs.NfoIndex] = None,
         api_cache: Optional[Dict[str, object]] = None,
+        ontonight_flow_columns: bool = False,
     ) -> None:
         super().__init__()
         self.frame_height = frame_height
@@ -2113,6 +2178,7 @@ class BookletHalfPageFlowable(Flowable):
         self.movie_inline_meta = movie_inline_meta
         self.nfo_index = nfo_index
         self.api_cache = api_cache
+        self.ontonight_flow_columns = ontonight_flow_columns
         self.header_h = 0.14 * inch
         self.gap = 0.06 * inch
 
@@ -2178,6 +2244,7 @@ class BookletHalfPageFlowable(Flowable):
                 ad_path=self.spec.bottom_ad,
                 frame_height=content_h,
                 descriptions=self.spec.bottom_descriptions,
+                ontonight_flow_columns=self.ontonight_flow_columns,
             )
 
         self.guide = content
@@ -2365,6 +2432,7 @@ def make_compilation_pdf(
     nfo_dir: Optional[Path] = Path("content/nfo"),
     status_messages: bool = False,
     fold_safe_gap: float = 0.0,
+    ontonight_flow_columns: bool = False,
 ) -> None:
     def _status(message: str) -> None:
         if status_messages:
@@ -2401,6 +2469,7 @@ def make_compilation_pdf(
     nfo_index = cs.load_nfo_index(nfo_root)
     _status(f"Loaded content manifests: covers={len(cover_specs)} promos={len(promo_specs)} from {content_root}")
     _status(f"Loaded NFO index entries: by_filename={len(nfo_index.by_filename_stem)} by_title={len(nfo_index.by_title)}")
+    _status(f"On Tonight flow mode: {'continuous columns' if ontonight_flow_columns else 'separate columns'}")
 
     full_ads = list_image_files(ads_dir)
     bottom_ads = list_image_files(bottom_ads_dir)
@@ -2433,40 +2502,76 @@ def make_compilation_pdf(
                 else:
                     _status("No cover art found in fallback folder")
 
-        if not double_sided_fold:
-            period = clean_text(cover_period_label) or pick_cover_period_label(range_mode, range_start)
-            story.append(
-                CoverPageFlowable(
-                    frame_height=frame_h,
-                    title=cover_title,
-                    subtitle=cover_subtitle,
-                    period_label=period,
-                    airing_label=cover_airing_label,
-                    art_path=cover_art,
-                    bg_color=cover_bg_color,
-                    border_size=cover_border_size,
-                    text_color=cover_text_color,
-                    text_outline_color=cover_text_outline_color,
-                    text_outline_width=cover_text_outline_width,
-                    title_font=cover_title_font,
-                    title_size=cover_title_size,
-                    subtitle_font=cover_subtitle_font,
-                    subtitle_size=cover_subtitle_size,
-                    date_font=cover_date_font,
-                    date_size=cover_date_size,
-                    date_y=cover_date_y,
-                    airing_font=cover_airing_font,
-                    airing_size=cover_airing_size,
-                    airing_y=cover_airing_y,
-                )
-            )
+    blocks_all = split_into_blocks(range_start, range_end, page_block_hours)
+    blocks: List[Tuple[datetime, datetime]] = list(blocks_all)
+    latest_event_end: Optional[datetime] = None
+    for ch, evs in schedules.items():
+        if clean_text(ch).lower() in ignore_ch:
+            continue
+        for ev in evs:
+            if latest_event_end is None or ev.end > latest_event_end:
+                latest_event_end = ev.end
 
-    blocks = split_into_blocks(range_start, range_end, page_block_hours)
+    if latest_event_end is not None:
+        trimmed = 0
+        while blocks and blocks[-1][0] >= latest_event_end:
+            b0, b1 = blocks.pop()
+            trimmed += 1
+            _status(
+                f"Skipping trailing empty block {b0.strftime('%m/%d %H:%M')} - {b1.strftime('%m/%d %H:%M')} "
+                f"(starts after latest schedule end {latest_event_end.strftime('%m/%d %H:%M')})"
+            )
+        if trimmed:
+            _status(f"Trimmed {trimmed} trailing block(s) beyond schedule end")
+    if blocks:
+        effective_start = blocks[0][0]
+        effective_end = blocks[-1][1]
+    else:
+        effective_start = range_start
+        effective_end = range_end
+        _status("All schedule blocks were empty for requested range; keeping original range metadata")
+
+    auto_period = pick_cover_period_label_for_span(range_mode, effective_start, effective_end)
+    if not clean_text(cover_period_label):
+        cover_period_label = auto_period
+    elif effective_start != range_start or effective_end != range_end:
+        _status(
+            f"Cover period label explicitly set to '{clean_text(cover_period_label)}'; "
+            f"effective rendered span is {auto_period}"
+        )
+
     movie_cache: Dict[str, MovieMeta] = {}
     used_promo_ids: set[str] = set()
     used_ontonight_titles: set[str] = set()
     enforce_unique_promos = bool(double_sided_fold)
-    _status(f"Computed {len(blocks)} schedule block(s) for compilation")
+    _status(f"Computed {len(blocks_all)} schedule block(s), kept {len(blocks)} with schedule content")
+
+    if cover_enabled and not double_sided_fold:
+        story.append(
+            CoverPageFlowable(
+                frame_height=frame_h,
+                title=cover_title,
+                subtitle=cover_subtitle,
+                period_label=clean_text(cover_period_label),
+                airing_label=cover_airing_label,
+                art_path=cover_art,
+                bg_color=cover_bg_color,
+                border_size=cover_border_size,
+                text_color=cover_text_color,
+                text_outline_color=cover_text_outline_color,
+                text_outline_width=cover_text_outline_width,
+                title_font=cover_title_font,
+                title_size=cover_title_size,
+                subtitle_font=cover_subtitle_font,
+                subtitle_size=cover_subtitle_size,
+                date_font=cover_date_font,
+                date_size=cover_date_size,
+                date_y=cover_date_y,
+                airing_font=cover_airing_font,
+                airing_size=cover_airing_size,
+                airing_y=cover_airing_y,
+            )
+        )
 
     def _pick_promo_asset(block_start: datetime, block_end: datetime, purpose: str) -> tuple[str, str, Optional[Path]]:
         _status(
@@ -2613,6 +2718,7 @@ def make_compilation_pdf(
                 box_height=box_height,
                 status_cb=_status,
                 label=label,
+                flow_columns=ontonight_flow_columns,
             )
             preflight_ok = _has_renderable_ontonight_content(entries, box_width=box_width)
             if preflight_ok and bool(diag.get("drew_any")):
@@ -2810,6 +2916,7 @@ def make_compilation_pdf(
                         movie_inline_meta=movie_inline_meta,
                         nfo_index=nfo_index,
                         api_cache=runtime_api_cache,
+                        ontonight_flow_columns=ontonight_flow_columns,
                     ),
                     right=BookletHalfPageFlowable(
                         frame_height=frame_h,
@@ -2823,6 +2930,7 @@ def make_compilation_pdf(
                         movie_inline_meta=movie_inline_meta,
                         nfo_index=nfo_index,
                         api_cache=runtime_api_cache,
+                        ontonight_flow_columns=ontonight_flow_columns,
                     ),
                     safe_gap=fold_safe_gap,
                 )
@@ -2903,6 +3011,7 @@ def make_compilation_pdf(
                 guide=guide_flow,
                 bottom_ad=bottom_ad,
                 bottom_descriptions=bottom_desc,
+                ontonight_flow_columns=ontonight_flow_columns,
             )
         )
 

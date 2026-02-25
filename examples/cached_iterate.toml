@@ -11,6 +11,7 @@ load_catalog = "./cache/march_week_catalog.json"
 dump_catalog = "./cache/march_week_catalog.json"
 ignore_list_file = "./examples/ignore_list.json"
 status_messages = true
+ontonight_flow_columns = true
 interstitial_source = "catch"
 cover_page = true
 cover_title = "Time Travel Cable Guide"

@@ -159,6 +159,7 @@ def test_catalog_options_and_status_toggle():
             "cache.json",
             "--no-api-cache",
             "--no-movie-inline-meta",
+            "--ontonight-flow-columns",
             "--no-status-messages",
         ]
     )
@@ -186,6 +187,7 @@ def test_catalog_options_and_status_toggle():
     assert args.api_cache_file == Path("cache.json")
     assert args.api_cache_enabled is False
     assert args.movie_inline_meta is False
+    assert args.ontonight_flow_columns is True
     assert args.status_messages is False
 
 

@@ -148,6 +148,9 @@ python3 print_guide.py \
 - A safe center gap is configurable via `--fold-safe-gap`.
 - Back cover always receives a promo page.
 - Blank filler pages are avoided by adding promo filler pages when booklet padding is needed.
+- On Tonight column behavior is configurable:
+  - default: separate column handling
+  - `--ontonight-flow-columns`: flow left column content into right column continuously
 
 ## Config
 
