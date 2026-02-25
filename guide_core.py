@@ -1065,9 +1065,36 @@ def _draw_description_columns(
             continue
 
         paragraph = Paragraph(f"<b>{escape(title)}:</b> {escape(' '.join(usable_lines))}", para_style)
-        _, needed_h = paragraph.wrap(col_w, h)
+        while True:
+            _, needed_h = paragraph.wrap(col_w, h)
+            available_h = cursor_y - body_y
 
-        if cursor_y - needed_h < body_y:
+            if needed_h <= available_h:
+                cx = body_x + col * (col_w + col_gap)
+                paragraph.drawOn(c, cx, cursor_y - needed_h)
+                cursor_y -= needed_h + para_style.spaceAfter
+                drew_any = True
+                drew_in_col = True
+                break
+
+            if flow_columns and available_h > (para_style.leading + 2.0):
+                parts = paragraph.split(col_w, available_h)
+                if len(parts) >= 2:
+                    first, rest = parts[0], parts[1]
+                    _, first_h = first.wrap(col_w, h)
+                    if 0 < first_h <= available_h:
+                        cx = body_x + col * (col_w + col_gap)
+                        first.drawOn(c, cx, cursor_y - first_h)
+                        drew_any = True
+                        drew_in_col = True
+                        col += 1
+                        if col >= cols:
+                            break
+                        cursor_y = text_top
+                        drew_in_col = False
+                        paragraph = rest
+                        continue
+
             had_content_in_col = drew_in_col
             col += 1
             if col >= cols:
@@ -1081,13 +1108,7 @@ def _draw_description_columns(
                     col = max(0, col - 1)
                     cursor_y = text_top
                     drew_in_col = False
-                continue
-
-        cx = body_x + col * (col_w + col_gap)
-        paragraph.drawOn(c, cx, cursor_y - needed_h)
-        cursor_y -= needed_h + para_style.spaceAfter
-        drew_any = True
-        drew_in_col = True
+                break
 
     if not drew_any:
         return
@@ -1212,12 +1233,47 @@ def _analyze_ontonight_layout(
             continue
 
         paragraph = Paragraph(f"<b>{escape(title)}:</b> {escape(' '.join(usable_lines))}", para_style)
-        _, needed_h = paragraph.wrap(col_w, box_height)
-        moved_col = False
-        if cursor_y - needed_h < body_y:
+        entry_drawn = False
+        moved_col_any = False
+        while True:
+            _, needed_h = paragraph.wrap(col_w, box_height)
+            available_h = cursor_y - body_y
+            if needed_h <= available_h:
+                cursor_y -= needed_h + para_style.spaceAfter
+                drew_any = True
+                drew_in_col = True
+                entry_drawn = True
+                chars_drawn += len(" ".join(usable_lines))
+                if status_cb:
+                    status_cb(
+                        f"On Tonight diag {label} entry#{idx} '{title}': draw col={col + 1}/{cols} "
+                        f"needed_h={needed_h:.1f} moved_col={'yes' if moved_col_any else 'no'} "
+                        f"sentences_kept={kept_sent} sentences_dropped={drop_sent} chars={len(' '.join(usable_lines))}"
+                    )
+                break
+
+            if flow_columns and available_h > (para_style.leading + 2.0):
+                parts = paragraph.split(col_w, available_h)
+                if len(parts) >= 2:
+                    first, rest = parts[0], parts[1]
+                    _, first_h = first.wrap(col_w, box_height)
+                    if 0 < first_h <= available_h:
+                        cursor_y -= first_h + para_style.spaceAfter
+                        drew_any = True
+                        drew_in_col = True
+                        entry_drawn = True
+                        moved_col_any = True
+                        col += 1
+                        if col >= cols:
+                            break
+                        cursor_y = text_top
+                        drew_in_col = False
+                        paragraph = rest
+                        continue
+
             had_content_in_col = drew_in_col
             col += 1
-            moved_col = True
+            moved_col_any = True
             if col >= cols:
                 dropped_no_space += 1
                 if status_cb:
@@ -1238,19 +1294,9 @@ def _analyze_ontonight_layout(
                     col = max(0, col - 1)
                     cursor_y = text_top
                     drew_in_col = False
-                continue
-
-        cursor_y -= needed_h + para_style.spaceAfter
-        drew_any = True
-        drew_in_col = True
-        entries_drawn += 1
-        chars_drawn += len(" ".join(usable_lines))
-        if status_cb:
-            status_cb(
-                f"On Tonight diag {label} entry#{idx} '{title}': draw col={col + 1}/{cols} "
-                f"needed_h={needed_h:.1f} moved_col={'yes' if moved_col else 'no'} "
-                f"sentences_kept={kept_sent} sentences_dropped={drop_sent} chars={len(' '.join(usable_lines))}"
-            )
+                break
+        if entry_drawn:
+            entries_drawn += 1
 
     summary: Dict[str, object] = {
         "drew_any": drew_any,

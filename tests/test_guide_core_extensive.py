@@ -461,6 +461,74 @@ def test_ontonight_diag_flow_columns_option(capsys):
     assert "entry#3 'Third Show': draw col=1/2" in out_flow
 
 
+def test_draw_description_columns_flow_mode_affects_column_advance(monkeypatch):
+    from reportlab.pdfgen import canvas
+
+    entries = [
+        core.OnTonightEntry(title="First Show", description="Sentence one. Sentence two."),
+        core.OnTonightEntry(title="Bad Entry", description="X" * 800),
+        core.OnTonightEntry(title="Third Show", description="Short sentence. Works well."),
+    ]
+
+    original_draw_on = core.Paragraph.drawOn
+
+    def _capture_x_positions(flow: bool) -> list[float]:
+        xs: list[float] = []
+
+        def _wrapped_draw_on(self, canv, x, y, _sW=0):
+            xs.append(float(x))
+            return original_draw_on(self, canv, x, y, _sW)
+
+        monkeypatch.setattr(core.Paragraph, "drawOn", _wrapped_draw_on)
+        c = canvas.Canvas("/tmp/flow_mode_probe.pdf")
+        core._draw_description_columns(c, entries, 0, 0, 363.6, 113.3, flow_columns=flow)
+        c.showPage()
+        c.save()
+        return xs
+
+    xs_separate = _capture_x_positions(flow=False)
+    xs_flow = _capture_x_positions(flow=True)
+
+    # Two show entries should draw (bad entry dropped).
+    assert len(xs_separate) >= 2
+    assert len(xs_flow) >= 2
+    # Separate mode: second drawn entry advances to next column.
+    assert xs_separate[1] > xs_separate[0]
+    # Flow mode: second drawn entry remains in same column.
+    assert abs(xs_flow[1] - xs_flow[0]) < 0.5
+
+
+def test_draw_description_columns_flows_single_entry_across_columns(monkeypatch):
+    from reportlab.pdfgen import canvas
+
+    entries = [
+        core.OnTonightEntry(title="Warmup", description="Short intro. Brief setup."),
+        core.OnTonightEntry(
+            title="Main Feature",
+            description=("This sentence should continue across columns. " * 30).strip(),
+        ),
+    ]
+
+    xs: list[float] = []
+    original_draw_on = core.Paragraph.drawOn
+
+    def _wrapped_draw_on(self, canv, x, y, _sW=0):
+        xs.append(float(x))
+        return original_draw_on(self, canv, x, y, _sW)
+
+    monkeypatch.setattr(core.Paragraph, "drawOn", _wrapped_draw_on)
+    c = canvas.Canvas("/tmp/flow_continuation_probe.pdf")
+    core._draw_description_columns(c, entries, 0, 0, 363.6, 113.3, flow_columns=True)
+    c.showPage()
+    c.save()
+
+    # warmup draws first in col 1, then main feature should draw at least once in
+    # col 1 and continue into col 2.
+    assert len(xs) >= 3
+    assert abs(xs[1] - xs[0]) < 0.5
+    assert xs[2] > xs[1]
+
+
 def test_draw_description_columns_empty_descriptions_shows_fallback(tmp_path: Path):
     from reportlab.pdfgen import canvas
 
