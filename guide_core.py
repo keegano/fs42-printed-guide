@@ -2158,6 +2158,8 @@ def make_compilation_pdf(
 
     blocks = split_into_blocks(range_start, range_end, page_block_hours)
     movie_cache: Dict[str, MovieMeta] = {}
+    used_promo_ids: set[str] = set()
+    enforce_unique_promos = bool(double_sided_fold)
     _status(f"Computed {len(blocks)} schedule block(s) for compilation")
 
     def _pick_promo_asset(block_start: datetime, block_end: datetime, purpose: str) -> tuple[str, str, Optional[Path]]:
@@ -2193,8 +2195,12 @@ def make_compilation_pdf(
 
         title_hints = [shown for shown, _ev, _ch in block_candidates]
         channel_hints = [ch for _shown, _ev, ch in block_candidates]
+        available_promos = promo_specs
+        if enforce_unique_promos:
+            available_promos = [p for p in promo_specs if p.id not in used_promo_ids]
+            _status(f"Unique promo filter for booklet: {len(available_promos)} available (used={len(used_promo_ids)})")
         promo = cs.pick_promo_spec(
-            promo_specs,
+            available_promos,
             range_mode=range_mode,
             title_hints=title_hints,
             channel_hints=channel_hints,
@@ -2264,26 +2270,12 @@ def make_compilation_pdf(
                 f"Rendered promo payload title_len={len(clean_text(promo.title))} "
                 f"message_len={len(rendered)} image={'yes' if promo.image else 'no'}"
             )
+            if enforce_unique_promos:
+                used_promo_ids.add(promo.id)
+                _status(f"Marked promo used for booklet: {promo.id}")
             return promo.title, rendered, promo.image
 
-        # Must never be blank on back cover; generate minimal promo text from schedule.
-        if purpose == "back-cover":
-            base_title, base_label = build_catch_promo_label(
-                schedules=schedules,
-                range_mode=range_mode,
-                start_dt=block_start,
-                end_dt=block_end,
-                ignored_channels=ignore_ch,
-                ignored_titles=ignore_t,
-                single_fmt=cover_airing_label_single_format,
-                day_fmt=cover_airing_label_day_format,
-                week_fmt=cover_airing_label_week_format,
-                month_fmt=cover_airing_label_month_format,
-            )
-            _status("No promo manifest matched for back cover; using generated schedule promo text")
-            return base_title, base_label, None
-
-        _status(f"No promo manifest matched for {purpose}; skipping optional promo content")
+        _status(f"No promo manifest matched for {purpose}; no auto-generated fallback will be used")
         return "", "", None
 
     if double_sided_fold:
@@ -2380,7 +2372,11 @@ def make_compilation_pdf(
         if not back_cover_catch_enabled:
             _status("back_cover_catch_enabled=false requested, but back cover promos are always enabled in file-content mode.")
         bc_title, bc_label, bc_art = _pick_promo_asset(range_start, range_end, "back-cover")
-        back_cover_spec = BookletPageSpec(
+        if not bc_title and not bc_label and not bc_art:
+            _status("No back-cover promo available; back cover will be blank")
+            back_cover_spec = BookletPageSpec(kind="blank")
+        else:
+            back_cover_spec = BookletPageSpec(
             kind="cover",
             cover_title=bc_title,
             cover_subtitle="",
@@ -2402,13 +2398,10 @@ def make_compilation_pdf(
             cover_airing_font=cover_airing_font,
             cover_airing_size=cover_airing_size,
             cover_airing_y=cover_airing_y,
-        )
+            )
         logical_pages.append(back_cover_spec)
         _status("Added promo back cover")
-
-        while len(logical_pages) % 4 != 0:
-            logical_pages.append(back_cover_spec)
-            _status("Added extra promo filler half-page to avoid blank booklet padding")
+        _status("Back-cover promo selected first; no explicit filler promo pages will be added")
 
         imposed = impose_booklet_pages(logical_pages)
         _status(f"Booklet imposition produced {len(imposed)} physical side(s)")

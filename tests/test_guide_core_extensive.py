@@ -671,7 +671,7 @@ def test_make_compilation_pdf_booklet_back_cover_catch(tmp_path: Path, monkeypat
     )
     text = _extract_pdf_text(out)
     assert "Catch Tonight" not in text
-    assert "Catch " in text
+    assert "Catch " not in text
 
 
 def test_make_compilation_pdf_booklet_back_cover_catch_without_front_cover(tmp_path: Path, monkeypatch):
@@ -698,7 +698,7 @@ def test_make_compilation_pdf_booklet_back_cover_catch_without_front_cover(tmp_p
         content_dir=content_dir,
     )
     text = _extract_pdf_text(out)
-    assert "Catch " in text
+    assert "Catch " not in text
 
 
 def test_make_compilation_pdf_interstitial_promo_template_fills_placeholders(tmp_path: Path):
@@ -798,6 +798,52 @@ def test_make_compilation_pdf_prefers_matched_promo_over_generic(tmp_path: Path)
     text = _extract_pdf_text(out)
     assert "Catch Test Show on Thursday at 9:00!" in text
     assert "Tony's Pizza" not in text
+
+
+def test_make_compilation_pdf_booklet_never_reuses_same_promo(tmp_path: Path):
+    channels, numbers, schedules = _sample_schedules()
+    content_dir = tmp_path / "content"
+    (content_dir / "covers").mkdir(parents=True)
+    promos = content_dir / "promos"
+    promos.mkdir(parents=True)
+    (promos / "promo_one.json").write_text(
+        json.dumps(
+            {
+                "id": "promo-one",
+                "enabled": True,
+                "range_modes": [],
+                "title": "Promo One",
+                "message_template": "First promo",
+                "image": "",
+                "match_titles": [],
+                "match_channels": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    out = tmp_path / "no_reuse.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 3, 5, 0, 0),
+        range_end=datetime(2026, 3, 6, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        double_sided_fold=True,
+        cover_enabled=False,
+        content_dir=content_dir,
+    )
+    reader = PdfReader(str(out))
+    pages_with_promo = 0
+    for p in reader.pages:
+        txt = p.extract_text() or ""
+        if "Promo One" in txt:
+            pages_with_promo += 1
+    assert pages_with_promo <= 1
 
 
 def test_flowable_wraps():

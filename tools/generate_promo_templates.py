@@ -203,6 +203,9 @@ def main() -> None:
                     tvdb_pin=args.tvdb_pin,
                     omdb_api_key=args.omdb_api_key,
                 )
+                if not poster_name:
+                    print(f"[status] skipping promo generation for '{shown}': no poster available")
+                    continue
             payload = {
                 "id": f"promo-{sid}",
                 "enabled": True,

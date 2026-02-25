@@ -51,7 +51,7 @@ def test_generate_promo_templates_accepts_missing_space_before_poster_source(tmp
         str(REAL_CATALOG_DUMP),
         "--out-dir",
         str(out_dir) + "--poster-source",
-        "tvdb",
+        "none",
         "--range-mode",
         "day",
         "--date",
@@ -64,6 +64,33 @@ def test_generate_promo_templates_accepts_missing_space_before_poster_source(tmp
     subprocess.run(cmd, check=True, cwd=str(ROOT))
     files = sorted(out_dir.glob("promo_*.json"))
     assert len(files) == 1
+
+
+def test_generate_promo_templates_skips_when_poster_unavailable(tmp_path: Path):
+    out_dir = tmp_path / "promos"
+    cmd = [
+        sys.executable,
+        str(ROOT / "tools" / "generate_promo_templates.py"),
+        "--catalog",
+        str(REAL_CATALOG_DUMP),
+        "--out-dir",
+        str(out_dir),
+        "--range-mode",
+        "day",
+        "--date",
+        "2026-02-24",
+        "--page-block-hours",
+        "12",
+        "--max",
+        "2",
+        "--poster-source",
+        "tvdb",
+        "--tvdb-api-key",
+        "",
+    ]
+    subprocess.run(cmd, check=True, cwd=str(ROOT))
+    files = sorted(out_dir.glob("promo_*.json"))
+    assert len(files) == 0
 
 
 def test_save_poster_and_backfill_existing_promo(tmp_path: Path, monkeypatch):
