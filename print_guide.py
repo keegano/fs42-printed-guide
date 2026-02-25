@@ -51,6 +51,49 @@ def _status(enabled: bool, message: str) -> None:
         print(f"[status] {clean_text(message)}")
 
 
+def load_ignore_list(path: Path | None) -> tuple[set[str], set[str]]:
+    if not path or not path.exists() or not path.is_file():
+        return set(), set()
+    raw = path.read_text(encoding="utf-8")
+    channels: set[str] = set()
+    titles: set[str] = set()
+    try:
+        data = json.loads(raw)
+        if isinstance(data, dict):
+            for c in data.get("channels", []) if isinstance(data.get("channels", []), list) else []:
+                v = clean_text(str(c)).lower()
+                if v:
+                    channels.add(v)
+            for t in data.get("titles", []) if isinstance(data.get("titles", []), list) else []:
+                v = clean_text(str(t)).lower()
+                if v:
+                    titles.add(v)
+            return channels, titles
+    except Exception:
+        pass
+
+    # Fallback plain-text format:
+    # channel: MTV
+    # title: Rock
+    # rock  (treated as title)
+    for line in raw.splitlines():
+        txt = clean_text(line)
+        if not txt or txt.startswith("#"):
+            continue
+        low = txt.lower()
+        if low.startswith("channel:"):
+            v = clean_text(txt.split(":", 1)[1]).lower()
+            if v:
+                channels.add(v)
+        elif low.startswith("title:"):
+            v = clean_text(txt.split(":", 1)[1]).lower()
+            if v:
+                titles.add(v)
+        else:
+            titles.add(low)
+    return channels, titles
+
+
 def dump_catalog_file(path: Path, fs42_dir: Path, channels: List[str], year: int, schedules: Dict[str, List[Event]]) -> None:
     payload = {
         "version": 1,
@@ -127,6 +170,12 @@ def load_catalog_file(path: Path) -> tuple[List[str], int, Dict[str, List[Event]
 
 def main(argv: List[str] | None = None) -> None:
     args = parse_effective_args(argv)
+    ignored_channels, ignored_titles = load_ignore_list(args.ignore_list_file)
+    if ignored_channels or ignored_titles:
+        _status(
+            args.status_messages,
+            f"Loaded ignore list: {len(ignored_channels)} channel(s), {len(ignored_titles)} title(s)",
+        )
 
     number_map = resolve_channel_numbers(args.confs_dir, args.numbers)
     if args.load_catalog:
@@ -242,6 +291,8 @@ def main(argv: List[str] | None = None) -> None:
             movie_inline_meta=args.movie_inline_meta,
             api_cache_enabled=args.api_cache_enabled,
             api_cache_file=args.api_cache_file,
+            ignored_channels=ignored_channels,
+            ignored_titles=ignored_titles,
             status_messages=args.status_messages,
             fold_safe_gap=args.fold_safe_gap,
         )

@@ -508,8 +508,20 @@ def pick_cover_airing_event(
     schedules: Dict[str, List[Event]],
     range_start: datetime,
     range_end: datetime,
+    ignored_channels: Optional[set[str]] = None,
+    ignored_titles: Optional[set[str]] = None,
 ) -> Optional[Event]:
-    events = [e for evs in schedules.values() for e in evs if clean_text(e.title)]
+    ignore_ch = ignored_channels or set()
+    ignore_t = ignored_titles or set()
+    events = []
+    for ch, evs in schedules.items():
+        if clean_text(ch).lower() in ignore_ch:
+            continue
+        for e in evs:
+            t = clean_text(display_title(e.title, e.filename)).lower()
+            if not t or t in ignore_t:
+                continue
+            events.append(e)
     if not events:
         return None
     in_range = [e for e in events if range_start <= e.start < range_end]
@@ -806,16 +818,22 @@ def _block_show_events(
     schedules: Dict[str, List[Event]],
     start_dt: datetime,
     end_dt: datetime,
+    ignored_channels: Optional[set[str]] = None,
+    ignored_titles: Optional[set[str]] = None,
     max_items: int = 20,
 ) -> List[Tuple[str, Event]]:
+    ignore_ch = ignored_channels or set()
+    ignore_t = ignored_titles or set()
     names: List[Tuple[str, Event]] = []
     seen = set()
-    for evs in schedules.values():
+    for ch, evs in schedules.items():
+        if clean_text(ch).lower() in ignore_ch:
+            continue
         for e in evs:
             if e.end <= start_dt or e.start >= end_dt:
                 continue
             t = display_title(e.title, e.filename)
-            if not t or t in seen:
+            if not t or t in seen or clean_text(t).lower() in ignore_t:
                 continue
             seen.add(t)
             names.append((t, e))
@@ -880,6 +898,7 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
         alignment=TA_JUSTIFY,
         spaceAfter=2,
     )
+    drew_any = False
     for entry in descriptions:
         title = clean_text(entry.title)
         if not title:
@@ -900,7 +919,7 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
 
         if not usable_lines:
             # Remove whole show and end this column.
-            return
+            break
 
         paragraph = Paragraph(f"<b>{escape(title)}:</b> {escape(' '.join(usable_lines))}", para_style)
         _, needed_h = paragraph.wrap(col_w, h)
@@ -916,12 +935,19 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
         cx = body_x + col * (col_w + col_gap)
         paragraph.drawOn(c, cx, cursor_y - needed_h)
         cursor_y -= needed_h + para_style.spaceAfter
+        drew_any = True
+
+    if not drew_any:
+        c.setFont("Helvetica-Oblique", 7)
+        c.drawString(body_x, body_y + 2, "No current descriptions available.")
 
 
 def _build_block_descriptions(
     schedules: Dict[str, List[Event]],
     start_dt: datetime,
     end_dt: datetime,
+    ignored_channels: Optional[set[str]],
+    ignored_titles: Optional[set[str]],
     tvdb_api_key: str,
     tvdb_pin: str,
     omdb_api_key: str,
@@ -931,7 +957,14 @@ def _build_block_descriptions(
     api_cache: Optional[Dict[str, object]] = None,
     max_items: int = 8,
 ) -> List[OnTonightEntry]:
-    candidates = _block_show_events(schedules, start_dt, end_dt, max_items=max_items * 3)
+    candidates = _block_show_events(
+        schedules,
+        start_dt,
+        end_dt,
+        ignored_channels=ignored_channels,
+        ignored_titles=ignored_titles,
+        max_items=max_items * 3,
+    )
     if not candidates:
         return []
     out: List[OnTonightEntry] = []
@@ -1941,6 +1974,8 @@ def make_compilation_pdf(
     tvdb_api_key: str = "",
     tvdb_pin: str = "",
     omdb_api_key: str = "",
+    ignored_channels: Optional[set[str]] = None,
+    ignored_titles: Optional[set[str]] = None,
     movie_inline_meta: bool = True,
     api_cache_enabled: bool = True,
     api_cache_file: Optional[Path] = Path(".cache/printed_guide_api_cache.json"),
@@ -1950,6 +1985,9 @@ def make_compilation_pdf(
     def _status(message: str) -> None:
         if status_messages:
             print(f"[status] {clean_text(message)}")
+
+    ignore_ch = ignored_channels or set()
+    ignore_t = ignored_titles or set()
 
     page_size = landscape(letter)
     doc = SimpleDocTemplate(
@@ -1982,7 +2020,13 @@ def make_compilation_pdf(
             if cover_art:
                 _status(f"Selected cover from folder: {cover_art.name}")
         if not cover_art and source in ("tvdb", "auto"):
-            cover_event = pick_cover_airing_event(schedules, range_start, range_end)
+            cover_event = pick_cover_airing_event(
+                schedules,
+                range_start,
+                range_end,
+                ignored_channels=ignore_ch,
+                ignored_titles=ignore_t,
+            )
             # For movie blocks, prefer OMDb poster over TVDB series art.
             if cover_event and is_movie_event(cover_event.title, cover_event.filename):
                 movie_title = display_title(cover_event.title, cover_event.filename)
@@ -2098,6 +2142,8 @@ def make_compilation_pdf(
                     schedules=schedules,
                     start_dt=b0,
                     end_dt=split_dt,
+                    ignored_channels=ignore_ch,
+                    ignored_titles=ignore_t,
                     tvdb_api_key=tvdb_api_key,
                     tvdb_pin=tvdb_pin,
                     omdb_api_key=omdb_api_key,
@@ -2115,6 +2161,8 @@ def make_compilation_pdf(
                     schedules=schedules,
                     start_dt=split_dt,
                     end_dt=b1,
+                    ignored_channels=ignore_ch,
+                    ignored_titles=ignore_t,
                     tvdb_api_key=tvdb_api_key,
                     tvdb_pin=tvdb_pin,
                     omdb_api_key=omdb_api_key,
@@ -2241,6 +2289,8 @@ def make_compilation_pdf(
                 schedules=schedules,
                 start_dt=b0,
                 end_dt=b1,
+                ignored_channels=ignore_ch,
+                ignored_titles=ignore_t,
                 tvdb_api_key=tvdb_api_key,
                 tvdb_pin=tvdb_pin,
                 omdb_api_key=omdb_api_key,

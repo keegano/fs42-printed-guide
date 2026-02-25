@@ -62,6 +62,7 @@ DEFAULTS: Dict[str, Any] = {
     "api_cache_file": Path(".cache/printed_guide_api_cache.json"),
     "load_catalog": None,
     "dump_catalog": None,
+    "ignore_list_file": None,
     "status_messages": True,
 }
 
@@ -136,6 +137,7 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
         "confs_dir",
         "load_catalog",
         "dump_catalog",
+        "ignore_list_file",
         "api_cache_file",
     )
     for k in path_keys:
@@ -244,6 +246,7 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-api-cache", dest="api_cache_enabled", action="store_false", help="Disable persistent API caching.")
     p.add_argument("--load-catalog", type=Path, help="Load pre-scanned channel schedules/catalog JSON instead of querying station_42.py.")
     p.add_argument("--dump-catalog", type=Path, help="Write scanned channel schedules/catalog JSON for later reuse.")
+    p.add_argument("--ignore-list-file", type=Path, help="JSON/TXT file listing ignored channels/titles for cover and On Tonight.")
     p.add_argument("--status-messages", action="store_true", help="Print progress/status messages while scanning and rendering (default on).")
     p.add_argument("--no-status-messages", dest="status_messages", action="store_false", help="Disable progress/status messages.")
     return p

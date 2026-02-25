@@ -341,6 +341,8 @@ def test_block_descriptions_skip_missing_instead_of_placeholder(monkeypatch):
         schedules=schedules,
         start_dt=datetime(2026, 2, 24, 0, 0),
         end_dt=datetime(2026, 2, 24, 6, 0),
+        ignored_channels=None,
+        ignored_titles=None,
         tvdb_api_key="k",
         tvdb_pin="",
         omdb_api_key="k",
@@ -352,3 +354,36 @@ def test_block_descriptions_skip_missing_instead_of_placeholder(monkeypatch):
     assert isinstance(entries, list)
     assert all(isinstance(e, core.OnTonightEntry) for e in entries)
     assert all("See schedule listing" not in e.description for e in entries)
+
+
+def test_load_ignore_list_json(tmp_path: Path):
+    p = tmp_path / "ignore.json"
+    p.write_text(json.dumps({"channels": ["MTV"], "titles": ["Rock", "News Block"]}), encoding="utf-8")
+    channels, titles = pg.load_ignore_list(p)
+    assert "mtv" in channels
+    assert "rock" in titles
+
+
+def test_ignore_list_filters_cover_and_ontonight(tmp_path: Path, monkeypatch):
+    channels, _, schedules = pg.load_catalog_file(REAL_CATALOG_DUMP)
+    monkeypatch.setattr(core, "_fetch_tvdb_token", lambda *_a, **_k: "tok")
+    monkeypatch.setattr(core, "_fetch_tvdb_overview_by_title", lambda title, token, api_cache=None: f"{title} desc")
+
+    out = tmp_path / "ignored.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers={},
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 2, 24, 0, 0),
+        range_end=datetime(2026, 2, 25, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        cover_enabled=True,
+        cover_art_source="tvdb",
+        tvdb_api_key="k",
+        ignored_channels={"mtv"},
+        ignored_titles={"rock"},
+    )
+    assert out.exists()

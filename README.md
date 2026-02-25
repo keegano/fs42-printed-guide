@@ -73,6 +73,7 @@ Compilation mode supports:
   using configurable templates per range mode (`single/day/week/month`)
 - If no bottom ad is available, guide pages can fill lower space with TVDB show-description columns for titles airing in that block
 - "On Tonight" titles are bold; entries without a usable description are skipped
+- If no usable entries remain, a fallback message is shown instead of an empty block
 
 Cover art sources (`--cover-art-source`):
 - `none`
@@ -177,6 +178,7 @@ Compilation extras:
 - `--dump-catalog PATH`
 - `--load-catalog PATH`
 - `--status-messages` / `--no-status-messages`
+- `--ignore-list-file PATH`
 
 `--fold-safe-gap` applies to folded single pages and folded booklet compilation spreads.
 Time tick labels on guide headers are inset at the edges so start/end labels stay
@@ -195,6 +197,11 @@ Movie metadata:
   TVDB overviews for series.
 - TVDB/OMDb responses are cached to disk by default (`.cache/printed_guide_api_cache.json`)
   to reduce API usage and avoid free-tier overages.
+
+Ignore list:
+- Use `--ignore-list-file` with JSON like:
+  `{"channels": ["MTV"], "titles": ["Rock"]}`
+- Ignored channels/titles are excluded from cover candidate selection and "On Tonight" content.
 
 ## Example
 

@@ -118,6 +118,8 @@ def test_catalog_options_and_status_toggle():
             "scan.json",
             "--dump-catalog",
             "dump.json",
+            "--ignore-list-file",
+            "ignore.json",
             "--fold-safe-gap",
             "0.2",
             "--cover-bg-color",
@@ -159,6 +161,7 @@ def test_catalog_options_and_status_toggle():
     )
     assert args.load_catalog == Path("scan.json")
     assert args.dump_catalog == Path("dump.json")
+    assert args.ignore_list_file == Path("ignore.json")
     assert args.fold_safe_gap == 0.2
     assert args.cover_bg_color == "112233"
     assert args.cover_border_size == 0.1

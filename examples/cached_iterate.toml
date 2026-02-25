@@ -8,6 +8,7 @@ double_sided_fold = true
 fold_safe_gap = 0.18
 load_catalog = "./cache/march_week_catalog.json"
 dump_catalog = "./cache/march_week_catalog.json"
+ignore_list_file = "./config/ignore_list.json"
 status_messages = true
 cover_page = true
 cover_title = "Time Travel Cable Guide"
