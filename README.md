@@ -6,7 +6,7 @@ Generate printable TV guide PDFs from FieldStation42 schedules.
 
 Rendering is now file-first and offline:
 
-1. Scan schedules from FieldStation42 (or load a catalog dump).
+1. Dump a reusable catalog JSON from FieldStation42 schedules.
 2. Prepare editable content files in `content/`:
 - `content/covers/*.json`
 - `content/promos/*.json`
@@ -78,6 +78,16 @@ Expected fields:
 - `<mpaa>`
 
 ## Tools
+
+### Dump catalog (first step)
+
+```bash
+python3 tools/dump_catalog.py \
+  --fs42-dir ../FieldStation42 \
+  --out ./cache/march_week_catalog.json
+```
+
+Optional: pass `--year 2026` to force the schedule year.
 
 ### Generate promo templates
 
