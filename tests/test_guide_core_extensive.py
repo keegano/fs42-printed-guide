@@ -409,6 +409,20 @@ def test_draw_description_columns_renders_bold_title_and_sentence(tmp_path: Path
     assert "Tommy leads a toy hunt." in txt
 
 
+def test_draw_description_columns_empty_descriptions_shows_fallback(tmp_path: Path):
+    from reportlab.pdfgen import canvas
+
+    out = tmp_path / "ontonight_empty.pdf"
+    c = canvas.Canvas(str(out))
+    core._draw_description_columns(c, [], 0, 0, 250, 100)
+    c.showPage()
+    c.save()
+
+    txt = _extract_pdf_text(out)
+    assert "ON TONIGHT" in txt
+    assert "No current descriptions available." in txt
+
+
 def test_movie_meta_badge_rendered_inline(monkeypatch, tmp_path: Path):
     channels = ["MTV"]
     numbers = {"MTV": "7"}
@@ -596,6 +610,52 @@ def test_make_compilation_pdf_folded_booklet_imposition(tmp_path: Path, monkeypa
     assert "Time Travel Cable Guide" in first_page_text
     assert "CABLE GUIDE" not in first_page_text
     assert "CABLE GUIDE" in second_page_text
+
+
+def test_make_compilation_pdf_interstitial_catch_page(tmp_path: Path, monkeypatch):
+    channels, numbers, schedules = _sample_schedules()
+    monkeypatch.setattr(core, "pick_cover_airing_event", lambda *a, **k: schedules["NBC"][0])
+
+    out = tmp_path / "catch_interstitial.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 3, 1, 0, 0),
+        range_end=datetime(2026, 3, 2, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        ad_insert_every=1,
+        interstitial_source="catch",
+        cover_enabled=False,
+    )
+    text = _extract_pdf_text(out)
+    assert "Catch Tonight" in text
+
+
+def test_make_compilation_pdf_booklet_back_cover_catch(tmp_path: Path, monkeypatch):
+    channels, numbers, schedules = _sample_schedules()
+    monkeypatch.setattr(core, "pick_cover_airing_event", lambda *a, **k: schedules["NBC"][0])
+
+    out = tmp_path / "booklet_back_catch.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 3, 1, 0, 0),
+        range_end=datetime(2026, 3, 2, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        double_sided_fold=True,
+        cover_enabled=True,
+        back_cover_catch_enabled=True,
+    )
+    text = _extract_pdf_text(out)
+    assert "Catch Tonight" in text
 
 
 def test_flowable_wraps():

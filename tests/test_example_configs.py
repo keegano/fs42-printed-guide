@@ -48,7 +48,8 @@ def test_example_cached_iterate_toml_parses():
     assert args.range_mode == "week"
     assert args.load_catalog == Path("cache/march_week_catalog.json")
     assert args.dump_catalog == Path("cache/march_week_catalog.json")
-    assert args.ignore_list_file == Path("config/ignore_list.json")
+    assert args.ignore_list_file == Path("examples/ignore_list.json")
+    assert args.interstitial_source == "catch"
     assert args.cover_art_source == "auto"
     assert args.cover_bg_color == "1D2A44"
     assert args.cover_border_size == 0.12

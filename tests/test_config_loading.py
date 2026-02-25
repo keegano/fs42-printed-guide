@@ -120,6 +120,9 @@ def test_catalog_options_and_status_toggle():
             "dump.json",
             "--ignore-list-file",
             "ignore.json",
+            "--interstitial-source",
+            "catch",
+            "--no-back-cover-catch",
             "--fold-safe-gap",
             "0.2",
             "--cover-bg-color",
@@ -162,6 +165,8 @@ def test_catalog_options_and_status_toggle():
     assert args.load_catalog == Path("scan.json")
     assert args.dump_catalog == Path("dump.json")
     assert args.ignore_list_file == Path("ignore.json")
+    assert args.interstitial_source == "catch"
+    assert args.back_cover_catch_enabled is False
     assert args.fold_safe_gap == 0.2
     assert args.cover_bg_color == "112233"
     assert args.cover_border_size == 0.1

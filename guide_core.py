@@ -28,7 +28,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, date, time, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 # ReportLab
 from reportlab.lib.pagesizes import letter, landscape
@@ -531,6 +531,40 @@ def pick_cover_airing_event(
     return events[0]
 
 
+def build_catch_promo_label(
+    schedules: Dict[str, List[Event]],
+    range_mode: str,
+    start_dt: datetime,
+    end_dt: datetime,
+    ignored_channels: Optional[set[str]] = None,
+    ignored_titles: Optional[set[str]] = None,
+    single_fmt: str = "{time}",
+    day_fmt: str = "Catch {show} at {time}!",
+    week_fmt: str = "Catch {show} on {weekday} at {time}!",
+    month_fmt: str = "Catch {show} on {md} at {time}!",
+) -> tuple[str, str]:
+    ev = pick_cover_airing_event(
+        schedules=schedules,
+        range_start=start_dt,
+        range_end=end_dt,
+        ignored_channels=ignored_channels,
+        ignored_titles=ignored_titles,
+    )
+    if not ev:
+        return "Catch Tonight", "Something good is always on."
+    shown = display_title(ev.title, ev.filename)
+    label = _build_airing_label(
+        range_mode=range_mode,
+        title=shown,
+        when_dt=ev.start,
+        single_fmt=single_fmt,
+        day_fmt=day_fmt,
+        week_fmt=week_fmt,
+        month_fmt=month_fmt,
+    )
+    return "Catch Tonight", label
+
+
 def compute_range_bounds(range_mode: str, anchor_date: date, start_time: time, hours: float) -> Tuple[datetime, datetime]:
     if range_mode == "single":
         s = datetime.combine(anchor_date, start_time)
@@ -867,7 +901,7 @@ def _split_sentences(text: str) -> List[str]:
 
 
 def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y: float, w: float, h: float) -> None:
-    if not descriptions or w <= 20 or h <= 16:
+    if w <= 20 or h <= 16:
         return
     c.setFillColorRGB(0, 0, 0)
     c.setStrokeColorRGB(0, 0, 0)
@@ -938,8 +972,8 @@ def _draw_description_columns(c, descriptions: List[OnTonightEntry], x: float, y
         drew_any = True
 
     if not drew_any:
-        c.setFont("Helvetica-Oblique", 7)
-        c.drawString(body_x, body_y + 2, "No current descriptions available.")
+        c.setFont("Helvetica", 7)
+        c.drawString(body_x, max(body_y + 6, text_top - 8), "No current descriptions available.")
 
 
 def _build_block_descriptions(
@@ -955,6 +989,7 @@ def _build_block_descriptions(
     movie_cache: Dict[str, MovieMeta],
     token_holder: Dict[str, str],
     api_cache: Optional[Dict[str, object]] = None,
+    status_cb: Optional[Callable[[str], None]] = None,
     max_items: int = 8,
 ) -> List[OnTonightEntry]:
     candidates = _block_show_events(
@@ -965,6 +1000,8 @@ def _build_block_descriptions(
         ignored_titles=ignored_titles,
         max_items=max_items * 3,
     )
+    if status_cb:
+        status_cb(f"On Tonight candidates considered: {len(candidates)}")
     if not candidates:
         return []
     out: List[OnTonightEntry] = []
@@ -1001,6 +1038,8 @@ def _build_block_descriptions(
             out.append(OnTonightEntry(title=title, description=desc))
         if len(out) >= max_items:
             break
+    if status_cb:
+        status_cb(f"On Tonight entries after filtering/descriptions: {len(out)}")
     return out
 
 
@@ -1969,6 +2008,8 @@ def make_compilation_pdf(
     cover_airing_label_day_format: str = "Catch {show} at {time}!",
     cover_airing_label_week_format: str = "Catch {show} on {weekday} at {time}!",
     cover_airing_label_month_format: str = "Catch {show} on {md} at {time}!",
+    back_cover_catch_enabled: bool = True,
+    interstitial_source: str = "ads",
     cover_art_source: str = "none",
     cover_art_dir: Optional[Path] = None,
     tvdb_api_key: str = "",
@@ -2027,6 +2068,10 @@ def make_compilation_pdf(
                 ignored_channels=ignore_ch,
                 ignored_titles=ignore_t,
             )
+            if cover_event:
+                _status(f"Cover event candidate: {display_title(cover_event.title, cover_event.filename)} @ {cover_event.start.strftime('%m/%d %H:%M')}")
+            else:
+                _status("No cover event candidate after ignore filters")
             # For movie blocks, prefer OMDb poster over TVDB series art.
             if cover_event and is_movie_event(cover_event.title, cover_event.filename):
                 movie_title = display_title(cover_event.title, cover_event.filename)
@@ -2151,6 +2196,7 @@ def make_compilation_pdf(
                     movie_cache=movie_cache,
                     token_holder=token_holder,
                     api_cache=runtime_api_cache,
+                    status_cb=_status,
                 )
                 _status(f"On Tonight entries (left): {len(bottom_desc_left)}")
             if not bottom_ad_right:
@@ -2170,6 +2216,7 @@ def make_compilation_pdf(
                     movie_cache=movie_cache,
                     token_holder=token_holder,
                     api_cache=runtime_api_cache,
+                    status_cb=_status,
                 )
                 _status(f"On Tonight entries (right): {len(bottom_desc_right)}")
             logical_pages.append(
@@ -2196,8 +2243,48 @@ def make_compilation_pdf(
             )
 
         if cover_enabled:
-            logical_pages.append(BookletPageSpec(kind="blank"))
-            _status("Added blank back-cover half-page")
+            if back_cover_catch_enabled:
+                bc_title, bc_label = build_catch_promo_label(
+                    schedules=schedules,
+                    range_mode=range_mode,
+                    start_dt=range_start,
+                    end_dt=range_end,
+                    ignored_channels=ignore_ch,
+                    ignored_titles=ignore_t,
+                    single_fmt=cover_airing_label_single_format,
+                    day_fmt=cover_airing_label_day_format,
+                    week_fmt=cover_airing_label_week_format,
+                    month_fmt=cover_airing_label_month_format,
+                )
+                logical_pages.append(
+                    BookletPageSpec(
+                        kind="cover",
+                        cover_title=bc_title,
+                        cover_subtitle="",
+                        cover_period_label="",
+                        cover_airing_label=bc_label,
+                        cover_art_path=None,
+                        cover_bg_color=cover_bg_color,
+                        cover_border_size=cover_border_size,
+                        cover_text_color=cover_text_color,
+                        cover_text_outline_color=cover_text_outline_color,
+                        cover_text_outline_width=cover_text_outline_width,
+                        cover_title_font=cover_title_font,
+                        cover_title_size=cover_title_size,
+                        cover_subtitle_font=cover_subtitle_font,
+                        cover_subtitle_size=cover_subtitle_size,
+                        cover_date_font=cover_date_font,
+                        cover_date_size=cover_date_size,
+                        cover_date_y=cover_date_y,
+                        cover_airing_font=cover_airing_font,
+                        cover_airing_size=cover_airing_size,
+                        cover_airing_y=cover_airing_y,
+                    )
+                )
+                _status("Added generated Catch promo on back cover")
+            else:
+                logical_pages.append(BookletPageSpec(kind="blank"))
+                _status("Added blank back-cover half-page")
 
         imposed = impose_booklet_pages(logical_pages)
         _status(f"Booklet imposition produced {len(imposed)} physical side(s)")
@@ -2298,6 +2385,7 @@ def make_compilation_pdf(
                 movie_cache=movie_cache,
                 token_holder=token_holder,
                 api_cache=runtime_api_cache,
+                status_cb=_status,
             )
             _status(f"On Tonight entries: {len(bottom_desc)}")
         header_left = "CABLE GUIDE"
@@ -2313,9 +2401,59 @@ def make_compilation_pdf(
             )
         )
 
-        if ad_insert_every > 0 and full_ads and (i + 1) % ad_insert_every == 0 and (i + 1) < len(blocks):
+        should_insert = (
+            ad_insert_every > 0
+            and (i + 1) % ad_insert_every == 0
+            and (i + 1) < len(blocks)
+            and (interstitial_source == "catch" or (interstitial_source == "ads" and bool(full_ads)))
+        )
+        if should_insert:
+            _status(f"Inserting interstitial page after block {i + 1} using source={interstitial_source}")
             story.append(PageBreak())
-            story.append(FullPageImageFlowable(choose_random(full_ads), frame_h))
+            if interstitial_source == "catch":
+                cap_title, cap_label = build_catch_promo_label(
+                    schedules=schedules,
+                    range_mode=range_mode,
+                    start_dt=b0,
+                    end_dt=b1,
+                    ignored_channels=ignore_ch,
+                    ignored_titles=ignore_t,
+                    single_fmt=cover_airing_label_single_format,
+                    day_fmt=cover_airing_label_day_format,
+                    week_fmt=cover_airing_label_week_format,
+                    month_fmt=cover_airing_label_month_format,
+                )
+                story.append(
+                    CoverPageFlowable(
+                        frame_height=frame_h,
+                        title=cap_title,
+                        subtitle="",
+                        period_label="",
+                        airing_label=cap_label,
+                        art_path=None,
+                        bg_color=cover_bg_color,
+                        border_size=cover_border_size,
+                        text_color=cover_text_color,
+                        text_outline_color=cover_text_outline_color,
+                        text_outline_width=cover_text_outline_width,
+                        title_font=cover_title_font,
+                        title_size=cover_title_size,
+                        subtitle_font=cover_subtitle_font,
+                        subtitle_size=cover_subtitle_size,
+                        date_font=cover_date_font,
+                        date_size=cover_date_size,
+                        date_y=cover_date_y,
+                        airing_font=cover_airing_font,
+                        airing_size=cover_airing_size,
+                        airing_y=cover_airing_y,
+                    )
+                )
+            elif interstitial_source == "ads" and full_ads:
+                story.append(FullPageImageFlowable(choose_random(full_ads), frame_h))
+        elif ad_insert_every > 0 and (i + 1) % ad_insert_every == 0 and (i + 1) < len(blocks):
+            _status(
+                f"Skipped interstitial after block {i + 1}: source={interstitial_source}, ads_available={bool(full_ads)}"
+            )
 
     doc.build(story)
     _status("PDF build complete")

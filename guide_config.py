@@ -47,11 +47,13 @@ DEFAULTS: Dict[str, Any] = {
     "cover_airing_font": "Helvetica-Bold",
     "cover_airing_size": 14.0,
     "cover_airing_y": 0.11,
-    "cover_airing_label_enabled": True,
+    "cover_airing_label_enabled": False,
     "cover_airing_label_single_format": "{time}",
     "cover_airing_label_day_format": "Catch {show} at {time}!",
     "cover_airing_label_week_format": "Catch {show} on {weekday} at {time}!",
     "cover_airing_label_month_format": "Catch {show} on {md} at {time}!",
+    "back_cover_catch_enabled": True,
+    "interstitial_source": "ads",
     "cover_art_source": "none",
     "cover_art_dir": None,
     "tvdb_api_key": "",
@@ -176,6 +178,7 @@ def _coerce_config_values(cfg: Dict[str, Any]) -> Dict[str, Any]:
         "cover_page",
         "status_messages",
         "cover_airing_label_enabled",
+        "back_cover_catch_enabled",
         "movie_inline_meta",
         "api_cache_enabled",
     )
@@ -237,6 +240,9 @@ def _build_cli_parser() -> argparse.ArgumentParser:
     p.add_argument("--cover-airing-label-month-format", type=str, help="Template for month range airing label.")
     p.add_argument("--cover-art-source", choices=["none", "folder", "tvdb", "auto"], help="Cover art source.")
     p.add_argument("--cover-art-dir", type=Path, help="Folder for cover art images (used by cover-art-source folder/auto).")
+    p.add_argument("--back-cover-catch-enabled", action="store_true", help="Render generated Catch promo content on booklet back cover (default on).")
+    p.add_argument("--no-back-cover-catch", dest="back_cover_catch_enabled", action="store_false", help="Keep booklet back cover blank.")
+    p.add_argument("--interstitial-source", choices=["ads", "catch", "none"], help="Source for interstitial pages inserted every N blocks.")
     p.add_argument("--tvdb-api-key", type=str, help="TVDB API key for cover-art-source tvdb/auto.")
     p.add_argument("--tvdb-pin", type=str, help="TVDB PIN (if required by your TVDB account/app).")
     p.add_argument("--omdb-api-key", type=str, help="OMDb API key for movie descriptions/ratings metadata.")

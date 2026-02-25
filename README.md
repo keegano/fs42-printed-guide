@@ -74,6 +74,7 @@ Compilation mode supports:
 - If no bottom ad is available, guide pages can fill lower space with TVDB show-description columns for titles airing in that block
 - "On Tonight" titles are bold; entries without a usable description are skipped
 - If no usable entries remain, a fallback message is shown instead of an empty block
+- Optional Catch promo interstitial pages can be generated instead of image ads
 
 Cover art sources (`--cover-art-source`):
 - `none`
@@ -143,6 +144,7 @@ Core options:
 Compilation extras:
 - `--ads-dir PATH`
 - `--ad-insert-every INT`
+- `--interstitial-source ads|catch|none`
 - `--bottom-ads-dir PATH`
 - `--cover-page`
 - `--cover-title TEXT`
@@ -179,6 +181,7 @@ Compilation extras:
 - `--load-catalog PATH`
 - `--status-messages` / `--no-status-messages`
 - `--ignore-list-file PATH`
+- `--back-cover-catch-enabled` / `--no-back-cover-catch`
 
 `--fold-safe-gap` applies to folded single pages and folded booklet compilation spreads.
 Time tick labels on guide headers are inset at the edges so start/end labels stay
@@ -202,6 +205,9 @@ Ignore list:
 - Use `--ignore-list-file` with JSON like:
   `{"channels": ["MTV"], "titles": ["Rock"]}`
 - Ignored channels/titles are excluded from cover candidate selection and "On Tonight" content.
+
+When `--interstitial-source catch` is used with `--ad-insert-every`, inserted interstitial
+pages use generated "Catch Tonight" copy instead of image ads.
 
 ## Example
 
