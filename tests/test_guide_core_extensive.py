@@ -270,6 +270,42 @@ def test_fetch_tvdb_cover_art_no_token(monkeypatch):
     assert core.fetch_tvdb_cover_art(["Some Show"], api_key="k") is None
 
 
+def test_movie_cover_prefers_omdb_over_tvdb(tmp_path: Path, monkeypatch):
+    channels, numbers, schedules = _sample_schedules()
+    movie_ev = core.Event(
+        start=datetime(2026, 3, 1, 20, 0),
+        end=datetime(2026, 3, 1, 22, 0),
+        title="Movie Block",
+        filename="The.Matrix.1999.1080p.BluRay.mkv",
+    )
+    schedules["NBC"].append(movie_ev)
+
+    cover_png = tmp_path / "cover.png"
+    _write_tiny_png(cover_png)
+
+    monkeypatch.setattr(core, "pick_cover_airing_event", lambda *_a, **_k: movie_ev)
+    monkeypatch.setattr(core, "fetch_omdb_cover_art", lambda *a, **k: cover_png)
+    monkeypatch.setattr(core, "fetch_tvdb_cover_art", lambda *a, **k: (_ for _ in ()).throw(AssertionError("TVDB should not be used")))
+
+    out = tmp_path / "movie_cover_pref.pdf"
+    core.make_compilation_pdf(
+        out_path=out,
+        channels=channels,
+        channel_numbers=numbers,
+        schedules=schedules,
+        range_mode="day",
+        range_start=datetime(2026, 3, 1, 0, 0),
+        range_end=datetime(2026, 3, 2, 0, 0),
+        page_block_hours=12,
+        step_minutes=30,
+        cover_enabled=True,
+        cover_art_source="tvdb",
+        omdb_api_key="ok",
+        tvdb_api_key="unused",
+    )
+    assert out.exists()
+
+
 def test_api_cache_reuses_tvdb_and_omdb_calls(monkeypatch):
     calls = {"n": 0}
 

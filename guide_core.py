@@ -172,6 +172,7 @@ class MovieMeta:
     plot: str
     imdb_rating: str
     rated: str
+    poster_url: str = ""
 
 
 def _ensure_api_cache_struct(cache: Optional[Dict[str, object]]) -> Dict[str, object]:
@@ -695,6 +696,7 @@ def _fetch_omdb_movie_meta(
             plot=clean_text(str(cached.get("plot", ""))),
             imdb_rating=clean_text(str(cached.get("imdb_rating", ""))),
             rated=clean_text(str(cached.get("rated", ""))),
+            poster_url=clean_text(str(cached.get("poster_url", ""))),
         )
     params = {"t": clean_text(title), "apikey": api_key}
     if year:
@@ -710,6 +712,7 @@ def _fetch_omdb_movie_meta(
         plot=clean_text(str(data.get("Plot", ""))),
         imdb_rating=clean_text(str(data.get("imdbRating", ""))),
         rated=clean_text(str(data.get("Rated", ""))),
+        poster_url=clean_text(str(data.get("Poster", ""))),
     )
     om_cache[cache_key] = {
         "title": meta.title,
@@ -717,6 +720,7 @@ def _fetch_omdb_movie_meta(
         "plot": meta.plot,
         "imdb_rating": meta.imdb_rating,
         "rated": meta.rated,
+        "poster_url": meta.poster_url,
     }
     return meta
 
@@ -742,6 +746,29 @@ def _movie_meta_badge(meta: Optional[MovieMeta]) -> str:
     except Exception:
         pass
     return " ".join(bits).strip()
+
+
+def fetch_omdb_cover_art(
+    title: str,
+    year: str,
+    api_key: str,
+    api_cache: Optional[Dict[str, object]] = None,
+) -> Optional[Path]:
+    meta = _fetch_omdb_movie_meta(title, year, api_key, api_cache=api_cache)
+    if not meta:
+        return None
+    url = clean_text(meta.poster_url)
+    if not url or url == "N/A":
+        return None
+    try:
+        suffix = Path(urllib.parse.urlparse(url).path).suffix or ".jpg"
+        tmp = tempfile.NamedTemporaryFile(prefix="omdb_cover_", suffix=suffix, delete=False)
+        tmp_path = Path(tmp.name)
+        tmp.close()
+        urllib.request.urlretrieve(url, str(tmp_path))
+        return tmp_path
+    except Exception:
+        return None
 
 
 def _movie_cache_key_for_event(event: Event) -> str:
@@ -1966,16 +1993,28 @@ def make_compilation_pdf(
                 _status(f"Selected cover from folder: {cover_art.name}")
         if not cover_art and source in ("tvdb", "auto"):
             cover_event = pick_cover_airing_event(schedules, range_start, range_end)
-            picked_title = normalize_title_text(cover_event.title) if cover_event else ""
-            candidates = [picked_title] if picked_title else sorted(
-                {normalize_title_text(e.title) for evs in schedules.values() for e in evs if e.title}
-            )
-            _status(f"Trying TVDB cover lookup from {len(candidates)} title candidate(s)")
-            fetched = fetch_tvdb_cover_art(candidates, api_key=tvdb_api_key, pin=tvdb_pin, api_cache=runtime_api_cache)
-            if fetched:
-                cover_art = fetched
-                tmp_files.append(fetched)
-                _status(f"Selected cover from TVDB download: {fetched.name}")
+            # For movie blocks, prefer OMDb poster over TVDB series art.
+            if cover_event and is_movie_event(cover_event.title, cover_event.filename):
+                movie_title = display_title(cover_event.title, cover_event.filename)
+                movie_year = _extract_year_hint(cover_event.filename)
+                _status(f"Trying OMDb cover lookup for movie: {movie_title}")
+                fetched_movie = fetch_omdb_cover_art(movie_title, movie_year, omdb_api_key, api_cache=runtime_api_cache)
+                if fetched_movie:
+                    cover_art = fetched_movie
+                    tmp_files.append(fetched_movie)
+                    _status(f"Selected cover from OMDb download: {fetched_movie.name}")
+
+            if not cover_art:
+                picked_title = normalize_title_text(cover_event.title) if cover_event else ""
+                candidates = [picked_title] if picked_title else sorted(
+                    {normalize_title_text(e.title) for evs in schedules.values() for e in evs if e.title}
+                )
+                _status(f"Trying TVDB cover lookup from {len(candidates)} title candidate(s)")
+                fetched = fetch_tvdb_cover_art(candidates, api_key=tvdb_api_key, pin=tvdb_pin, api_cache=runtime_api_cache)
+                if fetched:
+                    cover_art = fetched
+                    tmp_files.append(fetched)
+                    _status(f"Selected cover from TVDB download: {fetched.name}")
             if cover_airing_label_enabled and cover_event:
                 cover_airing_label = _build_airing_label(
                     range_mode=range_mode,

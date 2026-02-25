@@ -189,7 +189,8 @@ Date and airing-label lines are positioned near the bottom by default (`cover_da
 
 Movie metadata:
 - When `--omdb-api-key` is provided, movie blocks can include inline badges
-  like `[PG-13 3.8*]` in the guide.
+  like `[PG-13 ★★★ ½]` in the guide.
+- For movie cover picks (`cover_art_source=tvdb/auto`), OMDb poster is preferred.
 - "On Tonight" description fallback will use OMDb plot summaries for movies,
   TVDB overviews for series.
 - TVDB/OMDb responses are cached to disk by default (`.cache/printed_guide_api_cache.json`)
