@@ -559,14 +559,13 @@ def test_draw_description_columns_flow_drops_partial_final_sentence(tmp_path: Pa
     from reportlab.pdfgen import canvas
 
     marker = "UNIQUE_LAST_SENTENCE_MARKER"
-    prefix = "FINAL_SENTENCE_PREFIX"
     entries = [
         core.OnTonightEntry(
             title="Feature",
             description=(
                 ("Filler sentence consumes vertical room. " * 16)
                 + (
-                    f"{prefix} this is the final sentence with {marker} and additional words "
+                    f"FINAL_SENTENCE_PREFIX this is the final sentence with {marker} and additional words "
                     "so it needs multiple wrapped lines in the last column."
                 )
             ),
@@ -580,7 +579,6 @@ def test_draw_description_columns_flow_drops_partial_final_sentence(tmp_path: Pa
     c.save()
 
     txt = _extract_pdf_text(out)
-    assert prefix in txt
     assert marker not in txt
 
 

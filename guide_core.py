@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import re
 import os
+import sys
 import random
 import calendar
 import tempfile
@@ -221,7 +222,7 @@ def run_fs42(fs42_dir: Path, args: List[str]) -> str:
     """
     Runs: python station_42.py <args...> inside fs42_dir and returns stdout+stderr merged.
     """
-    cmd = ["python", "station_42.py"] + args
+    cmd = [sys.executable, "station_42.py"] + args
     p = subprocess.run(
         cmd,
         cwd=str(fs42_dir),
@@ -1087,16 +1088,36 @@ def _draw_description_columns(
                     parts = paragraph.split(col_w, available_h)
                     if len(parts) >= 2:
                         first, rest = parts[0], parts[1]
+                        # Final column: truncate to full-sentence boundary.
+                        if col >= cols - 1:
+                            plain = clean_text(getattr(first, "getPlainText", lambda: "")())
+                            cut = max(plain.rfind("."), plain.rfind("!"), plain.rfind("?"))
+                            if cut >= 0:
+                                trimmed_plain = plain[: cut + 1].strip()
+                                if trimmed_plain:
+                                    title_prefix = f"{clean_text(title)}:"
+                                    if trimmed_plain.lower().startswith(title_prefix.lower()):
+                                        body = trimmed_plain[len(title_prefix):].strip()
+                                        html = f"<b>{escape(title)}:</b> {escape(body)}"
+                                    else:
+                                        html = escape(trimmed_plain)
+                                    final_part = Paragraph(html, para_style)
+                                    _, final_h = final_part.wrap(col_w, h)
+                                    if 0 < final_h <= available_h:
+                                        cx = body_x + col * (col_w + col_gap)
+                                        final_part.drawOn(c, cx, cursor_y - final_h)
+                                        cursor_y -= final_h + para_style.spaceAfter
+                                        drew_any = True
+                                        drew_in_col = True
+                            exhausted_columns = True
+                            break
+
                         _, first_h = first.wrap(col_w, h)
                         if 0 < first_h <= available_h:
                             cx = body_x + col * (col_w + col_gap)
                             first.drawOn(c, cx, cursor_y - first_h)
                             drew_any = True
                             drew_in_col = True
-                            # Final column: truncate remainder.
-                            if col >= cols - 1:
-                                exhausted_columns = True
-                                break
                             col += 1
                             cursor_y = text_top
                             drew_in_col = False
